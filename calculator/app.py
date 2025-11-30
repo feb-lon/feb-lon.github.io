@@ -1,6 +1,7 @@
 from math import floor, ceil
 
 import faicons as fa
+import pandas
 import plotly.express as px
 import pandas as pd
 import numpy as np
@@ -220,13 +221,21 @@ def server(input: Inputs, output: Outputs, session: Session):
         return pokemons["Type 1"][int(pokemon)], pokemons["Type 2"][int(pokemon)]
 
     def calc_effectiveness(move_type, mon_type_1, mon_type_2):
+
+        if(pandas.isnull(mon_type_2)):
+            return types[mon_type_1][type_priority[move_type]], 1
+
         type_1_prio = type_priority[mon_type_1]
         type_2_prio = type_priority[mon_type_2]
+
         move_used_key = type_priority[move_type]
+
+        type_1_effectiveness = types[mon_type_1][move_used_key]
+        type_2_effectiveness = types[mon_type_2][move_used_key]
         if type_1_prio < type_2_prio:
-            return types[mon_type_1][move_used_key], types[mon_type_2][move_used_key]
+            return type_1_effectiveness, type_2_effectiveness
         else:
-            return types[mon_type_2][move_used_key], types[mon_type_1][move_used_key]
+            return type_2_effectiveness, type_1_effectiveness
 
     def biv_min(level: int, current_stat: int, evs: int, nature: float):
         return max(22, int(floor(floor(floor(current_stat / nature) - 5) * 100 / level) + (0 if not (nature == 0.9 and current_stat % 10 == 0) else 100 % level) - floor(evs / 4)))
