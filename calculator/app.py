@@ -224,9 +224,9 @@ def server(input: Inputs, output: Outputs, session: Session):
         type_2_prio = type_priority[mon_type_2]
         move_used_key = type_priority[move_type]
         if type_1_prio < type_2_prio:
-            return types.loc[[move_used_key]][mon_type_1][0], types.loc[[move_used_key]][mon_type_2][0]
+            return types[mon_type_1][move_used_key], types[mon_type_2][move_used_key]
         else:
-            return types.loc[[move_used_key]][mon_type_2][0], types.loc[[move_used_key]][mon_type_1][0]
+            return types[mon_type_2][move_used_key], types[mon_type_1][move_used_key]
 
     def biv_min(level: int, current_stat: int, evs: int, nature: float):
         return max(22, int(floor(floor(floor(current_stat / nature) - 5) * 100 / level) + (0 if not (nature == 0.9 and current_stat % 10 == 0) else 100 % level) - floor(evs / 4)))
@@ -259,8 +259,8 @@ def server(input: Inputs, output: Outputs, session: Session):
         offense_guess_min = dmg_dealt
         offense_guess_max = ceil(dmg_dealt/0.85) + 1
         for factor in obm:
-            offense_guess_min = floor(offense_guess_min  / factor)
-            offense_guess_max = floor(offense_guess_max  / factor) + (0 if factor == 1 else 1)
+            offense_guess_min = floor(offense_guess_min / factor)
+            offense_guess_max = floor(offense_guess_max / factor) + (0 if factor == 1 else 1)
 
         offense_guess_min = offense_guess_min - 2
         offense_guess_max = offense_guess_max - 2
@@ -270,7 +270,7 @@ def server(input: Inputs, output: Outputs, session: Session):
             offense_guess_max = floor(offense_guess_max / factor) + (0 if factor == 1 else 1)
 
         offense_guess_min = calc_stat_stages_backwards(floor(int(offense_guess_min * 50 * defense) / int(base_power)), offense_stage)[0]
-        offense_guess_max = calc_stat_stages_backwards(floor(int((offense_guess_max * 50 + 49) * defense + defense -1) / int(base_power)), offense_stage)[1]
+        offense_guess_max = calc_stat_stages_backwards(floor(int((offense_guess_max * 50 + 49) * defense + defense - 1) / int(base_power)), offense_stage)[1]
 
         # to be careful add / subtract one
         return offense_guess_min - 1, offense_guess_max + 1
