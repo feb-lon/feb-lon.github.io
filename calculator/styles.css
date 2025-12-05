@@ -19,8 +19,21 @@
   padding-left: 0.5rem
 }
 .form-switch {
-  padding-left: 3rem}
+  padding-left: 3rem
+}
 /*
+#own_pokemon_modifier_selection{
+  background-color: lightgreen;
+}
+#own_pokemon_selection{
+  background-color: lightgreen;
+}
+#enemy_pokemon_modifier_selection {
+  background-color: lightsalmon;
+}
+#enemy_move_selection {
+  background-color: lightsalmon;
+}
 .form-switch .form-check-input {
   float:"right";
 }
