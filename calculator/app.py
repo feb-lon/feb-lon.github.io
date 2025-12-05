@@ -42,7 +42,7 @@ def advanced_page():
                 ui.page_fluid(
                     ui.layout_columns(
                         ui.page_fluid(
-                            ui.h4("Own Pokemon / Neutral Effects:"),
+                            ui.h4("Own Pokemon:"),
                             ui.layout_columns(
                                 ui.navset_card_tab(
                                     ui.nav_spacer(),
@@ -230,17 +230,30 @@ def server(input: Inputs, output: Outputs, session: Session):
 
         current_weather = input.weather()
         if input.enemy_move_selection_type() == "Name":
+            if not input.enemy_move():
+                raise SilentException()
             enemy_move = input.enemy_move()
+            if moves["Category"][enemy_move] == "Status":
+                raise SilentException()
             move_type, move_power, is_physical = get_move_attributes(enemy_move, current_weather)
         elif input.enemy_move_selection_type() == "Power + Type":
+            if not input.enemy_move_power():
+                raise SilentException()
             move_power = int(input.enemy_move_power())
+            if not input.enemy_move_type():
+                raise SilentException()
             move_type = input.enemy_move_type()
             is_physical = is_type_physical(type_priority.index(move_type))
 
         weather_modifier = get_weather_modifier(current_weather, move_type)
         eff1, eff2 = calc_effectiveness(move_type, type1, type2)
+
+        if not input.def_spd():
+            raise SilentException()
         own_defense = int(input.def_spd())
         has_def_spd_badge = input.def_spd_badge()
+        if not input.enemy_level_advanced():
+            raise SilentException()
         enemy_level_advanced = int(input.enemy_level_advanced())
 
         has_thick_fat = input.thick_fat()
@@ -256,13 +269,16 @@ def server(input: Inputs, output: Outputs, session: Session):
 
         is_crit = input.crit()
         crit_modifier = 2 if is_crit else 1
-
+        if not (input.atk_spa_stage() or input.atk_spa_stage()) == 0:
+            raise SilentException()
         atk_spa_stage = int(input.atk_spa_stage())
         applied_atk_spa_stage = 0 if (is_crit and atk_spa_stage < 0) else atk_spa_stage
 
-        own_defense_stage = int(input.def_spd_stage())
-        applied_def_spd_stage = 0 if (is_crit and own_defense_stage > 0) else own_defense_stage
-        own_effective_defense = calc_defensive_stat_modifiers(own_defense, has_def_spd_badge, applied_def_spd_stage)
+        if not (input.def_spd_stage() or input.def_spd_stage() == 0):
+            raise SilentException()
+        def_spd_stage = int(input.def_spd_stage())
+        applied_def_spd_stage = 0 if (is_crit and def_spd_stage > 0) else def_spd_stage
+        effective_def_spd = calc_defensive_stat_modifiers(own_defense, has_def_spd_badge, applied_def_spd_stage)
 
         has_reflect_lightscreen = input.reflect_lightscreen()
         reflect_lightscreen_modifier = 1 if (is_crit or not has_reflect_lightscreen) else 0.5
@@ -276,6 +292,8 @@ def server(input: Inputs, output: Outputs, session: Session):
         has_double_damage_or_charge = input.dd_charge()
         double_damage_or_charge_modifier = 2 if has_double_damage_or_charge else 1
 
+        if not input.dmg_received_advanced():
+            raise SilentException()
         damage_received = int(input.dmg_received_advanced())
 
         min_offense_guess, max_offense_guess = calc_offense_backwards(
@@ -283,7 +301,7 @@ def server(input: Inputs, output: Outputs, session: Session):
             [eff2, eff1, stab_modifier, double_damage_or_charge_modifier, crit_modifier],
             [ff_modifier, weather_modifier,
              reflect_lightscreen_modifier, burned_modifier],
-            own_effective_defense,
+            effective_def_spd,
             calc_base_power(enemy_level_advanced, move_power), applied_atk_spa_stage, sport_modifier, thick_fat_modifier
         )
 
@@ -297,7 +315,7 @@ def server(input: Inputs, output: Outputs, session: Session):
             full_damage = floor(floor(
                 base_power * calc_stat_stages(floor(floor(x * thick_fat_modifier) * sport_modifier),
                                               applied_atk_spa_stage)
-                / own_effective_defense) / 50)
+                / effective_def_spd) / 50)
             full_damage = calc_ibm_damage(int(full_damage), burned_modifier,
                                           reflect_lightscreen_modifier, weather_modifier, ff_modifier)
             full_damage = calc_obm_damage_no_randomness(full_damage, crit_modifier,
@@ -314,7 +332,8 @@ def server(input: Inputs, output: Outputs, session: Session):
 
         ax.set_yticks([0, 2, 4, 6, 8, 10, 12, 14, 16], labels=["0", "2", "4", "6", "8", "10", "12", "14", "16"])
         ax.set_ylim(0, 16)
-        ax.set_xticks(range(min_offense, max_offense + 1))
+        if max_offense - min_offense < 20:
+            ax.set_xticks(range(min_offense, max_offense + 1))
         ax.bar(range(min_offense, max_offense + 1), dmg)
         if not fig:
             raise SilentException()
