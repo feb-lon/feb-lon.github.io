@@ -269,7 +269,7 @@ def server(input: Inputs, output: Outputs, session: Session):
 
         is_crit = input.crit()
         crit_modifier = 2 if is_crit else 1
-        if not (input.atk_spa_stage() or input.atk_spa_stage()) == 0:
+        if not (input.atk_spa_stage() or input.atk_spa_stage() == 0):
             raise SilentException()
         atk_spa_stage = int(input.atk_spa_stage())
         applied_atk_spa_stage = 0 if (is_crit and atk_spa_stage < 0) else atk_spa_stage
