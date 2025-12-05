@@ -4,7 +4,6 @@ import numpy as np
 import matplotlib.pyplot as plt
 import pandas as pd
 from shiny.types import SilentException
-from shinywidgets import render_plotly
 
 # Load data and compute static values
 from shared import app_dir, pokemons, types, moves, type_priority, experience, weather, question_circle_fill
