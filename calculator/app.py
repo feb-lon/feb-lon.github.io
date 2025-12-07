@@ -234,7 +234,8 @@ def server(input: Inputs, output: Outputs, session: Session):
 
         ax.set_yticks([0, 2, 4, 6, 8, 10, 12, 14, 16], labels=["0", "2", "4", "6", "8", "10", "12", "14", "16"])
         ax.set_ylim(0, 16)
-        ax.set_xticks(range(min_offense, max_offense + 1))
+        if max_offense - min_offense < 20:
+            ax.set_xticks(range(min_offense, max_offense + 1))
         ax.bar(range(min_offense, max_offense + 1), dmg)
         return fig
 
