@@ -6,7 +6,7 @@ import pandas as pd
 from shiny.types import SilentException
 
 # Load data and compute static values
-from shared import app_dir, pokemons, types, moves, type_priority, experience, weather, question_circle_fill
+from shared import *
 
 from shiny import App, Inputs, Outputs, Session, reactive, render, ui, render_plot, render_ui, req
 
@@ -27,7 +27,7 @@ def simplified_page():
                     ui.input_switch("crit_simplified", "CRIT"),
                 ),
                 ui.input_radio_buttons(
-                    "effectiveness",
+                    "effectiveness_simplified",
                     "Effectiveness:",
                     {
                         "0.25": "0.25x",
@@ -64,39 +64,39 @@ def advanced_page():
                                 ui.navset_card_tab(
                                     ui.nav_spacer(),
                                     ui.nav_panel("Pokemon",
-                                                 ui.input_selectize("own_pokemon", "Select Pokemon:",
+                                                 ui.input_selectize("own_pokemon_advanced", "Select Pokemon:",
                                                                     sorted(pokemons.index)),
                                                  ),
                                     ui.nav_panel("Type",
-                                                 ui.input_selectize("types", "Select types:",
+                                                 ui.input_selectize("types_advanced", "Select types:",
                                                                     sorted(types.index), multiple=True)
                                                  ),
                                     title=ui.tooltip(
                                         ui.span("Typing by:   ", question_circle_fill),
                                         "Select your own Typing. \n\n In case no type is selected, it is assumed that the opponents move is neutral against both your types.\n\n Be careful with double types that \"cancel each other out\" if you want exact results:\ne.g. Kingdra takes more damage from electic moves than ice moves in about 50% of cases!",
                                         placement="right",
-                                        id="pokemon_type_tooltip",
+                                        id="pokemon_type_tooltip_advanced",
                                     ),
-                                    id="input_type_type",
+                                    id="input_type_type_advanced",
                                     selected="Type",
                                 ),
                             ),
-                            id="own_pokemon_selection",
+                            id="own_pokemon_selection_advanced",
                         ),
                         ui.page_fluid(
                             ui.h4("Enemy Pokemon:"),
                             ui.navset_card_tab(
                                 ui.nav_spacer(),
                                 ui.nav_panel("Name",
-                                             ui.input_selectize("enemy_move", "Move Name",
+                                             ui.input_selectize("enemy_move_advanced", "Move Name",
                                                                 choices=sorted(moves.index)),
                                              ),
                                 ui.nav_panel("Power + Type",
                                              ui.layout_columns(
-                                                 ui.input_numeric("enemy_move_power", "Move Power", min=5,
+                                                 ui.input_numeric("enemy_move_power_advanced", "Move Power", min=5,
                                                                   value=40,
                                                                   step=5, max=999),
-                                                 ui.input_selectize("enemy_move_type", "Move Type",
+                                                 ui.input_selectize("enemy_move_type_advanced", "Move Type",
                                                                     choices=sorted(types.index),
                                                                     selected="Normal"),
                                              ),
@@ -105,9 +105,9 @@ def advanced_page():
                                     ui.span("Move by:   ", question_circle_fill),
                                     "Select the move used by the opponent",
                                     placement="left",
-                                    id="move_used_tooltip",
+                                    id="move_used_tooltip_advanced",
                                 ),
-                                id="enemy_move_selection_type",
+                                id="enemy_move_selection_type_advanced",
                                 selected="Power + Type",
                             ),
                         ),
@@ -116,47 +116,47 @@ def advanced_page():
                     ui.layout_columns(
                         ui.page_fluid(
                             ui.layout_columns(
-                                ui.input_numeric("def_spd", "DEF/SPD:", 20, min=1, max=999),
+                                ui.input_numeric("def_spd_advanced", "DEF/SPD:", 20, min=1, max=999),
                                 ui.input_numeric("dmg_received_advanced", "DMG Taken:", 10, min=1, max=999),
                             ),
-                            id="own_pokemon_modifier_selection",
+                            id="own_pokemon_modifier_selection_advanced",
                         ),
                         ui.page_fluid(
                             ui.layout_columns(
                                 ui.input_numeric("enemy_level_advanced", "Level:", 8, min=1, max=100),
                                 ui.page_fluid(
-                                    ui.input_switch("enemy_stab", "STAB"),
-                                    ui.input_switch("crit", "CRIT"),
+                                    ui.input_switch("enemy_stab_advanced", "STAB"),
+                                    ui.input_switch("crit_advanced", "CRIT"),
                                 ),
                             ),
-                            id="enemy_pokemon_modifier_selection",
+                            id="enemy_pokemon_modifier_selection_advanced",
                         ),
                     ),
                     ui.layout_columns(
                         ui.accordion(
                             ui.accordion_panel(
                                 "other modifiers:",
-                                ui.input_numeric("def_spd_stage", "DEF/SPD Stage:", 0, min=-6, max=6),
-                                ui.input_switch("reflect_lightscreen", "Reflect / Lightscreen:"),
-                                ui.input_switch("def_spd_badge", "DEF/SPD Badge:"),
-                                ui.input_switch("thick_fat", "Thick Fat:"),
+                                ui.input_numeric("def_spd_stage_advanced", "DEF/SPD Stage:", 0, min=-6, max=6),
+                                ui.input_switch("reflect_lightscreen_advanced", "Reflect / Lightscreen:"),
+                                ui.input_switch("def_spd_badge_advanced", "DEF/SPD Badge:"),
+                                ui.input_switch("thick_fat_advanced", "Thick Fat:"),
                             ),
                             ui.accordion_panel(
                                 "field effects:",
-                                ui.input_select("weather", "The current Weather:",
+                                ui.input_select("weather_advanced", "The current Weather:",
                                                 weather,
                                                 selected="Clear"),
-                                ui.input_switch("mud_or_water_sport", "Mud Sport or Water Sport:"),
+                                ui.input_switch("mud_or_water_sport_advanced", "Mud Sport or Water Sport:"),
                             ),
                             open=False
                         ),
                         ui.accordion(
                             ui.accordion_panel(
                                 "other modifiers",
-                                ui.input_numeric("atk_spa_stage", "ATK/SPA Stage:", 0, min=-6, max=6),
-                                ui.input_switch("burned", "Enemy is burned:"),
-                                ui.input_switch("ff_active", "Enemy gets bonus from Flashfire"),
-                                ui.input_switch("dd_charge", "Damage is doubled or Charge bonus active:"),
+                                ui.input_numeric("atk_spa_stage_advanced", "ATK/SPA Stage:", 0, min=-6, max=6),
+                                ui.input_switch("burned_advanced", "Enemy is burned:"),
+                                ui.input_switch("ff_active_advanced", "Enemy gets bonus from Flashfire"),
+                                ui.input_switch("dd_charge_advanced", "Damage is doubled or Charge bonus active:"),
                             ),
                             open=False,
                         ),
@@ -172,11 +172,47 @@ def advanced_page():
     )
 
 
+def xp_ev_info_page():
+    return ui.nav_panel(
+        "XP / EV Info",
+        ui.layout_columns(
+            ui.card(ui.h4("Pokemon Yields"),
+                ui.input_selectize("pokemon_info", "Select Pokemon:", sorted(pokemons.index)),
+                ui.input_switch("is_trainer_info", "Trainer Fight"),
+                ui.input_numeric("enemy_level_info", "Level:", 8, min=1, max=100),
+                ui.h4("You will get the following EVs / XP:"),
+                ui.output_table("calculate_xp_ev_info"),
+            ),
+            ui.page_fluid(
+                ui.card(
+                    ui.h4("XP requirement"),
+                    ui.input_selectize("xp_curve_1_info", "XP Curve:", choices=list(experience.head()), selected="Fluctuating"),
+                    ui.layout_columns(
+                        ui.input_numeric("level_from_1_info", "Level From:", min=1, max=100, value=5),
+                        ui.input_numeric("level_to_1_info", "Level To:", min=1, max=100, value=8),
+                    ),
+                    ui.row(
+                        ui.column(5,
+                            "XP required: ",
+                        ),
+                        ui.column(5,
+                                  ui.output_code("calc_xp_from_to"),
+                        ),
+                    ),
+                ),
+            ),
+            ui.page_fluid(),
+            col_widths=(4, 4, 4),
+        )
+    )
+
+
 app_ui = \
     ui.page_navbar(
         ui.nav_spacer(),
         simplified_page(),
         advanced_page(),
+        xp_ev_info_page(),
         id="mode",
         title="Pokemon Generation 3 Calculator",
         window_title="Gen 3 Calculator",
@@ -184,6 +220,31 @@ app_ui = \
 
 
 def server(input: Inputs, output: Outputs, session: Session):
+
+    @render.text
+    def calc_xp_from_to():
+        xp_curve = input.xp_curve_1_info()
+        lvl_from = input.level_from_1_info()
+        lvl_to = input.level_to_1_info()
+
+        xp_all = experience[xp_curve][lvl_from:lvl_to].sum()
+
+        return xp_all
+
+
+    @render.table
+    def calculate_xp_ev_info():
+
+        pokemon = input.pokemon_info()
+        is_trainer = input.is_trainer_info()
+        enemy_level = input.enemy_level_info()
+
+        xp = calc_xp_yield(pokemon, enemy_level, is_trainer)
+        table = pokemons.loc[[pokemon], ["HP", "ATK", "DEF", "SPA", "SPD", "SPE"]]
+
+        table["XP"] = xp
+        return table
+
     @render.plot
     def calculate_offense_simplified():
         fig, ax = plt.subplots()
@@ -202,7 +263,7 @@ def server(input: Inputs, output: Outputs, session: Session):
         is_crit = input.crit_simplified()
         crit_modifier = 2 if is_crit else 1
 
-        effectiveness = float(input.effectiveness())
+        effectiveness = float(input.effectiveness_simplified())
         eff2 = 2 if effectiveness == 4 else 1
         if effectiveness == 0.25: eff2 = 0.5
         eff1 = 2 if effectiveness > 1 else 1
@@ -222,7 +283,7 @@ def server(input: Inputs, output: Outputs, session: Session):
             dmg.append(0)
             dmg100 = floor(floor(floor(enemy_level * 2 / 5 + 2) * move_power * x / own_defense) / 50 + 2)
             dmg100 = calc_obm_damage_no_randomness(dmg100, crit_modifier,
-                                                        1, stab_modifier, eff1, eff2)
+                                                   1, stab_modifier, eff1, eff2)
             for y in range(16):
                 if floor(dmg100 * (y + 85) / 100) == damage_received:
                     dmg[x - min_offense_guess] += 1
@@ -249,79 +310,79 @@ def server(input: Inputs, output: Outputs, session: Session):
 
         type1 = ""
         type2 = ""
-        if input.input_type_type() == "Pokemon":
+        if input.input_type_type_advanced() == "Pokemon":
             own_pokemon = input.own_pokemon()
             type1, type2 = get_pokemon_types(own_pokemon)
-        elif input.input_type_type() == "Type":
-            type1 = "" if len(input.types()) == 0 else input.types()[0]
-            type2 = "" if len(input.types()) <= 1 else input.types()[1]
+        elif input.input_type_type_advanced() == "Type":
+            type1 = "" if len(input.types_advanced()) == 0 else input.types_advanced()[0]
+            type2 = "" if len(input.types_advanced()) <= 1 else input.types_advanced()[1]
 
         move_type = ""
         move_power = 0
         is_physical = False
 
-        current_weather = input.weather()
-        if input.enemy_move_selection_type() == "Name":
-            if not input.enemy_move():
+        current_weather = input.weather_advanced()
+        if input.enemy_move_selection_type_advanced() == "Name":
+            if not input.enemy_move_advanced():
                 raise SilentException()
-            enemy_move = input.enemy_move()
+            enemy_move = input.enemy_move_advanced()
             if moves["Category"][enemy_move] == "Status":
                 raise SilentException()
             move_type, move_power, is_physical = get_move_attributes(enemy_move, current_weather)
-        elif input.enemy_move_selection_type() == "Power + Type":
-            if not input.enemy_move_power():
+        elif input.enemy_move_selection_type_advanced() == "Power + Type":
+            if not input.enemy_move_power_advanced():
                 raise SilentException()
-            move_power = int(input.enemy_move_power())
-            if not input.enemy_move_type():
+            move_power = int(input.enemy_move_power_advanced())
+            if not input.enemy_move_type_advanced():
                 raise SilentException()
-            move_type = input.enemy_move_type()
+            move_type = input.enemy_move_type_advanced()
             is_physical = is_type_physical(type_priority.index(move_type))
 
         weather_modifier = get_weather_modifier(current_weather, move_type)
         eff1, eff2 = calc_effectiveness(move_type, type1, type2)
 
-        if not input.def_spd():
+        if not input.def_spd_advanced():
             raise SilentException()
-        own_defense = int(input.def_spd())
-        has_def_spd_badge = input.def_spd_badge()
+        own_defense = int(input.def_spd_advanced())
+        has_def_spd_badge = input.def_spd_badge_advanced()
         if not input.enemy_level_advanced():
             raise SilentException()
-        enemy_level_advanced = int(input.enemy_level_advanced())
+        enemy_level = int(input.enemy_level_advanced())
 
-        has_thick_fat = input.thick_fat()
+        has_thick_fat = input.thick_fat_advanced()
         thick_fat_modifier = 1 if not has_thick_fat or (
-                    has_thick_fat and not (move_type == "Ice" or move_type == "Fire")) else 0.5
+                has_thick_fat and not (move_type == "Ice" or move_type == "Fire")) else 0.5
 
-        has_sport = input.mud_or_water_sport()
+        has_sport = input.mud_or_water_sport_advanced()
         sport_modifier = 1 if not has_sport or (
-                    has_sport and not (move_type == "Electric" or move_type == "Fire")) else 0.5
+                has_sport and not (move_type == "Electric" or move_type == "Fire")) else 0.5
 
-        is_stab = input.enemy_stab()
+        is_stab = input.enemy_stab_advanced()
         stab_modifier = 1.5 if is_stab else 1
 
-        is_crit = input.crit()
+        is_crit = input.crit_advanced()
         crit_modifier = 2 if is_crit else 1
-        if not (input.atk_spa_stage() or input.atk_spa_stage() == 0):
+        if not (input.atk_spa_stage_advanced() or input.atk_spa_stage_advanced() == 0):
             raise SilentException()
-        atk_spa_stage = int(input.atk_spa_stage())
+        atk_spa_stage = int(input.atk_spa_stage_advanced())
         applied_atk_spa_stage = 0 if (is_crit and atk_spa_stage < 0) else atk_spa_stage
 
-        if not (input.def_spd_stage() or input.def_spd_stage() == 0):
+        if not (input.def_spd_stage_advanced() or input.def_spd_stage_advanced() == 0):
             raise SilentException()
-        def_spd_stage = int(input.def_spd_stage())
+        def_spd_stage = int(input.def_spd_stage_advanced())
         applied_def_spd_stage = 0 if (is_crit and def_spd_stage > 0) else def_spd_stage
         effective_def_spd = calc_defensive_stat_modifiers(own_defense, has_def_spd_badge, applied_def_spd_stage)
 
-        has_reflect_lightscreen = input.reflect_lightscreen()
+        has_reflect_lightscreen = input.reflect_lightscreen_advanced()
         reflect_lightscreen_modifier = 1 if (is_crit or not has_reflect_lightscreen) else 0.5
 
-        is_burned = input.burned()
+        is_burned = input.burned_advanced()
         burned_modifier = 0.5 if (is_burned and is_physical) else 1
 
-        ff_active = input.ff_active()
+        ff_active = input.ff_active_advanced()
         ff_modifier = 1.5 if (ff_active and move_type == "Fire") else 1
 
-        has_double_damage_or_charge = input.dd_charge()
+        has_double_damage_or_charge = input.dd_charge_advanced()
         double_damage_or_charge_modifier = 2 if has_double_damage_or_charge else 1
 
         if not input.dmg_received_advanced():
@@ -334,13 +395,13 @@ def server(input: Inputs, output: Outputs, session: Session):
             [ff_modifier, weather_modifier,
              reflect_lightscreen_modifier, burned_modifier],
             effective_def_spd,
-            calc_base_power(enemy_level_advanced, move_power), applied_atk_spa_stage, sport_modifier, thick_fat_modifier
+            calc_base_power(enemy_level, move_power), applied_atk_spa_stage, sport_modifier, thick_fat_modifier
         )
 
         min_offense = -1
         max_offense = -1
 
-        base_power = calc_base_power(enemy_level_advanced, move_power)
+        base_power = calc_base_power(enemy_level, move_power)
 
         for x in range(min_offense_guess, max_offense_guess + 1):
             dmg.append(0)
@@ -503,6 +564,13 @@ def server(input: Inputs, output: Outputs, session: Session):
 
     def calc_stat_stages(stat: int, stages: int):
         return floor(stat * (2 + (stages if stages > 0 else 0)) / (2 - (stages if stages < 0 else 0)))
+
+    def calc_xp_yield(pokemon, level: int, opponent_is_trainer: bool, lucky_egg_held = False, is_original_trainer= True):
+        xp_pokemon = floor(pokemons["XP"][pokemon] * level / 7)
+        xp = floor(floor(floor(xp_pokemon * (1.5 if lucky_egg_held else 1)) * (1.5 if opponent_is_trainer else 1)) * (1.5 if not is_original_trainer else 1))
+        return xp
+
+
 
 
 app = App(app_ui, server)

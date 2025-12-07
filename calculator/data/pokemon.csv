@@ -1,4 +1,4 @@
-#,Pokemon,Exp.,HP,ATK,DEF,SPA,SPD,SPE,Total EVs,BST,Type 1,Type 2
+#,Pokemon,XP,HP,ATK,DEF,SPA,SPD,SPE,Total EVs,BST,Type 1,Type 2
 1,Bulbasaur,64,0,0,0,1,0,0,1,318,Grass,Poison
 2,Ivysaur,141,0,0,0,1,1,0,2,405,Grass,Poison
 3,Venusaur,208,0,0,0,2,1,0,3,525,Grass,Poison
