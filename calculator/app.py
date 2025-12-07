@@ -22,11 +22,28 @@ def simplified_page():
                 ui.input_numeric("move_power_simplified", "Power:", 50, step=5, min=5, max=999),
                 ui.input_numeric("own_defense_simplified", "Defense:", 20, min=1, max=999),
                 ui.input_numeric("damage_received_simplified", "DMG Taken:", 5, min=1, max=999),
+                ui.layout_columns(
+                    ui.input_switch("stab_simplífied", "STAB"),
+                    ui.input_switch("crit_simplified", "CRIT"),
+                ),
+                ui.input_radio_buttons(
+                    "effectiveness",
+                    "Effectiveness:",
+                    {
+                        "0.25": "0.25x",
+                        "0.5": "0.5x",
+                        "1": "1x",
+                        "2": "2x",
+                        "4": "4x",
+                    },
+                    inline=True,
+                    selected="1",
+                ),
             ),
             ui.page_fluid(
                 ui.output_plot("calculate_offense_simplified"),
             ),
-            col_widths=(2, 10),
+            col_widths=(3, 9),
         )
     )
 
@@ -179,19 +196,33 @@ def server(input: Inputs, output: Outputs, session: Session):
         own_defense = int(input.own_defense_simplified())
         damage_received = int(input.damage_received_simplified())
 
-        min_offense_guess = max(1, int(floor(
-            ((damage_received - 2) * 50) * own_defense / move_power / floor(enemy_level * 2 / 5 + 2))) - 3)
+        is_stab = input.stab_simplífied()
+        stab_modifier = 1.5 if is_stab else 1
 
-        max_offense_guess = min(600, int(ceil((ceil(
-            (ceil(damage_received / 0.75) - 2) * 50 + 49) * own_defense + own_defense - 1) / move_power / floor(
-            enemy_level * 2 / 5 + 2))) + 3)
+        is_crit = input.crit_simplified()
+        crit_modifier = 2 if is_crit else 1
 
+        effectiveness = float(input.effectiveness())
+        eff2 = 2 if effectiveness == 4 else 1
+        if effectiveness == 0.25: eff2 = 0.5
+        eff1 = 2 if effectiveness > 1 else 1
+        if effectiveness < 1: eff1 = 0.5
+
+        min_offense_guess, max_offense_guess = calc_offense_backwards(
+            damage_received, False,
+            [eff2, eff1, stab_modifier, 1, crit_modifier],
+            [1],
+            own_defense,
+            calc_base_power(enemy_level, move_power), 0, 1, 1
+        )
         min_offense = -1
         max_offense = -1
 
         for x in range(min_offense_guess, max_offense_guess + 1):
             dmg.append(0)
             dmg100 = floor(floor(floor(enemy_level * 2 / 5 + 2) * move_power * x / own_defense) / 50 + 2)
+            dmg100 = calc_obm_damage_no_randomness(dmg100, crit_modifier,
+                                                        1, stab_modifier, eff1, eff2)
             for y in range(16):
                 if floor(dmg100 * (y + 85) / 100) == damage_received:
                     dmg[x - min_offense_guess] += 1
