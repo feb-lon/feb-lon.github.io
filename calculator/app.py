@@ -1,14 +1,16 @@
+from collections import namedtuple
 from math import floor, ceil, isnan
 
 import numpy as np
 import matplotlib.pyplot as plt
+import matplotlib.axes as maxes
 import pandas as pd
 from shiny.types import SilentException
 
 # Load data and compute static values
 from shared import *
 
-from shiny import App, Inputs, Outputs, Session, reactive, render, ui, render_plot, render_ui, req
+from shiny import *
 
 
 def xp_ev_info_page():
@@ -21,7 +23,7 @@ def xp_ev_info_page():
                     ui.input_selectize("pokemon_info", "Select Pokemon:", sorted(pokemons.index)),
                     ui.input_numeric("enemy_level_info", "Level:", 8, min=1, max=100),
                     ui.input_switch("is_trainer_info", "Trainer Fight"),
-                    ui.h4("You will get the following EVs / XP:"),
+                    ui.h4("You will get the following XP / EVs:"),
                     ui.output_table("calculate_xp_ev_info"),
                 ),
             ),
@@ -35,7 +37,6 @@ def xp_ev_info_page():
                 "XP required: ",
                 ui.output_code("calc_xp_from_to"),
             ),
-            ui.page_fluid(),
             col_widths=(4, 4, 4),
         )
     )
@@ -79,7 +80,8 @@ def atk_spa_calculator_page():
                         ui.input_switch("has_dd_charge", "Double Damage / Charge Bonus"),
                         ui.input_switch("is_physical", "Move is Physical"),
                         ui.input_select("enemy_ability", "Enemy Ability: ",
-                                        {"1": "1x (irrelevant)", "1.5": "1.5x (e.g. Hustle, Swarm)", "2": "2x (Huge Power)"}),
+                                        {"1": "1x (irrelevant)", "1.5": "1.5x (e.g. Hustle, Swarm)",
+                                         "2": "2x (Huge Power)"}),
                     ),
                     ui.accordion_panel(
                         "Own Pokemon Modifiers:",
@@ -104,6 +106,23 @@ def atk_spa_calculator_page():
             ),
             ui.page_fluid(
                 ui.output_plot("calculate_offense"),
+                ui.layout_columns(
+                    ui.card(
+                        ui.input_radio_buttons(
+                            "graph_style",
+                            "Graph Style:",
+                            {"only_dmg_received": "Only DMG Received", "all_dmg_values": "All DMG Values"},
+                            inline=True,
+                            selected="only_dmg_received",
+                        ),
+                    ),
+                    ui.layout_columns(
+                        ui.input_action_button("clear_all", "Clear All Inputs"),
+                        ui.input_action_button("clear_dropdowns", "Clear Inputs In Dropdowns"),
+                        col_widths=(6, 6),
+                    ),
+                    col_widths=(6, 6)
+                ),
             ),
             col_widths=(3, 9),
         )
@@ -123,40 +142,75 @@ app_ui = \
 
 
 def server(input: Inputs, output: Outputs, session: Session):
+    @reactive.effect
+    @reactive.event(input.clear_all)
+    def clear_all():
+        session.send_input_message("enemy_level", {"value": ""})
+        session.send_input_message("move_power", {"value": ""})
+        session.send_input_message("own_defense", {"value": ""})
+        session.send_input_message("damage_received", {"value": ""})
+        session.send_input_message("is_stab", {"value": False})
+        session.send_input_message("is_crit", {"value": False})
+        session.send_input_message("effectiveness", {"value": "1"})
+        clear_dropdowns_unreactive()
+
+    @reactive.effect
+    @reactive.event(input.clear_dropdowns)
+    def clear_dropdowns():
+        clear_dropdowns_unreactive()
+
+    def clear_dropdowns_unreactive():
+        session.send_input_message("atk_spa_stage", {"value": 0})
+        session.send_input_message("is_burned", {"value": False})
+        session.send_input_message("ff_active", {"value": False})
+        session.send_input_message("has_dd_charge", {"value": False})
+        session.send_input_message("is_physical", {"value": False})
+        session.send_input_message("enemy_ability", {"value": 1})
+        session.send_input_message("effectiveness", {"value": 1})
+        session.send_input_message("def_spd_stage", {"value": 0})
+        session.send_input_message("has_reflect_lightscreen", {"value": False})
+        session.send_input_message("has_def_spd_badge", {"value": False})
+        session.send_input_message("has_thick_fat", {"value": False})
+        session.send_input_message("weather_modifier", {"value": "1"})
+        session.send_input_message("mud_or_water_sport_active", {"value": False})
+
     @render.text
     def calc_xp_from_to():
         xp_curve = input.xp_curve_1_info()
         lvl_from = input.level_from_1_info()
         lvl_to = input.level_to_1_info()
 
-        xp_all = experience[xp_curve][lvl_from:lvl_to].sum()
-
-        return xp_all
+        return experience[xp_curve][lvl_from:lvl_to].sum()
 
     @render.table
     def calculate_xp_ev_info():
-
+        # returns XP and EVs for a mon in a specific situation
         pokemon = input.pokemon_info()
         is_trainer = input.is_trainer_info()
         enemy_level = input.enemy_level_info()
 
         xp = calc_xp_yield(pokemon, enemy_level, is_trainer)
         table = pokemons.loc[[pokemon], ["HP", "ATK", "DEF", "SPA", "SPD", "SPE"]]
+        table = table.loc[:, (table != 0).any(axis=0)]
 
-        table["XP"] = xp
+        table.insert(0, "XP", [xp])
         return table
 
     @render.plot
     def calculate_offense():
-        fig, ax = plt.subplots()
-        ax.set_title("ATK/SPA Value Likelihood")
-        ax.set_ylabel("Nr. of rolls / 16")
-        ax.set_xlabel("ATK/SPA value")
-        dmg = []
+        # the formula used to determine ATK / SPA of the opponent in the ATK / SPA calculator
 
+        if not input.enemy_level():
+            raise SilentException()
         enemy_level = int(input.enemy_level())
+        if not input.move_power():
+            raise SilentException()
         move_power = int(input.move_power())
+        if not input.own_defense():
+            raise SilentException()
         own_defense = int(input.own_defense())
+        if not input.damage_received():
+            raise SilentException()
         damage_received = int(input.damage_received())
 
         is_stab = input.is_stab()
@@ -169,12 +223,14 @@ def server(input: Inputs, output: Outputs, session: Session):
         eff2 = 2
 
         if input.effectiveness() != "1-":
+            # get effectiveness for "normal" (= how you would intuitively expect effectiveness to work) situations
             effectiveness = float(input.effectiveness())
             eff2 = 2 if effectiveness == 4 else 1
             if effectiveness == 0.25: eff2 = 0.5
             eff1 = 2 if effectiveness > 1 else 1
             if effectiveness < 1: eff1 = 0.5
 
+        # only used for minimum damage (increases minimum dmg at that point in the calc from 0 to 1 if physical)
         is_physical = input.is_physical()
 
         weather_modifier = float(input.weather_modifier())
@@ -213,13 +269,14 @@ def server(input: Inputs, output: Outputs, session: Session):
 
         enemy_ability_modifier = float(input.enemy_ability())
 
+        # get rough lower / upper limits of possible ATK / SPA values to reduce calculations needed
         min_offense_guess, max_offense_guess = calc_offense_backwards(
             damage_received, is_physical,
             [eff2, eff1, stab_modifier, double_damage_or_charge_modifier, crit_modifier],
             [ff_modifier, weather_modifier,
              reflect_lightscreen_modifier, burned_modifier],
-            effective_def_spd,
-            calc_base_power(enemy_level, move_power), applied_atk_spa_stage, sport_modifier, thick_fat_modifier, enemy_ability_modifier
+            effective_def_spd, calc_base_power(enemy_level, move_power), applied_atk_spa_stage,
+            sport_modifier, thick_fat_modifier, enemy_ability_modifier
         )
 
         min_offense = -1
@@ -227,34 +284,105 @@ def server(input: Inputs, output: Outputs, session: Session):
 
         base_power = calc_base_power(enemy_level, move_power)
 
+        dmg = []
+        values = []
+        # go through the previously determined upper and lower limits
         for x in range(min_offense_guess, max_offense_guess + 1):
             dmg.append(0)
-            full_damage = floor(floor(
-                base_power * calc_stat_stages(floor(floor(floor(x * enemy_ability_modifier) * thick_fat_modifier) * sport_modifier),
-                                              applied_atk_spa_stage)
-                / effective_def_spd) / 50)
+            values.append([])
+            # calc the whole dmg formula except random factor for this specific ATK / SPA value
+            full_damage = floor(floor(base_power
+                                      * calc_stat_stages(floor(floor(floor(x * enemy_ability_modifier)
+                                                                     * thick_fat_modifier) * sport_modifier),
+                                                         applied_atk_spa_stage) / effective_def_spd) / 50)
             full_damage = calc_ibm_damage(int(full_damage), burned_modifier,
                                           reflect_lightscreen_modifier, weather_modifier, ff_modifier)
             full_damage = calc_obm_damage_no_randomness(full_damage, crit_modifier,
                                                         double_damage_or_charge_modifier, stab_modifier, eff1, eff2)
 
             for y in range(16):
-                if floor(full_damage * (y + 85) / 100) == damage_received:
+                # apply the random factor of the dmg calculation, and use it if it matches the dmg we received
+                value = floor(full_damage * (y + 85) / 100)
+                values[x - min_offense_guess].append(value)
+                if floor(value == damage_received):
                     dmg[x - min_offense_guess] += 1
                     max_offense = x
                     if min_offense == -1:
                         min_offense = x
 
-        dmg = dmg[(min_offense - min_offense_guess): (max_offense - min_offense_guess + 1)]
+        graph_style = input.graph_style()
 
-        ax.set_yticks([0, 2, 4, 6, 8, 10, 12, 14, 16], labels=["0", "2", "4", "6", "8", "10", "12", "14", "16"])
-        ax.set_ylim(0, 16)
-        if max_offense - min_offense < 20:
-            ax.set_xticks(range(min_offense, max_offense + 1))
-        ax.bar(range(min_offense, max_offense + 1), dmg)
-        if not fig:
+        if graph_style == "only_dmg_received":
+            # limit the upper and lower limits of the list so the graph only shows relevant information
+            dmg = dmg[(min_offense - min_offense_guess): (max_offense - min_offense_guess + 1)]
+
+            fig, ax = plt.subplots()
+            ax.set_title("ATK/SPA Value Likelihood")
+            ax.set_ylabel("Nr. of rolls / 16")
+            ax.set_xlabel("ATK/SPA value")
+
+            ax.set_yticks([0, 2, 4, 6, 8, 10, 12, 14, 16], labels=["0", "2", "4", "6", "8", "10", "12", "14", "16"])
+            ax.set_ylim(0, 16)
+            if max_offense - min_offense < 20:
+                ax.set_xticks(range(min_offense, max_offense + 1))
+            ax.bar(range(min_offense, max_offense + 1), dmg)
+            if not fig:
+                raise SilentException()
+            return fig
+        elif graph_style == "all_dmg_values":
+            # limit the upper and lower limits of the list so the graph only shows relevant information
+            values = values[(min_offense - min_offense_guess): (max_offense - min_offense_guess + 1)]
+
+            # we want the count of occurences of each dmg value
+            new_values = []
+            for i in range(0, max_offense - min_offense + 1):
+                new_values.append(i)
+                new_values[i] = (np.unique_counts(values[i]))
+
+            rows = []
+            for ucr in new_values:
+                row = {}
+                for val, count in zip(ucr.values, ucr.counts):
+                    row[str(val)] = count
+                rows.append(row)
+
+            df = pd.DataFrame(rows).fillna(0)
+            plot = df.plot(kind="bar", stacked=True)
+
+            plot.set_yticks([0, 2, 4, 6, 8, 10, 12, 14, 16], labels=["0", "2", "4", "6", "8", "10", "12", "14", "16"])
+            plot.set_ylim(0, 16)
+            plot.set_title("ATK/SPA Value Likelihood")
+            plot.set_ylabel("The 16 different Options")
+            plot.set_xlabel("ATK/SPA value")
+
+            num_rows = len(df)
+            col_names = list(df.columns)
+
+            # write dmg numbers on the bars
+            for patch_index, rect in enumerate(plot.patches):
+                col_idx = patch_index
+                col_value = col_names[floor(col_idx / num_rows)]
+                height = rect.get_height()
+
+                if height > 0:  # only label non-zero segments
+                    x = rect.get_x() + rect.get_width() / 2
+                    y = rect.get_y() + rect.get_height() / 2
+                    plot.text(
+                        x, y, str(col_value),
+                        ha='center', va='center',
+                        color='black', fontsize=11
+                    )
+            plot.get_legend().remove()
+            # to avoid the graph getting to crowded with labels
+            if max_offense - min_offense < 20:
+                plot.set_xticks(range(0, max_offense - min_offense + 1), range(min_offense, max_offense + 1),
+                                rotation="horizontal")
+            else:
+                plot.set_xticks(range(0, max_offense - min_offense + 1), range(min_offense, max_offense + 1))
+
+            return plot
+        else:
             raise SilentException()
-        return fig
 
     def is_type_physical(type_number: int):
         return type_number in [0, 6, 7, 8, 9, 11, 12, 13, 16]
@@ -277,11 +405,12 @@ def server(input: Inputs, output: Outputs, session: Session):
         is_physical = is_type_physical(move_type) == "Physical"
         return move_type, move_power, is_physical
 
-    # ibm = "inside bracket modifier", the modifiers before the +2 in the formula
-    # obm = "outside bracket modifier", the modifiers after the +2 in the formula
-    # see https://bulbapedia.bulbagarden.net/wiki/Damage#Generation_III
     def calc_offense_backwards(dmg_dealt: int, is_physical: bool, obm: list, ibm: list, defense: int, base_power: int,
-                               offense_stage: int, sport_modifier: float, thick_fat_modifier: float, enemy_ability_modifier: float):
+                               offense_stage: int, sport_modifier: float, thick_fat_modifier: float,
+                               enemy_ability_modifier: float):
+        # ibm = "inside bracket modifier", the modifiers before the +2 in the formula
+        # obm = "outside bracket modifier", the modifiers after the +2 in the formula
+        # see https://bulbapedia.bulbagarden.net/wiki/Damage#Generation_III
         offense_guess_min = dmg_dealt
         offense_guess_max = ceil(dmg_dealt / 0.85) + 1
         for factor in obm:
@@ -300,20 +429,19 @@ def server(input: Inputs, output: Outputs, session: Session):
             offense_guess_max = floor(offense_guess_max / factor) + (0 if factor == 1 else 1)
 
         offense_guess_min = floor(floor(floor(calc_stat_stages_backwards(floor(int(offense_guess_min * 50 * defense)
-                                                                         / int(base_power)), offense_stage)[
-                                            0] / sport_modifier) / thick_fat_modifier) / enemy_ability_modifier)
-        offense_guess_max = floor(floor(
-            floor(calc_stat_stages_backwards(floor(int((offense_guess_max * 50 + 49) * defense + defense - 1)
-                                                   / int(base_power)), offense_stage)[
-                      1] / sport_modifier + 1) / thick_fat_modifier + 1) / enemy_ability_modifier + 1)
+                                                                               / int(base_power)), offense_stage)[0]
+                                              / sport_modifier) / thick_fat_modifier) / enemy_ability_modifier)
+        offense_guess_max = floor(floor(floor(
+            calc_stat_stages_backwards(floor(int((offense_guess_max * 50 + 49) * defense + defense - 1)
+                                             / int(base_power)), offense_stage)[1] / sport_modifier + 1)
+                                        / thick_fat_modifier + 1) / enemy_ability_modifier + 1)
 
         return offense_guess_min, offense_guess_max
 
     def calc_ibm_damage(base_damage: int, burned_modifier: float, barrier_lightscreen_modifier: float,
                         current_weather_modifier: float, flash_fire_modifier: float):
-        result = floor(floor(
-            floor(floor(base_damage * flash_fire_modifier) * current_weather_modifier)
-            * barrier_lightscreen_modifier) * burned_modifier)
+        result = floor(floor(floor(floor(base_damage * flash_fire_modifier)
+                                   * current_weather_modifier) * barrier_lightscreen_modifier) * burned_modifier)
         return result + 2
 
     def calc_obm_damage_no_randomness(base_damage: int, crit_modifier: int, double_damage_charge_modifier: int,
@@ -327,6 +455,7 @@ def server(input: Inputs, output: Outputs, session: Session):
         original_stat = stat / (2 + (stages if stages > 0 else 0)) * (2 - (stages if stages < 0 else 0))
         if stages < 0:
             result = ceil(original_stat)
+            # -stages increases the result due to stages < 0
             return result, result - ceil(stages / 2)
         else:
             result = floor(original_stat)
@@ -341,7 +470,6 @@ def server(input: Inputs, output: Outputs, session: Session):
         return pokemons["Type 1"][pokemon], pokemons["Type 2"][pokemon]
 
     def calc_effectiveness(move_type, mon_type_1, mon_type_2):
-
         if mon_type_1 == "":
             return 1, 1
         elif mon_type_2 == "":
@@ -357,13 +485,16 @@ def server(input: Inputs, output: Outputs, session: Session):
                 return type_2_effectiveness, type_1_effectiveness
 
     def biv_min(level: int, current_stat: int, evs: int, nature: float):
+        # biv is my abbreviation for 2 * Base stat + Individual Value (also written: 2 * Base + IVs)
+        # i use it as it is easier to get both as a package than directly calc the base stat
+        # (and it does not make a difference for the resulting stat anyway)
         return max(22, int(floor(floor(floor(current_stat / nature) - 5) * 100 / level) + (
             0 if not (nature == 0.9 and current_stat % 10 == 0) else 100 % level) - floor(evs / 4)))
 
     def biv_max(level: int, current_stat: int, evs: int, nature: float):
         return min(541, int(np.floor(ceil(
-            ceil(current_stat + (0 if (nature == 1.1 and current_stat % 11 == 0) else 0.01)) / nature - (
-                5 if nature == 1 else 4)) * 100 / level) + 1 - floor(evs / 4)))
+            ceil(current_stat + (0 if (nature == 1.1 and current_stat % 11 == 0) else 0.01)) / nature
+            - (5 if nature == 1 else 4)) * 100 / level) + 1 - floor(evs / 4)))
 
     def biv_to_base_min(biv):
         return ceil((biv - 31) / 2)
@@ -375,6 +506,7 @@ def server(input: Inputs, output: Outputs, session: Session):
         return floor(floor(2 * level / 5 + 2) * move_power * offense / defense)
 
     def calc_base_power(level: int, move_power: int):
+        # in case you don't want offense / defense included in the calculation
         return floor(2 * level / 5 + 2) * move_power
 
     def get_weather_modifier(weather, move_type):
@@ -388,9 +520,10 @@ def server(input: Inputs, output: Outputs, session: Session):
         return floor(stat * (2 + (stages if stages > 0 else 0)) / (2 - (stages if stages < 0 else 0)))
 
     def calc_xp_yield(pokemon, level: int, opponent_is_trainer: bool, lucky_egg_held=False, is_original_trainer=True):
+        # the generation 3 XP formula from https://bulbapedia.bulbagarden.net/wiki/Experience
         xp_pokemon = floor(pokemons["XP"][pokemon] * level / 7)
-        xp = floor(floor(floor(xp_pokemon * (1.5 if lucky_egg_held else 1)) * (1.5 if opponent_is_trainer else 1)) * (
-            1.5 if not is_original_trainer else 1))
+        xp = floor(floor(floor(xp_pokemon * (1.5 if lucky_egg_held else 1)) * (1.5 if opponent_is_trainer else 1))
+                   * (1.5 if not is_original_trainer else 1))
         return xp
 
 

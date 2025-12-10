@@ -73,3 +73,9 @@ shiny-options-group {
   justify-content: end;
   display: flex;
 }
+
+.action-button {
+  --bs-btn-padding-x: 1em;
+  --bs-btn-padding-y: .5em;
+  --bs-btn-font-size: .9rem;
+}
