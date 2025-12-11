@@ -17,9 +17,16 @@ input[type="radio"], input[type="checkbox"]{
 }
 
 input[type="radio"]:checked +span, .form-check-input:checked +label {
-  background: #007bc2 !important;
   color: white !important;
   border-color: #007bc2 !important;
+}
+
+input[type="radio"]:checked +span {
+  background: #007bc2 !important;
+}
+
+.form-check-input:checked +label {
+  background:#009456 !important;
 }
 
 input[type="radio"] +span, .form-check-input +label {
@@ -31,8 +38,12 @@ input[type="radio"] +span, .form-check-input +label {
   transition: 0.2s;
 }
 
-input[type="radio"]:hover +span, input[type="checkbox"]:hover +label {
-  background: lightblue;
+input[type="radio"]:hover +span {
+  background: #BFDEF0;
+}
+
+input[type="checkbox"]:hover +label {
+  background: #BFEEDA;
 }
 
 .radio-inline, .bslib-input-switch {
