@@ -76,10 +76,6 @@ shiny-options-group {
   align-items: center;
 }
 
-.selectize-control.single .selectize-input {
-  width: 150px;
-}
-
 .shiny-input-container:has(.form-switch) {
   justify-content: end;
   display: flex;
@@ -89,4 +85,8 @@ shiny-options-group {
   --bs-btn-padding-x: 1em;
   --bs-btn-padding-y: .5em;
   --bs-btn-font-size: .9rem;
+}
+
+div:has(.selectize-control) {
+  min-width: 200px;
 }

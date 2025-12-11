@@ -13,6 +13,55 @@ from shared import *
 from shiny import *
 
 
+def iv_calculation_page():
+    return ui.nav_panel(
+        "IV Calculator",
+        ui.layout_columns(
+            ui.h4("IV Calculator"),
+        ),
+        ui.layout_columns(
+            ui.page_fluid(
+                ui.input_selectize("pokemon_iv", "Select Pokemon:", sorted(pokemons.index)),
+            ),
+            ui.page_fluid(
+                ui.input_radio_buttons("nature_plus_iv", "Nature + :",
+                                       ["neutral", "+ ATK", "+ DEF", "+ SPA", "+ SPD", "+ SPE"], inline=True),
+                ui.input_radio_buttons("nature_minus_iv", "Nature - :",
+                                       ["neutral", "- ATK", "- DEF", "- SPA", "- SPD", "- SPE"], inline=True)
+            ),
+            col_widths=(3, 6, 3),
+        ),
+        ui.layout_columns(
+            ui.page_fluid(
+                ui.h5("Stats at specific Level"),
+                ui.input_numeric("level_iv", "Level:", None, min=1, max=100),
+                ui.input_numeric("hp_iv", "HP:", None, min=4, max=999),
+                ui.input_numeric("atk_iv", "ATK:", None, min=4, max=999),
+                ui.input_numeric("def_iv", "DEF:", None, min=4, max=999),
+                ui.input_numeric("spa_iv", "SPA:", None, min=4, max=999),
+                ui.input_numeric("spd_iv", "SPD:", None, min=4, max=999),
+                ui.input_numeric("spe_iv", "SPE:", None, min=4, max=999),
+                ui.input_selectize("mons_defeated_ivs", "Mons Defeated at this Level:",
+                                   sorted(pokemons.index), multiple=True),
+                ui.input_action_button("save_stats_iv", "Save Stats"),
+            ),
+            ui.page_fluid(
+                ui.card(
+                    ui.input_action_button("create_empty_lvl_iv", "New Empty Level"),
+                    ui.input_action_button("create_filled_lvl_iv", "New Prefilled Level"),
+                ),
+            ),
+            ui.page_fluid(
+                ui.output_table("history_iv"),
+            ),
+            ui.page_fluid(
+                ui.output_table("result_iv"),
+            ),
+            col_widths=(3, 2, 4, 3),
+        ),
+    )
+
+
 def xp_ev_info_page():
     return ui.nav_panel(
         "XP / EV Info",
@@ -44,7 +93,7 @@ def xp_ev_info_page():
 
 def atk_spa_calculator_page():
     return ui.nav_panel(
-        "Calculator",
+        "ATK / SPA Calculator",
         ui.layout_columns(
             ui.h2("ATK / SPA Calculator"),
         ),
@@ -119,7 +168,7 @@ def atk_spa_calculator_page():
                     ),
                     ui.card(
                         ui.layout_columns(
-                        ui.h5("Reset Buttons:"),
+                            ui.h5("Reset Buttons:"),
                         ),
                         ui.layout_columns(
                             ui.input_action_button("clear_all", "Clear All Inputs"),
@@ -140,6 +189,7 @@ app_ui = \
         ui.nav_spacer(),
         atk_spa_calculator_page(),
         xp_ev_info_page(),
+        iv_calculation_page(),
         ui.head_content(ui.include_css(app_dir / "styles.css")),
         id="mode",
         title="Pokemon Generation 3 Calculator",
