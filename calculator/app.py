@@ -189,7 +189,6 @@ app_ui = \
         ui.nav_spacer(),
         atk_spa_calculator_page(),
         xp_ev_info_page(),
-        iv_calculation_page(),
         ui.head_content(ui.include_css(app_dir / "styles.css")),
         id="mode",
         title="Pokemon Generation 3 Calculator",
@@ -418,6 +417,7 @@ def server(input: Inputs, output: Outputs, session: Session):
             for patch_index, rect in enumerate(plot.patches):
                 col_idx = patch_index
                 col_value = col_names[floor(col_idx / num_rows)]
+                is_searched_value = (int(col_value) == int(damage_received))
                 height = rect.get_height()
 
                 if height > 0:  # only label non-zero segments
@@ -426,7 +426,8 @@ def server(input: Inputs, output: Outputs, session: Session):
                     plot.text(
                         x, y, str(col_value),
                         ha='center', va='center',
-                        color='black', fontsize=11
+                        color='black', fontsize=(15 if is_searched_value else 11),
+                        fontweight=('bold' if is_searched_value else 'normal'),
                     )
             plot.get_legend().remove()
             # to avoid the graph getting to crowded with labels
