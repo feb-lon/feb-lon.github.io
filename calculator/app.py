@@ -108,18 +108,24 @@ def atk_spa_calculator_page():
                 ui.output_plot("calculate_offense"),
                 ui.layout_columns(
                     ui.card(
+                        ui.h5("Graph Style:"),
                         ui.input_radio_buttons(
                             "graph_style",
-                            "Graph Style:",
+                            None,
                             {"only_dmg_received": "Only DMG Received", "all_dmg_values": "All DMG Values"},
                             inline=True,
                             selected="only_dmg_received",
                         ),
                     ),
-                    ui.layout_columns(
-                        ui.input_action_button("clear_all", "Clear All Inputs"),
-                        ui.input_action_button("clear_dropdowns", "Clear Inputs In Dropdowns"),
-                        col_widths=(6, 6),
+                    ui.card(
+                        ui.layout_columns(
+                        ui.h5("Reset Buttons:"),
+                        ),
+                        ui.layout_columns(
+                            ui.input_action_button("clear_all", "Clear All Inputs"),
+                            ui.input_action_button("clear_dropdowns", "Clear Inputs In Dropdowns"),
+                            col_widths=(6, 6),
+                        ),
                     ),
                     col_widths=(6, 6)
                 ),
