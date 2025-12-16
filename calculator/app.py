@@ -1,13 +1,8 @@
-from collections import namedtuple
-from math import floor, ceil, isnan
+from math import floor, ceil
 
-import numpy as np
 import matplotlib.pyplot as plt
-import matplotlib.axes as maxes
-import pandas as pd
 from shiny.types import SilentException
 
-# Load data and compute static values
 from shared import *
 
 from shiny import *
@@ -21,7 +16,9 @@ def iv_calculation_page():
         ),
         ui.layout_columns(
             ui.page_fluid(
-                ui.input_selectize("pokemon_iv", "Select Pokemon:", sorted(pokemons.index)),
+                ui.input_selectize("pokemon_iv", "Select Pokemon:",
+                                   sorted(pokemons.index), selected="Lickitung"),
+                ui.output_code("pokemon_bst_iv"),
             ),
             ui.page_fluid(
                 ui.input_radio_buttons("nature_plus_iv", "Nature + :",
@@ -29,35 +26,42 @@ def iv_calculation_page():
                 ui.input_radio_buttons("nature_minus_iv", "Nature - :",
                                        ["neutral", "- ATK", "- DEF", "- SPA", "- SPD", "- SPE"], inline=True)
             ),
+            ui.page_fluid(
+                ui.card(
+                    ui.layout_columns(
+                        ui.input_action_button("clear_all_iv", "Clear All"),
+                    ),
+                ),
+            ),
             col_widths=(3, 6, 3),
         ),
         ui.layout_columns(
             ui.page_fluid(
                 ui.h5("Stats at specific Level"),
-                ui.input_numeric("level_iv", "Level:", None, min=1, max=100),
-                ui.input_numeric("hp_iv", "HP:", None, min=4, max=999),
-                ui.input_numeric("atk_iv", "ATK:", None, min=4, max=999),
-                ui.input_numeric("def_iv", "DEF:", None, min=4, max=999),
-                ui.input_numeric("spa_iv", "SPA:", None, min=4, max=999),
-                ui.input_numeric("spd_iv", "SPD:", None, min=4, max=999),
-                ui.input_numeric("spe_iv", "SPE:", None, min=4, max=999),
-                ui.input_selectize("mons_defeated_ivs", "Mons Defeated at this Level:",
-                                   sorted(pokemons.index), multiple=True),
-                ui.input_action_button("save_stats_iv", "Save Stats"),
-            ),
-            ui.page_fluid(
+                ui.input_numeric("level_iv", "Level:", 5, min=1, max=100),
+                ui.input_numeric("hp_iv", "HP:", 22, min=11, max=999),
+                ui.input_numeric("atk_iv", "ATK:", 12, min=4, max=999),
+                ui.input_numeric("def_iv", "DEF:", 12, min=4, max=999),
+                ui.input_numeric("spa_iv", "SPA:", 12, min=4, max=999),
+                ui.input_numeric("spd_iv", "SPD:", 12, min=4, max=999),
+                ui.input_numeric("spe_iv", "SPE:", 12, min=4, max=999),
+                # ui.input_selectize("mons_defeated_iv", "Mons Defeated at this Level:", sorted(pokemons.index), multiple=True),
                 ui.card(
-                    ui.input_action_button("create_empty_lvl_iv", "New Empty Level"),
-                    ui.input_action_button("create_filled_lvl_iv", "New Prefilled Level"),
-                ),
+                    ui.layout_columns(
+                        ui.input_action_button("save_stats_iv", "Save Stats"),
+                        ui.input_action_button("prefill_next_level_iv", "Prefill Next Level"),
+                        ui.input_action_button("prefill_current_level_iv", "Prefill Current Level"),
+                    )
+                )
             ),
             ui.page_fluid(
-                ui.output_table("history_iv"),
+                ui.layout_columns("Stat History (editable soon)"),
+                ui.output_data_frame("history_iv")
             ),
             ui.page_fluid(
                 ui.output_table("result_iv"),
             ),
-            col_widths=(3, 2, 4, 3),
+            col_widths=(3, 6, 3),
         ),
     )
 
@@ -79,10 +83,10 @@ def xp_ev_info_page():
             ui.page_fluid(),
             ui.page_fluid(
                 ui.h4("XP requirement"),
-                ui.input_selectize("xp_curve_1_info", "XP Curve:", choices=list(experience.head()),
+                ui.input_selectize("xp_curve_info", "XP Curve:", choices=list(experience.head()),
                                    selected="Fluctuating"),
-                ui.input_numeric("level_from_1_info", "Level From:", min=1, max=100, value=5),
-                ui.input_numeric("level_to_1_info", "Level To:", min=1, max=100, value=8),
+                ui.input_numeric("level_from_info", "Level From:", min=1, max=100, value=5),
+                ui.input_numeric("level_to_info", "Level To:", min=1, max=100, value=8),
                 "XP required: ",
                 ui.output_code("calc_xp_from_to"),
             ),
@@ -189,6 +193,7 @@ app_ui = \
         ui.nav_spacer(),
         atk_spa_calculator_page(),
         xp_ev_info_page(),
+        iv_calculation_page(),
         ui.head_content(ui.include_css(app_dir / "styles.css")),
         id="mode",
         title="Pokemon Generation 3 Calculator",
@@ -197,9 +202,176 @@ app_ui = \
 
 
 def server(input: Inputs, output: Outputs, session: Session):
+    stat_history = reactive.value(
+        pd.DataFrame(columns=["level", "hp", "atk", "def", "spa", "spd", "spe"], dtype=int))
+
+    current_bst = reactive.value(int(385))  # initial mon is Lickitung with 385 BST
+
+    # we set the initial nature as neutral
+    atk_nature_modifier = reactive.value(float(1))
+    def_nature_modifier = reactive.value(float(1))
+    spa_nature_modifier = reactive.value(float(1))
+    spd_nature_modifier = reactive.value(float(1))
+    spe_nature_modifier = reactive.value(float(1))
+
+    @reactive.effect
+    @reactive.event(input.prefill_next_level_iv)
+    def prefill_next_level_iv():
+        prefill_level_iv(input.level_iv() + 1)
+
+    @reactive.effect
+    @reactive.event(input.prefill_current_level_iv)
+    def prefill_current_level_iv():
+        prefill_level_iv(input.level_iv())
+
+    def prefill_level_iv(level: int):
+        biv_table = calc_biv_table()
+
+        hp_biv = ceil(biv_table.loc["hp_biv"].mean())
+        atk_biv = ceil(biv_table.loc["atk_biv"].mean())
+        def_biv = ceil(biv_table.loc["def_biv"].mean())
+        spa_biv = ceil(biv_table.loc["spa_biv"].mean())
+        spd_biv = ceil(biv_table.loc["spd_biv"].mean())
+        spe_biv = ceil(biv_table.loc["spe_biv"].mean())
+
+        ui.update_numeric("level_iv", value=level)
+        ui.update_numeric("hp_iv", value=calc_hp(level, 0, hp_biv, 0))
+        ui.update_numeric("atk_iv", value=calc_stat(level, 0, atk_biv, 0, atk_nature_modifier()))
+        ui.update_numeric("def_iv", value=calc_stat(level, 0, def_biv, 0, def_nature_modifier()))
+        ui.update_numeric("spa_iv", value=calc_stat(level, 0, spa_biv, 0, spa_nature_modifier()))
+        ui.update_numeric("spd_iv", value=calc_stat(level, 0, spd_biv, 0, spd_nature_modifier()))
+        ui.update_numeric("spe_iv", value=calc_stat(level, 0, spe_biv, 0, spe_nature_modifier()))
+
+
+
+    @reactive.effect
+    @reactive.event(input.nature_plus_iv, input.nature_minus_iv)
+    def change_nature_iv():
+
+        nature_plus = input.nature_plus_iv()
+        nature_minus = input.nature_minus_iv()
+
+        atk_nature_modifier.set(1.1 if nature_plus == "+ ATK" else 0.9 if nature_minus == "- ATK" else 1)
+        def_nature_modifier.set(1.1 if nature_plus == "+ DEF" else 0.9 if nature_minus == "- DEF" else 1)
+        spa_nature_modifier.set(1.1 if nature_plus == "+ SPA" else 0.9 if nature_minus == "- SPA" else 1)
+        spd_nature_modifier.set(1.1 if nature_plus == "+ SPD" else 0.9 if nature_minus == "- SPD" else 1)
+        spe_nature_modifier.set(1.1 if nature_plus == "+ SPE" else 0.9 if nature_minus == "- SPE" else 1)
+
+    @render.table(index=True)
+    @reactive.event(input.save_stats_iv, input.clear_all_iv, input.pokemon_iv,
+                    input.nature_plus_iv, input.nature_minus_iv)
+    def result_iv():
+        df = calc_biv_table()
+        print(df)
+        base_as_biv = current_bst() * 2
+
+        total_ivs = [df["min"].sum() - base_as_biv, df["max"].sum() - base_as_biv]
+        total_ivs_avg = [f"{total_ivs[0] / 6:.2f}", f"{total_ivs[1] / 6:.2f}"]
+
+        result = pd.DataFrame(columns=["min", "max"], dtype=int)
+        result.loc["Base HP:"] = [biv_to_base_min(df.loc["hp_biv", "min"]), biv_to_base_max(df.loc["hp_biv", "max"])]
+        result.loc["Base ATK:"] = [biv_to_base_min(df.loc["atk_biv", "min"]), biv_to_base_max(df.loc["atk_biv", "max"])]
+        result.loc["Base DEF:"] = [biv_to_base_min(df.loc["def_biv", "min"]), biv_to_base_max(df.loc["def_biv", "max"])]
+        result.loc["Base SPA:"] = [biv_to_base_min(df.loc["spa_biv", "min"]), biv_to_base_max(df.loc["spa_biv", "max"])]
+        result.loc["Base SPD:"] = [biv_to_base_min(df.loc["spd_biv", "min"]), biv_to_base_max(df.loc["spd_biv", "max"])]
+        result.loc["Base SPE"] = [biv_to_base_min(df.loc["spe_biv", "min"]), biv_to_base_max(df.loc["spe_biv", "max"])]
+        result.loc["Total IVs"] = total_ivs
+        result.loc["Average IVs"] = total_ivs_avg
+
+        return result
+
+    def calc_biv_table():
+        if stat_history().size < 1:
+            raise SilentException()
+
+        df = pd.DataFrame(columns=["min", "max"],
+                          index=["hp_biv", "atk_biv", "def_biv", "spa_biv", "spd_biv", "spe_biv"])
+
+        for row in stat_history.get().itertuples():
+
+            level, hp, atk, deff, spa, spd, spe = row[1:8]
+
+            df.loc["hp_biv"] = (biv_min(level, hp - 5 - level, 0, 1),
+                                        biv_max(level, hp - 5 - level, 0, 1))
+            df.loc["atk_biv"] = (biv_min(level, atk, 0, atk_nature_modifier.get()),
+                                        biv_max(level, atk, 0, atk_nature_modifier.get()))
+            df.loc["def_biv"] = (biv_min(level, deff, 0, def_nature_modifier.get()),
+                                        biv_max(level, deff, 0, def_nature_modifier.get()))
+            df.loc["spa_biv"] = (biv_min(level, spa, 0, spa_nature_modifier.get()),
+                                        biv_max(level, spa, 0, spa_nature_modifier.get()))
+            df.loc["spd_biv"] = (biv_min(level, spd, 0, spd_nature_modifier.get()),
+                                        biv_max(level, spd, 0, spd_nature_modifier.get()))
+            df.loc["spe_biv"] = (biv_min(level, spe, 0, spe_nature_modifier.get()),
+                                        biv_max(level, spe, 0, spe_nature_modifier.get()))
+
+        return df
+
+    @render.text
+    def pokemon_bst_iv():
+        current_bst.set(pokemons["BST"][input.pokemon_iv()])
+        return "BST: " + str(current_bst.get())
+
+    @reactive.effect
+    @reactive.event(input.clear_all_iv)
+    def clear_all_iv():
+        stat_history.set(pd.DataFrame(
+            pd.DataFrame(columns=["level", "hp", "atk", "def", "spa", "spd", "spe"], dtype=int)))
+
+    @render.data_frame
+    @reactive.event(input.save_stats_iv, input.clear_all_iv, ignore_none=False)
+    def history_iv():
+        return render.DataTable(
+            stat_history(),
+            editable=True,
+            selection_mode="row",
+        )
+
+    @reactive.effect
+    @reactive.event(input.save_stats_iv)
+    def save_stats_iv():
+        if not input.level_iv():
+            raise SilentException()
+        level = input.level_iv()
+
+        if not input.hp_iv():
+            raise SilentException()
+        hp = input.hp_iv()
+
+        if not input.atk_iv():
+            raise SilentException()
+        atk = input.atk_iv()
+
+        if not input.def_iv():
+            raise SilentException()
+        deff = input.def_iv()
+
+        if not input.spa_iv():
+            raise SilentException()
+        spa = input.spa_iv()
+
+        if not input.spd_iv():
+            raise SilentException()
+        spd = input.spd_iv()
+
+        if not input.spe_iv():
+            raise SilentException()
+        spe = input.spe_iv()
+
+        stat_history.get().loc[-1] = [level, hp, atk, deff, spa, spd, spe]
+        stat_history.get().index = stat_history.get().index + 1
+
     @reactive.effect
     @reactive.event(input.clear_all)
     def clear_all():
+        clear_visible_inputs()
+        clear_dropdowns()
+
+    @reactive.effect
+    @reactive.event(input.clear_dropdowns, input.clear_all)
+    def clear_dropdowns_only():
+        clear_dropdowns()
+
+    def clear_visible_inputs():
         session.send_input_message("enemy_level", {"value": ""})
         session.send_input_message("move_power", {"value": ""})
         session.send_input_message("own_defense", {"value": ""})
@@ -207,14 +379,8 @@ def server(input: Inputs, output: Outputs, session: Session):
         session.send_input_message("is_stab", {"value": False})
         session.send_input_message("is_crit", {"value": False})
         session.send_input_message("effectiveness", {"value": "1"})
-        clear_dropdowns_unreactive()
 
-    @reactive.effect
-    @reactive.event(input.clear_dropdowns)
     def clear_dropdowns():
-        clear_dropdowns_unreactive()
-
-    def clear_dropdowns_unreactive():
         session.send_input_message("atk_spa_stage", {"value": 0})
         session.send_input_message("is_burned", {"value": False})
         session.send_input_message("ff_active", {"value": False})
@@ -231,9 +397,9 @@ def server(input: Inputs, output: Outputs, session: Session):
 
     @render.text
     def calc_xp_from_to():
-        xp_curve = input.xp_curve_1_info()
-        lvl_from = input.level_from_1_info()
-        lvl_to = input.level_to_1_info()
+        xp_curve = input.xp_curve_info()
+        lvl_from = input.level_from_info()
+        lvl_to = input.level_to_info()
 
         return experience[xp_curve][lvl_from:lvl_to].sum()
 
@@ -545,19 +711,19 @@ def server(input: Inputs, output: Outputs, session: Session):
         # biv is my abbreviation for 2 * Base stat + Individual Value (also written: 2 * Base + IVs)
         # i use it as it is easier to get both as a package than directly calc the base stat
         # (and it does not make a difference for the resulting stat anyway)
-        return max(22, int(floor(floor(floor(current_stat / nature) - 5) * 100 / level) + (
-            0 if not (nature == 0.9 and current_stat % 10 == 0) else 100 % level) - floor(evs / 4)))
+        return min(541, max(22, int(floor(floor(floor(current_stat / nature) - 5) * 100 / level) + (
+            0 if not (nature == 0.9 and current_stat % 10 == 0) else 100 % level) - floor(evs / 4))))
 
     def biv_max(level: int, current_stat: int, evs: int, nature: float):
-        return min(541, int(np.floor(ceil(
+        return max(22, min(541, int(np.floor(ceil(
             ceil(current_stat + (0 if (nature == 1.1 and current_stat % 11 == 0) else 0.01)) / nature
-            - (5 if nature == 1 else 4)) * 100 / level) + 1 - floor(evs / 4)))
+            - (5 if nature == 1 else 4)) * 100 / level) + 1 - floor(evs / 4))))
 
     def biv_to_base_min(biv):
-        return ceil((biv - 31) / 2)
+        return int(ceil((biv - 31) / 2))
 
     def biv_to_base_max(biv):
-        return np.floor(biv / 2)
+        return int(floor(biv / 2))
 
     def calc_dmg_base(level: int, move_power: int, offense: int, defense: int):
         return floor(floor(2 * level / 5 + 2) * move_power * offense / defense)
@@ -582,6 +748,12 @@ def server(input: Inputs, output: Outputs, session: Session):
         xp = floor(floor(floor(xp_pokemon * (1.5 if lucky_egg_held else 1)) * (1.5 if opponent_is_trainer else 1))
                    * (1.5 if not is_original_trainer else 1))
         return xp
+
+    def calc_stat(level: int, base: int, iv: int, ev: int, nature: float):
+        return int(floor((floor(floor(2*base + iv + floor(ev/4)) * level / 100) + 5) * nature))
+
+    def calc_hp(level: int, base: int, iv: int, ev: int):
+        return int(floor(floor(2*base + iv + floor(ev/4)) * level / 100) + 10 + level)
 
 
 app = App(app_ui, server)
