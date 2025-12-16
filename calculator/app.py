@@ -55,7 +55,7 @@ def iv_calculation_page():
                 )
             ),
             ui.page_fluid(
-                ui.layout_columns("Stat History (editable soon)"),
+                ui.layout_columns(ui.h5("Stat History (editable)")),
                 ui.output_data_frame("history_iv")
             ),
             ui.page_fluid(
@@ -202,6 +202,10 @@ app_ui = \
 
 
 def server(input: Inputs, output: Outputs, session: Session):
+
+    """
+    ---------------------- IV Page
+    """
     stat_history = reactive.value(
         pd.DataFrame(columns=["level", "hp", "atk", "def", "spa", "spd", "spe"], dtype=int))
 
@@ -242,8 +246,6 @@ def server(input: Inputs, output: Outputs, session: Session):
         ui.update_numeric("spd_iv", value=calc_stat(level, 0, spd_biv, 0, spd_nature_modifier()))
         ui.update_numeric("spe_iv", value=calc_stat(level, 0, spe_biv, 0, spe_nature_modifier()))
 
-
-
     @reactive.effect
     @reactive.event(input.nature_plus_iv, input.nature_minus_iv)
     def change_nature_iv():
@@ -259,10 +261,9 @@ def server(input: Inputs, output: Outputs, session: Session):
 
     @render.table(index=True)
     @reactive.event(input.save_stats_iv, input.clear_all_iv, input.pokemon_iv,
-                    input.nature_plus_iv, input.nature_minus_iv)
+                    input.nature_plus_iv, input.nature_minus_iv, stat_history)
     def result_iv():
         df = calc_biv_table()
-        print(df)
         base_as_biv = current_bst() * 2
 
         total_ivs = [df["min"].sum() - base_as_biv, df["max"].sum() - base_as_biv]
@@ -291,18 +292,18 @@ def server(input: Inputs, output: Outputs, session: Session):
 
             level, hp, atk, deff, spa, spd, spe = row[1:8]
 
-            df.loc["hp_biv"] = (biv_min(level, hp - 5 - level, 0, 1),
-                                        biv_max(level, hp - 5 - level, 0, 1))
-            df.loc["atk_biv"] = (biv_min(level, atk, 0, atk_nature_modifier.get()),
-                                        biv_max(level, atk, 0, atk_nature_modifier.get()))
-            df.loc["def_biv"] = (biv_min(level, deff, 0, def_nature_modifier.get()),
-                                        biv_max(level, deff, 0, def_nature_modifier.get()))
-            df.loc["spa_biv"] = (biv_min(level, spa, 0, spa_nature_modifier.get()),
-                                        biv_max(level, spa, 0, spa_nature_modifier.get()))
-            df.loc["spd_biv"] = (biv_min(level, spd, 0, spd_nature_modifier.get()),
-                                        biv_max(level, spd, 0, spd_nature_modifier.get()))
-            df.loc["spe_biv"] = (biv_min(level, spe, 0, spe_nature_modifier.get()),
-                                        biv_max(level, spe, 0, spe_nature_modifier.get()))
+            hp_biv_min, hp_biv_max = biv_range_hp(level, hp, 0)
+            df.loc["hp_biv"] = [hp_biv_min, hp_biv_max]
+            atk_biv_min, atk_biv_max = biv_range(level, atk, 0, atk_nature_modifier.get())
+            df.loc["atk_biv"] = [atk_biv_min, atk_biv_max]
+            def_biv_min, def_biv_max = biv_range(level, deff, 0, def_nature_modifier.get())
+            df.loc["def_biv"] = [def_biv_min, def_biv_max]
+            spa_biv_min, spa_biv_max = biv_range(level, spa, 0, spa_nature_modifier.get())
+            df.loc["spa_biv"] = [spa_biv_min, spa_biv_max]
+            spd_biv_min, spd_biv_max = biv_range(level, spd, 0, spd_nature_modifier.get())
+            df.loc["spd_biv"] = [spd_biv_min, spd_biv_max]
+            spe_biv_min, spe_biv_max = biv_range(level, spe, 0, spe_nature_modifier.get())
+            df.loc["spe_biv"] = [spe_biv_min, spe_biv_max]
 
         return df
 
@@ -325,6 +326,14 @@ def server(input: Inputs, output: Outputs, session: Session):
             editable=True,
             selection_mode="row",
         )
+
+    @history_iv.set_patch_fn
+    def _(*, patch: render.CellPatch):
+        stat_history_copy = stat_history().copy()
+        fn = str if patch["column_index"] == 0 else int
+        stat_history_copy.iat[patch["row_index"], patch["column_index"]] = fn(patch["value"])
+        stat_history.set(stat_history_copy)
+        return patch["value"]
 
     @reactive.effect
     @reactive.event(input.save_stats_iv)
@@ -360,6 +369,36 @@ def server(input: Inputs, output: Outputs, session: Session):
         stat_history.get().loc[-1] = [level, hp, atk, deff, spa, spd, spe]
         stat_history.get().index = stat_history.get().index + 1
 
+    """
+    ---------------------- XP Page
+    """
+
+    @render.text
+    def calc_xp_from_to():
+        xp_curve = input.xp_curve_info()
+        lvl_from = input.level_from_info()
+        lvl_to = input.level_to_info()
+
+        return experience[xp_curve][lvl_from:lvl_to].sum()
+
+    @render.table
+    def calculate_xp_ev_info():
+        # returns XP and EVs for a mon in a specific situation
+        pokemon = input.pokemon_info()
+        is_trainer = input.is_trainer_info()
+        enemy_level = input.enemy_level_info()
+
+        xp = calc_xp_yield(pokemon, enemy_level, is_trainer)
+        table = pokemons.loc[[pokemon], ["HP", "ATK", "DEF", "SPA", "SPD", "SPE"]]
+        table = table.loc[:, (table != 0).any(axis=0)]
+
+        table.insert(0, "XP", [xp])
+        return table
+
+    """
+    ---------------------- ATK / SPA Page
+    """
+
     @reactive.effect
     @reactive.event(input.clear_all)
     def clear_all():
@@ -394,28 +433,6 @@ def server(input: Inputs, output: Outputs, session: Session):
         session.send_input_message("has_thick_fat", {"value": False})
         session.send_input_message("weather_modifier", {"value": "1"})
         session.send_input_message("mud_or_water_sport_active", {"value": False})
-
-    @render.text
-    def calc_xp_from_to():
-        xp_curve = input.xp_curve_info()
-        lvl_from = input.level_from_info()
-        lvl_to = input.level_to_info()
-
-        return experience[xp_curve][lvl_from:lvl_to].sum()
-
-    @render.table
-    def calculate_xp_ev_info():
-        # returns XP and EVs for a mon in a specific situation
-        pokemon = input.pokemon_info()
-        is_trainer = input.is_trainer_info()
-        enemy_level = input.enemy_level_info()
-
-        xp = calc_xp_yield(pokemon, enemy_level, is_trainer)
-        table = pokemons.loc[[pokemon], ["HP", "ATK", "DEF", "SPA", "SPD", "SPE"]]
-        table = table.loc[:, (table != 0).any(axis=0)]
-
-        table.insert(0, "XP", [xp])
-        return table
 
     @render.plot
     def calculate_offense():
@@ -607,6 +624,10 @@ def server(input: Inputs, output: Outputs, session: Session):
         else:
             raise SilentException()
 
+    """
+    ---------------------- Support Methods
+    """
+
     def is_type_physical(type_number: int):
         return type_number in [0, 6, 7, 8, 9, 11, 12, 13, 16]
 
@@ -707,17 +728,57 @@ def server(input: Inputs, output: Outputs, session: Session):
             else:
                 return type_2_effectiveness, type_1_effectiveness
 
+    def biv_range_hp(level: int, current_stat: int, evs:int):
+        return biv_range(level, current_stat - 5 - level, evs, 1)
+
+    def biv_range(level:int, current_stat:int, evs:int, nature:float):
+        biv_maximum = biv_max(level, current_stat, evs, nature)
+        biv_minimum = biv_min(level, current_stat, evs, nature)
+
+        # min > max: should not happen (in that case some of the inputs have to be wrong, user sees result is wrong)
+        # min = max: we know the exact biv value
+        # min < max: might not be exact boundaries, so we readjust
+        if biv_minimum < biv_maximum:
+            min_stat = calc_stat(level, 0, biv_minimum, evs, nature)
+            max_stat = calc_stat(level, 0, biv_maximum, evs, nature)
+
+            if min_stat < current_stat:
+                while calc_stat(level, 0, biv_minimum, evs, nature) < current_stat and biv_minimum <= biv_maximum:
+                    biv_minimum += 1
+
+            if max_stat > current_stat:
+                while calc_stat(level, 0, biv_maximum, evs, nature) > current_stat and biv_minimum <= biv_maximum:
+                    biv_maximum -= 1
+
+        return biv_minimum, biv_maximum
+
+
+    def biv_min_hp(level: int, current_stat: int, evs: int,):
+        return int(biv_min(level, current_stat - 5 - level, evs, 1))
+
     def biv_min(level: int, current_stat: int, evs: int, nature: float):
         # biv is my abbreviation for 2 * Base stat + Individual Value (also written: 2 * Base + IVs)
         # i use it as it is easier to get both as a package than directly calc the base stat
         # (and it does not make a difference for the resulting stat anyway)
-        return min(541, max(22, int(floor(floor(floor(current_stat / nature) - 5) * 100 / level) + (
-            0 if not (nature == 0.9 and current_stat % 10 == 0) else 100 % level) - floor(evs / 4))))
+        biv = min(541, max(22,
+                            int(floor(floor(floor(current_stat / nature) - 4
+                                            - (1 if nature == 1 or (nature == 1.1 and current_stat % 11 == 0) else 0))
+                                      * 100 / level) + (0 if not (nature == 0.9 and current_stat % 10 == 0)
+                                                                                        else 100 % level)
+                                - floor(evs / 4))))
+        result = calc_stat(level, 0, biv, 0, nature)
+        return biv
+
+    def biv_max_hp(level: int, current_stat: int, evs: int):
+        return int(biv_max(level, current_stat - 5 - level, evs, 1))
 
     def biv_max(level: int, current_stat: int, evs: int, nature: float):
-        return max(22, min(541, int(np.floor(ceil(
-            ceil(current_stat + (0 if (nature == 1.1 and current_stat % 11 == 0) else 0.01)) / nature
-            - (5 if nature == 1 else 4)) * 100 / level) + 1 - floor(evs / 4))))
+        biv = max(22, min(541, int(ceil(ceil((
+            (current_stat + (1 if (nature == 1.1 and current_stat % 11 == 0) else 0)) / nature
+            - (5 if nature == 1 else 4)) * 100 + 99) / level) - floor(evs / 4))))
+
+        result = calc_stat(level, 0, biv, 0, nature)
+        return biv
 
     def biv_to_base_min(biv):
         return int(ceil((biv - 31) / 2))
@@ -732,10 +793,10 @@ def server(input: Inputs, output: Outputs, session: Session):
         # in case you don't want offense / defense included in the calculation
         return floor(2 * level / 5 + 2) * move_power
 
-    def get_weather_modifier(weather, move_type):
-        if (weather == "Sunny" and move_type == "Fire") or (weather == "Rain" and move_type == "Water"):
+    def get_weather_modifier(current_weather, move_type):
+        if (current_weather == "Sunny" and move_type == "Fire") or (current_weather == "Rain" and move_type == "Water"):
             return 1.5
-        elif (weather == "Sunny" and move_type == "Water") or (weather == "Rain" and move_type == "Fire"):
+        elif (current_weather == "Sunny" and move_type == "Water") or (current_weather == "Rain" and move_type == "Fire"):
             return 0.5
         return 1
 
@@ -749,6 +810,7 @@ def server(input: Inputs, output: Outputs, session: Session):
                    * (1.5 if not is_original_trainer else 1))
         return xp
 
+    # Formula: https://bulbapedia.bulbagarden.net/wiki/Stat#Generation_III_onward
     def calc_stat(level: int, base: int, iv: int, ev: int, nature: float):
         return int(floor((floor(floor(2*base + iv + floor(ev/4)) * level / 100) + 5) * nature))
 
