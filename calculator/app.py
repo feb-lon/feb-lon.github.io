@@ -127,7 +127,11 @@ def atk_spa_calculator_page():
                 ),
                 ui.accordion(
                     ui.accordion_panel(
-                        "Enemy Pokemon Modifiers:",
+                        ui.span(
+                            ui.h5("Enemy Pokemon Modifiers:"),
+                            ui.output_text_verbatim("enemy_modifiers_panel"),
+                            style="display: inline-flex; align-items: center; gap: 2rem;"
+                        ),
                         ui.input_numeric("atk_spa_stage", "ATK/SPA Stage:", 0, min=-6, max=6),
                         ui.input_switch("is_burned", "Enemy Burned"),
                         ui.input_switch("ff_active", "Flashfire Bonus"),
@@ -136,16 +140,26 @@ def atk_spa_calculator_page():
                         ui.input_select("enemy_ability", "Enemy Ability: ",
                                         {"1": "1x (irrelevant)", "1.5": "1.5x (e.g. Hustle, Swarm)",
                                          "2": "2x (Huge Power)"}),
+                        value="enemy_modifiers_panel",
                     ),
                     ui.accordion_panel(
-                        "Own Pokemon Modifiers:",
+                        ui.span(
+                            ui.h5("Own Pokemon Modifiers:"),
+                            ui.output_text_verbatim("own_modifiers_panel"),
+                            style="display: inline-flex; align-items: center; gap: 2rem;"
+                        ),
                         ui.input_numeric("def_spd_stage", "DEF/SPD Stage:", 0, min=-6, max=6),
                         ui.input_switch("has_reflect_lightscreen", "Reflect / Lightscreen"),
                         ui.input_switch("has_def_spd_badge", "DEF/SPD Badge"),
                         ui.input_switch("has_thick_fat", "Thick Fat"),
+                        value="own_modifiers_panel",
                     ),
                     ui.accordion_panel(
-                        "Field Effects:",
+                        ui.span(
+                            ui.h5("Field Effects:"),
+                            ui.output_text_verbatim("field_effects_panel"),
+                            style="display: inline-flex; align-items: center; gap: 2rem;"
+                        ),
                         ui.input_radio_buttons(
                             "weather_modifier",
                             "Weather Modifier:",
@@ -154,6 +168,7 @@ def atk_spa_calculator_page():
                             selected="1",
                         ),
                         ui.input_switch("mud_or_water_sport_active", "Mud/Water Sport"),
+                        value="field_effects_panel",
                     ),
                     open=False,
                 ),
@@ -639,6 +654,46 @@ def server(input: Inputs, output: Outputs, session: Session):
             return plot
         else:
             raise SilentException()
+
+    @render.text
+    def own_modifiers_panel():
+        stage_modifier = int(input.def_spd_stage() != 0)
+        screen_modifier = int(input.has_reflect_lightscreen())
+        badge_modifier = int(input.has_def_spd_badge())
+        thick_fat_modifier = int(input.has_thick_fat())
+        modifiers_changed = stage_modifier + screen_modifier + badge_modifier + thick_fat_modifier
+
+        if modifiers_changed > 0:
+            return modifiers_changed
+        else:
+            return ""
+
+    @render.text
+    def enemy_modifiers_panel():
+        stage_modifier = int(input.atk_spa_stage() != 0)
+        burned_modifier = int(input.is_burned())
+        ff_modifier = int(input.ff_active())
+        dd_charge_modifier = int(input.has_dd_charge())
+        is_physical_modifier = int(input.is_physical())
+        enemy_ability_modifier = int(input.enemy_ability() != "1")
+        modifiers_changed = (stage_modifier + burned_modifier + ff_modifier + dd_charge_modifier
+                             + is_physical_modifier + enemy_ability_modifier)
+
+        if modifiers_changed > 0:
+            return modifiers_changed
+        else:
+            return ""
+
+    @render.text
+    def field_effects_panel():
+        weather_modifier = input.weather_modifier()
+        sport_modifier = input.mud_or_water_sport_active()
+        modifiers_changed = int(weather_modifier != "1") + int(sport_modifier)
+
+        if modifiers_changed > 0:
+            return modifiers_changed
+        else:
+            return ""
 
     """
     ---------------------- Support Methods ----------------------
