@@ -145,7 +145,7 @@ def atk_spa_calculator_page():
                         ui.input_switch("has_thick_fat", "Thick Fat"),
                     ),
                     ui.accordion_panel(
-                        "field effects:",
+                        "Field Effects:",
                         ui.input_radio_buttons(
                             "weather_modifier",
                             "Weather Modifier:",
