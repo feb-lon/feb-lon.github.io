@@ -29,6 +29,7 @@ def iv_calculation_page():
             ui.page_fluid(
                 ui.card(
                     ui.layout_columns(
+                        ui.input_action_button("delete_row_iv", "Delete Selected Row"),
                         ui.input_action_button("clear_all_iv", "Clear All"),
                     ),
                 ),
@@ -319,7 +320,7 @@ def server(input: Inputs, output: Outputs, session: Session):
             pd.DataFrame(columns=["level", "hp", "atk", "def", "spa", "spd", "spe"], dtype=int)))
 
     @render.data_frame
-    @reactive.event(input.save_stats_iv, input.clear_all_iv, ignore_none=False)
+    @reactive.event(input.save_stats_iv, input.clear_all_iv, input.delete_row_iv ,ignore_none=False)
     def history_iv():
         return render.DataTable(
             stat_history(),
@@ -334,6 +335,21 @@ def server(input: Inputs, output: Outputs, session: Session):
         stat_history_copy.iat[patch["row_index"], patch["column_index"]] = fn(patch["value"])
         stat_history.set(stat_history_copy)
         return patch["value"]
+
+    @reactive.effect
+    @reactive.event(input.delete_row_iv)
+    def delete_row_iv():
+        if not history_iv.cell_selection()["rows"]:
+            raise SilentException()
+        selected_row_number = history_iv.cell_selection()["rows"][0]
+        stat_history_copy = stat_history.get().copy()
+        print(stat_history_copy)
+        stat_history_copy.drop(selected_row_number, inplace=True)
+        print(stat_history_copy)
+        stat_history_copy.reset_index(drop=True, inplace=True)
+        print(stat_history_copy)
+        stat_history.set(stat_history_copy)
+
 
     @reactive.effect
     @reactive.event(input.save_stats_iv)
