@@ -204,7 +204,7 @@ app_ui = \
 def server(input: Inputs, output: Outputs, session: Session):
 
     """
-    ---------------------- IV Page
+    ---------------------- IV Page ----------------------
     """
     stat_history = reactive.value(
         pd.DataFrame(columns=["level", "hp", "atk", "def", "spa", "spd", "spe"], dtype=int))
@@ -330,7 +330,7 @@ def server(input: Inputs, output: Outputs, session: Session):
     @history_iv.set_patch_fn
     def _(*, patch: render.CellPatch):
         stat_history_copy = stat_history().copy()
-        fn = str if patch["column_index"] == 0 else int
+        fn = int
         stat_history_copy.iat[patch["row_index"], patch["column_index"]] = fn(patch["value"])
         stat_history.set(stat_history_copy)
         return patch["value"]
@@ -370,7 +370,7 @@ def server(input: Inputs, output: Outputs, session: Session):
         stat_history.get().index = stat_history.get().index + 1
 
     """
-    ---------------------- XP Page
+    ---------------------- XP Page ----------------------
     """
 
     @render.text
@@ -396,7 +396,7 @@ def server(input: Inputs, output: Outputs, session: Session):
         return table
 
     """
-    ---------------------- ATK / SPA Page
+    ---------------------- ATK / SPA Page ----------------------
     """
 
     @reactive.effect
@@ -602,6 +602,8 @@ def server(input: Inputs, output: Outputs, session: Session):
                 col_value = col_names[floor(col_idx / num_rows)]
                 is_searched_value = (int(col_value) == int(damage_received))
                 height = rect.get_height()
+                rect.set_edgecolor('black')
+                rect.set_linewidth(float(.5))
 
                 if height > 0:  # only label non-zero segments
                     x = rect.get_x() + rect.get_width() / 2
@@ -609,9 +611,10 @@ def server(input: Inputs, output: Outputs, session: Session):
                     plot.text(
                         x, y, str(col_value),
                         ha='center', va='center',
-                        color='black', fontsize=(15 if is_searched_value else 11),
+                        color='black', fontsize=13,
                         fontweight=('bold' if is_searched_value else 'normal'),
                     )
+                    if is_searched_value: rect.set_linewidth(2)
             plot.get_legend().remove()
             # to avoid the graph getting to crowded with labels
             if max_offense - min_offense < 20:
@@ -625,7 +628,7 @@ def server(input: Inputs, output: Outputs, session: Session):
             raise SilentException()
 
     """
-    ---------------------- Support Methods
+    ---------------------- Support Methods ----------------------
     """
 
     def is_type_physical(type_number: int):
