@@ -343,11 +343,8 @@ def server(input: Inputs, output: Outputs, session: Session):
             raise SilentException()
         selected_row_number = history_iv.cell_selection()["rows"][0]
         stat_history_copy = stat_history.get().copy()
-        print(stat_history_copy)
-        stat_history_copy.drop(selected_row_number, inplace=True)
-        print(stat_history_copy)
+        stat_history_copy.drop(stat_history_copy.index[[selected_row_number]], inplace=True)
         stat_history_copy.reset_index(drop=True, inplace=True)
-        print(stat_history_copy)
         stat_history.set(stat_history_copy)
 
 
