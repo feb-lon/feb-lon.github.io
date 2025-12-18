@@ -90,3 +90,14 @@ shiny-options-group {
 div:has(.selectize-control) {
   min-width: 200px;
 }
+
+pre.shiny-text-output {
+  border-radius: 12px;
+  border-color: green;
+  background-color: #009456;
+  color: white;
+  margin-top: 0rem;
+  margin-bottom: 0rem;
+  padding-top: 0.2rem;
+  padding-bottom: 0.2rem;
+}
