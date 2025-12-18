@@ -129,8 +129,9 @@ def atk_spa_calculator_page():
                     ui.accordion_panel(
                         ui.span(
                             ui.h5("Enemy Pokemon Modifiers:"),
-                            ui.output_text_verbatim("enemy_modifiers_panel"),
-                            style="display: inline-flex; align-items: center; gap: 2rem;"
+                            ui.output_text_verbatim("enemy_modifiers_counter"),
+                            style="display: inline-flex; align-items: center; gap: 2rem;",
+                            id="enemy_modifiers_title"
                         ),
                         ui.input_numeric("atk_spa_stage", "ATK/SPA Stage:", 0, min=-6, max=6),
                         ui.input_switch("is_burned", "Enemy Burned"),
@@ -140,25 +141,27 @@ def atk_spa_calculator_page():
                         ui.input_select("enemy_ability", "Enemy Ability: ",
                                         {"1": "1x (irrelevant)", "1.5": "1.5x (e.g. Hustle, Swarm)",
                                          "2": "2x (Huge Power)"}),
-                        value="enemy_modifiers_panel",
+                        value="enemy_modifiers_counter",
                     ),
                     ui.accordion_panel(
                         ui.span(
                             ui.h5("Own Pokemon Modifiers:"),
-                            ui.output_text_verbatim("own_modifiers_panel"),
-                            style="display: inline-flex; align-items: center; gap: 2rem;"
+                            ui.output_text_verbatim("own_modifiers_counter"),
+                            style="display: inline-flex; align-items: center; gap: 2rem;",
+                            id="own_modifiers_title",
                         ),
                         ui.input_numeric("def_spd_stage", "DEF/SPD Stage:", 0, min=-6, max=6),
                         ui.input_switch("has_reflect_lightscreen", "Reflect / Lightscreen"),
                         ui.input_switch("has_def_spd_badge", "DEF/SPD Badge"),
                         ui.input_switch("has_thick_fat", "Thick Fat"),
-                        value="own_modifiers_panel",
+                        value="own_modifiers_counter",
                     ),
                     ui.accordion_panel(
                         ui.span(
                             ui.h5("Field Effects:"),
-                            ui.output_text_verbatim("field_effects_panel"),
-                            style="display: inline-flex; align-items: center; gap: 2rem;"
+                            ui.output_text_verbatim("field_effects_counter"),
+                            style="display: inline-flex; align-items: center; gap: 2rem;",
+                            id="field_effects_title",
                         ),
                         ui.input_radio_buttons(
                             "weather_modifier",
@@ -168,7 +171,7 @@ def atk_spa_calculator_page():
                             selected="1",
                         ),
                         ui.input_switch("mud_or_water_sport_active", "Mud/Water Sport"),
-                        value="field_effects_panel",
+                        value="field_effects_counter",
                     ),
                     open=False,
                 ),
@@ -656,7 +659,7 @@ def server(input: Inputs, output: Outputs, session: Session):
             raise SilentException()
 
     @render.text
-    def own_modifiers_panel():
+    def own_modifiers_counter():
         stage_modifier = int(input.def_spd_stage() != 0)
         screen_modifier = int(input.has_reflect_lightscreen())
         badge_modifier = int(input.has_def_spd_badge())
@@ -669,7 +672,7 @@ def server(input: Inputs, output: Outputs, session: Session):
             return ""
 
     @render.text
-    def enemy_modifiers_panel():
+    def enemy_modifiers_counter():
         stage_modifier = int(input.atk_spa_stage() != 0)
         burned_modifier = int(input.is_burned())
         ff_modifier = int(input.ff_active())
@@ -685,7 +688,7 @@ def server(input: Inputs, output: Outputs, session: Session):
             return ""
 
     @render.text
-    def field_effects_panel():
+    def field_effects_counter():
         weather_modifier = input.weather_modifier()
         sport_modifier = input.mud_or_water_sport_active()
         modifiers_changed = int(weather_modifier != "1") + int(sport_modifier)
