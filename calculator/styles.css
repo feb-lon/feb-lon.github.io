@@ -91,7 +91,7 @@ div:has(.selectize-control) {
   min-width: 200px;
 }
 
-pre.shiny-text-output {
+pre.noplaceholder {
   border-radius: 12px;
   border-color: green;
   background-color: #009456;
