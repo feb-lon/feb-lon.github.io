@@ -12,7 +12,7 @@ def iv_calculation_page():
     return ui.nav_panel(
         "IV Calculator",
         ui.layout_columns(
-            ui.h4("IV Calculator"),
+            ui.h2("IV Calculator"),
         ),
         ui.layout_columns(
             ui.page_fluid(
@@ -70,6 +70,9 @@ def iv_calculation_page():
 def xp_ev_info_page():
     return ui.nav_panel(
         "XP / EV Info",
+        ui.layout_columns(
+            ui.h2("XP / EV Information"),
+        ),
         ui.layout_columns(
             ui.page_fluid(
                 ui.page_fluid(
