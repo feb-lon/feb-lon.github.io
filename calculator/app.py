@@ -568,13 +568,13 @@ def server(input: Inputs, output: Outputs, session: Session):
                                                                      * thick_fat_modifier) * sport_modifier),
                                                          applied_atk_spa_stage) / effective_def_spd) / 50)
             full_damage = calc_ibm_damage(int(full_damage), burned_modifier,
-                                          reflect_lightscreen_modifier, weather_modifier, ff_modifier)
+                                          reflect_lightscreen_modifier, weather_modifier, ff_modifier, is_physical)
             full_damage = calc_obm_damage_no_randomness(full_damage, crit_modifier,
                                                         double_damage_or_charge_modifier, stab_modifier, eff1, eff2)
 
             for y in range(16):
                 # apply the random factor of the dmg calculation, and use it if it matches the dmg we received
-                value = floor(full_damage * (y + 85) / 100)
+                value = max(1, floor(full_damage * (y + 85) / 100))
                 values[x - min_offense_guess].append(value)
                 if floor(value == damage_received):
                     dmg[x - min_offense_guess] += 1
@@ -623,7 +623,7 @@ def server(input: Inputs, output: Outputs, session: Session):
 
             plot.set_yticks([0, 2, 4, 6, 8, 10, 12, 14, 16], labels=["0", "2", "4", "6", "8", "10", "12", "14", "16"])
             plot.set_ylim(0, 16)
-            plot.set_title("ATK/SPA Value Likelihood")
+            plot.set_title("ATK/SPA Value Likelihood, DMG values shown on bars")
             plot.set_ylabel("The 16 different Options")
             plot.set_xlabel("ATK/SPA value")
 
@@ -760,16 +760,18 @@ def server(input: Inputs, output: Outputs, session: Session):
         return offense_guess_min, offense_guess_max
 
     def calc_ibm_damage(base_damage: int, burned_modifier: float, barrier_lightscreen_modifier: float,
-                        current_weather_modifier: float, flash_fire_modifier: float):
+                        current_weather_modifier: float, flash_fire_modifier: float, is_physical: bool):
         result = floor(floor(floor(floor(base_damage * flash_fire_modifier)
                                    * current_weather_modifier) * barrier_lightscreen_modifier) * burned_modifier)
+
+        result = max(result, 1 if is_physical else 0) # minimum dmg of 1 only for physical moves at this point
         return result + 2
 
     def calc_obm_damage_no_randomness(base_damage: int, crit_modifier: int, double_damage_charge_modifier: int,
                                       stab_modifier: float,
                                       effectiveness_type_1: float, effectiveness_type_2: float):
-        result = floor(base_damage * crit_modifier * double_damage_charge_modifier * stab_modifier)
-        result = floor(floor(result * effectiveness_type_1) * effectiveness_type_2)
+        result = apply(crit_modifier, double_damage_charge_modifier, stab_modifier, effectiveness_type_1,
+                       effectiveness_type_2, dmg_val=base_damage)
         return result
 
     def calc_stat_stages_backwards(stat: int, stages: int):
@@ -786,6 +788,12 @@ def server(input: Inputs, output: Outputs, session: Session):
         result = floor(stat * defensive_badge_modifier)
         result = calc_stat_stages(result, defensive_stage)
         return result
+
+    def apply(*args, dmg_val: int):
+        result = dmg_val
+        for arg in args:
+            result = max(1, floor(result * arg))
+        return int(result)
 
     def get_pokemon_types(pokemon):
         return pokemons["Type 1"][pokemon], pokemons["Type 2"][pokemon]
