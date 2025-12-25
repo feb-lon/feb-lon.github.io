@@ -1,4 +1,5 @@
 from math import floor, ceil
+from os import listdir
 
 import matplotlib.pyplot as plt
 from shiny.types import SilentException
@@ -16,55 +17,54 @@ def iv_calculation_page():
         ),
         ui.layout_columns(
             ui.page_fluid(
-                ui.input_selectize("pokemon_iv", "Select Pokemon:",
-                                   sorted(pokemons.index), selected="Lickitung"),
-                ui.output_code("pokemon_bst_iv"),
-            ),
-            ui.page_fluid(
-                ui.input_radio_buttons("nature_plus_iv", "Nature + :",
-                                       ["neutral", "+ ATK", "+ DEF", "+ SPA", "+ SPD", "+ SPE"], inline=True),
-                ui.input_radio_buttons("nature_minus_iv", "Nature - :",
-                                       ["neutral", "- ATK", "- DEF", "- SPA", "- SPD", "- SPE"], inline=True)
-            ),
-            ui.page_fluid(
-                ui.card(
+                ui.page_fluid(
                     ui.layout_columns(
-                        ui.input_action_button("delete_row_iv", "Delete Selected Row"),
-                        ui.input_action_button("clear_all_iv", "Clear All"),
+                        ui.page_fluid(
+                            ui.input_selectize("pokemon_iv", "Select Pokemon:",
+                                               sorted(pokemons.index), selected="Lickitung"),
+                        ),
+                        ui.output_code("pokemon_bst_iv"),
+                        col_widths=(8, 4),
                     ),
+                    ui.input_radio_buttons("nature_plus_iv", "Nature + :",
+                                           ["neutral", "+ ATK", "+ DEF", "+ SPA", "+ SPD", "+ SPE"], inline=True),
+                    ui.input_radio_buttons("nature_minus_iv", "Nature - :",
+                                           ["neutral", "- ATK", "- DEF", "- SPA", "- SPD", "- SPE"], inline=True)
                 ),
-            ),
-            col_widths=(3, 6, 3),
-        ),
-        ui.layout_columns(
-            ui.page_fluid(
-                ui.h5("Stats at specific Level"),
-                ui.input_numeric("level_iv", "Level:", 5, min=1, max=100),
-                ui.input_numeric("hp_iv", "HP:", 22, min=11, max=999),
-                ui.input_numeric("atk_iv", "ATK:", 12, min=4, max=999),
-                ui.input_numeric("def_iv", "DEF:", 12, min=4, max=999),
-                ui.input_numeric("spa_iv", "SPA:", 12, min=4, max=999),
-                ui.input_numeric("spd_iv", "SPD:", 12, min=4, max=999),
-                ui.input_numeric("spe_iv", "SPE:", 12, min=4, max=999),
-                # ui.input_selectize("mons_defeated_iv", "Mons Defeated at this Level:", sorted(pokemons.index), multiple=True),
-                ui.card(
-                    ui.layout_columns(
+                ui.layout_columns(
+                    ui.page_fillable(
                         ui.input_action_button("save_stats_iv", "Save Stats"),
                         ui.input_action_button("prefill_next_level_iv", "Prefill Next Level"),
                         ui.input_action_button("prefill_current_level_iv", "Prefill Current Level"),
-                    )
-                )
+                        ui.input_action_button("delete_row_iv", "Delete Selected Row"),
+                        ui.input_action_button("clear_all_iv", "Clear All"),
+                    ),
+                    ui.page_fluid(
+                        ui.h5("Stats at specific Level"),
+                        ui.input_numeric("level_iv", "Level:", 5, min=1, max=100),
+                        ui.input_numeric("hp_iv", "HP:", 22, min=11, max=999),
+                        ui.input_numeric("atk_iv", "ATK:", 12, min=4, max=999),
+                        ui.input_numeric("def_iv", "DEF:", 12, min=4, max=999),
+                        ui.input_numeric("spa_iv", "SPA:", 12, min=4, max=999),
+                        ui.input_numeric("spd_iv", "SPD:", 12, min=4, max=999),
+                        ui.input_numeric("spe_iv", "SPE:", 12, min=4, max=999),
+                        # ui.input_selectize("mons_defeated_iv", "Mons Defeated at this Level:", sorted(pokemons.index), multiple=True),
+                    ),
+                    col_widths=(6, 6),
+                ),
             ),
             ui.page_fluid(
-                ui.layout_columns(ui.h5("Stat History (editable)")),
-                ui.output_data_frame("history_iv")
+                ui.page_fillable(
+                    ui.output_table("result_iv"),
+                ),
+                ui.page_fluid(
+                    ui.layout_columns(ui.h5("Stat History (editable)")),
+                    ui.output_data_frame("history_iv")
+                ),
             ),
-            ui.page_fluid(
-                ui.output_table("result_iv"),
-            ),
-            col_widths=(3, 6, 3),
+            col_widths=(5, 7),
         ),
-    )
+    ),
 
 
 def xp_ev_info_page():
@@ -120,11 +120,11 @@ def atk_spa_calculator_page():
                     "effectiveness",
                     ui.tooltip(
                         ui.span("Effectiveness:   ", question_circle_fill),
-                        "Effectiveness \"1x-\" is for cases where the move used has opposite effectivenes against the two defending types, and damage gets lost during rounding.\n In this generation, this is the case with: \n\n Bug -> Fire/Dark, Fight/Psy, Fly/Psy, Fly/Dark, Ghost/Dark \n Dark -> Fight/Psy \n Electric -> Electric/Fly, Electric \n Fight -> Fly/Dark, Fly/Steel, Psy/Rock, Bug/Rock, Bug/Steel \n Fire -> Water/Grass, Water/Ice, Water/Bug, Rock/Steel \n Grass -> Fire/Ground, Fire/Rock, Grass/Rock, Fly/Rock, Bug/Rock \n Ground -> Grass/Poison, Bug/Rock, Bug/Steel \n Ice -> Fire/Ground, Fire/Rock, Fire/Fly, Water/Grass, Water/Ground, Water/Fly, Water/Dragon, Ice/Ground, Ice/Fly \n Rock -> Ground/Fly, Ground/Bug \n Steel -> Fire/Rock, Water/Ice, Water/Rock \n Water -> Water/Ground, Water/Rock",
-                        placement="left",
+                        typing_tooltip(),
+                        placement="right",
                         id="effectiveness_tooltip_advanced",
                     ),
-                    {"0.25": "0.25x", "0.5": "0.5x", "1": "1x", "1-": "1x-", "2": "2x", "4": "4x"},
+                    {"0.25": "0.25x", "0.5": "0.5x", "1-": "1x-", "1": "1x", "2": "2x", "4": "4x"},
                     inline=True,
                     selected="1",
                 ),
@@ -138,9 +138,21 @@ def atk_spa_calculator_page():
                         ),
                         ui.input_numeric("atk_spa_stage", "ATK/SPA Stage:", 0, min=-6, max=6),
                         ui.input_switch("is_burned", "Enemy Burned"),
-                        ui.input_switch("ff_active", "Flashfire Bonus"),
-                        ui.input_switch("has_dd_charge", "Double Damage / Charge Bonus"),
-                        ui.input_switch("is_physical", "Move is Physical"),
+                        ui.tooltip(
+                            ui.input_switch("ff_active", "Flashfire Bonus"),
+                            ui.card(
+                                "Getting hit by a fire move gives this bonus for the whole fight. "
+                                "\nWhile frozen, Flash Fire does not work."
+                            ),
+                        ),
+                        ui.tooltip(
+                            ui.input_switch("has_dd_charge", "Double Damage / Charge Bonus"),
+                            double_damage_tooltip(),
+                        ),
+                        ui.tooltip(
+                            ui.input_switch("is_physical", "Move is Physical"),
+                            ui.card("Only used for determining minimum DMG (physical DMG has higher minimum DMG)"),
+                        ),
                         ui.input_select("enemy_ability", "Enemy Ability: ",
                                         {"1": "1x (irrelevant)", "1.5": "1.5x (e.g. Hustle, Swarm)",
                                          "2": "2x (Huge Power)"}),
@@ -182,8 +194,10 @@ def atk_spa_calculator_page():
             ui.page_fluid(
                 ui.output_plot("calculate_offense"),
                 ui.layout_columns(
-                    ui.card(
-                        ui.h5("Graph Style:"),
+                    ui.page_fluid(
+                        ui.layout_columns(
+                            ui.h5("Graph Style:"),
+                        ),
                         ui.input_radio_buttons(
                             "graph_style",
                             None,
@@ -192,7 +206,7 @@ def atk_spa_calculator_page():
                             selected="only_dmg_received",
                         ),
                     ),
-                    ui.card(
+                    ui.page_fluid(
                         ui.layout_columns(
                             ui.h5("Reset Buttons:"),
                         ),
@@ -202,15 +216,238 @@ def atk_spa_calculator_page():
                             col_widths=(6, 6),
                         ),
                     ),
-                    col_widths=(6, 6)
+                    col_widths=(-1, 3, -4, 3, -1)
                 ),
+                id="right_side",
             ),
             col_widths=(3, 9),
         )
     )
 
 
-app_ui = \
+def double_damage_tooltip():
+    return ui.card(
+        ui.card_header("Double Damage Situations:"),
+        ui.card_body(
+            ui.layout_columns(
+                ui.page_fluid("Needle Arm, Astonish, Extrasensory, Stomp"),
+                ui.page_fluid("vs Minimized Target"),
+                ui.page_fluid("Gust, Twister"),
+                ui.page_fluid("vs mon in the air via Fly or Bounce"),
+                ui.page_fluid("Earthquake, Magnitude"),
+                ui.page_fluid("vs mon under ground via Dig"),
+                ui.page_fluid("Surf, Whirlpool"),
+                ui.page_fluid("vs mon under water using Dive"),
+                ui.page_fluid("Revenge"),
+                ui.page_fluid("after being hit"),
+                ui.page_fluid("Weather Ball"),
+                ui.page_fluid("during non-clear Weather"),
+                ui.page_fluid("Pursuit"),
+                ui.page_fluid("vs enemy switching pokemon"),
+                col_widths=(6, 6),
+            )
+        ),
+    )
+
+
+def typing_tooltip():
+    return ui.card(
+        ui.card_header(
+            "Effectiveness \"1x-\" is for cases where the move used has opposite effectiveness against "
+            "the two defending types, and damage gets lost during rounding.In this generation, this is "
+            "the case with: "
+        ),
+        ui.card_body(
+            ui.row(
+                ui.layout_columns(
+                    ui.column(12, ui.h6("Move Type")),
+                    ui.column(1, ui.h1(">")),
+                    ui.column(12, ui.h6("Defending Types")),
+                    col_widths=(1, 1, 2, 8),
+                ),
+            ),
+            ui.row(
+                ui.layout_columns(
+                    ui.column(1, bug_type()),
+                    ui.column(1, ui.h1(">")),
+                    ui.column(1, fire_type(), dark_type()),
+                    ui.column(1, fighting_type(), psychic_type()),
+                    ui.column(1, flying_type(), psychic_type()),
+                    ui.column(1, flying_type(), dark_type()),
+                    ui.column(1, ghost_type(), dark_type()),
+                    col_widths=type_tooltip_col_width,
+                ),
+            ),
+            ui.row(
+                ui.layout_columns(
+                    ui.column(1, electric_type()),
+                    ui.column(1, ui.h1(">")),
+                    ui.column(1, electric_type(), flying_type()),
+                    col_widths=type_tooltip_col_width,
+                ),
+            ),
+            ui.row(
+                ui.layout_columns(
+                    ui.column(1, fighting_type()),
+                    ui.column(1, ui.h1(">")),
+                    ui.column(1, flying_type(), dark_type()),
+                    ui.column(1, flying_type(), steel_type()),
+                    ui.column(1, psychic_type(), rock_type()),
+                    ui.column(1, bug_type(), rock_type()),
+                    ui.column(1, bug_type(), steel_type()),
+                    col_widths=type_tooltip_col_width,
+                ),
+            ),
+            ui.row(
+                ui.layout_columns(
+                    ui.column(1, fire_type()),
+                    ui.column(1, ui.h1(">")),
+                    ui.column(1, water_type(), grass_type()),
+                    ui.column(1, water_type(), ice_type()),
+                    ui.column(1, water_type(), bug_type()),
+                    ui.column(1, rock_type(), steel_type()),
+                    col_widths=type_tooltip_col_width,
+                ),
+            ),
+            ui.row(
+                ui.layout_columns(
+                    ui.column(1, grass_type()),
+                    ui.column(1, ui.h1(">")),
+                    ui.column(1, fire_type(), ground_type()),
+                    ui.column(1, fire_type(), rock_type()),
+                    ui.column(1, grass_type(), rock_type()),
+                    ui.column(1, flying_type(), rock_type()),
+                    ui.column(1, bug_type(), rock_type()),
+                    col_widths=type_tooltip_col_width,
+                ),
+            ),
+            ui.row(
+                ui.layout_columns(
+                    ui.column(1, ground_type()),
+                    ui.column(1, ui.h1(">")),
+                    ui.column(1, grass_type(), poison_type()),
+                    ui.column(1, bug_type(), rock_type()),
+                    ui.column(1, bug_type(), steel_type()),
+                    col_widths=type_tooltip_col_width,
+                ),
+            ),
+            ui.row(
+                ui.layout_columns(
+                    ui.column(1, ice_type()),
+                    ui.column(1, ui.h1(">")),
+                    ui.column(1, fire_type(), ground_type()),
+                    ui.column(1, fire_type(), rock_type()),
+                    ui.column(1, fire_type(), flying_type()),
+                    ui.column(1, water_type(), grass_type()),
+                    ui.column(1, water_type(), ground_type()),
+                    ui.column(1, water_type(), flying_type()),
+                    ui.column(1, water_type(), dragon_type()),
+                    ui.column(1, ice_type(), ground_type()),
+                    ui.column(1, ice_type(), flying_type()),
+                    col_widths=type_tooltip_col_width,
+                ),
+            ),
+            ui.row(
+                ui.layout_columns(
+                    ui.column(1, rock_type()),
+                    ui.column(1, ui.h1(">")),
+                    ui.column(1, ground_type(), flying_type()),
+                    ui.column(1, ground_type(), bug_type()),
+                    col_widths=type_tooltip_col_width,
+                ),
+            ),
+            ui.row(
+                ui.layout_columns(
+                    ui.column(1, steel_type()),
+                    ui.column(1, ui.h1(">")),
+                    ui.column(1, fire_type(), rock_type()),
+                    ui.column(1, water_type(), ice_type()),
+                    ui.column(1, water_type(), rock_type()),
+                    col_widths=type_tooltip_col_width,
+                ),
+            ),
+            ui.row(
+                ui.layout_columns(
+                    ui.column(1, water_type()),
+                    ui.column(1, ui.h1(">")),
+                    ui.column(1, water_type(), rock_type()),
+                    ui.column(1, water_type(), ground_type()),
+                    col_widths=type_tooltip_col_width,
+                ),
+            ),
+        ),
+    ),
+
+
+def dark_type():
+    return ui.tags.img(src="dark_type.png", width=type_image_size)
+
+
+def bug_type():
+    return ui.tags.img(src="bug_type.png", width=type_image_size)
+
+
+def fire_type():
+    return ui.tags.img(src="fire_type.png", width=type_image_size)
+
+
+def normal_type():
+    return ui.tags.img(src="normal_type.png", width=type_image_size)
+
+
+def water_type():
+    return ui.tags.img(src="water_type.png", width=type_image_size)
+
+
+def electric_type():
+    return ui.tags.img(src="electric_type.png", width=type_image_size)
+
+
+def grass_type():
+    return ui.tags.img(src="grass_type.png", width=type_image_size)
+
+
+def ice_type():
+    return ui.tags.img(src="ice_type.png", width=type_image_size)
+
+
+def fighting_type():
+    return ui.tags.img(src="fighting_type.png", width=type_image_size)
+
+
+def poison_type():
+    return ui.tags.img(src="poison_type.png", width=type_image_size)
+
+
+def ground_type():
+    return ui.tags.img(src="ground_type.png", width=type_image_size)
+
+
+def flying_type():
+    return ui.tags.img(src="flying_type.png", width=type_image_size)
+
+
+def psychic_type():
+    return ui.tags.img(src="psychic_type.png", width=type_image_size)
+
+
+def rock_type():
+    return ui.tags.img(src="rock_type.png", width=type_image_size)
+
+
+def ghost_type():
+    return ui.tags.img(src="ghost_type.png", width=type_image_size)
+
+
+def dragon_type():
+    return ui.tags.img(src="dragon_type.png", width=type_image_size)
+
+
+def steel_type():
+    return ui.tags.img(src="steel_type.png", width=type_image_size)
+
+
+app_ui = (
     ui.page_navbar(
         ui.nav_spacer(),
         atk_spa_calculator_page(),
@@ -221,15 +458,18 @@ app_ui = \
         title="Pokemon Generation 3 Calculator",
         window_title="Gen 3 Calculator",
     )
+)
 
 
 def server(input: Inputs, output: Outputs, session: Session):
-
     """
     ---------------------- IV Page ----------------------
     """
     stat_history = reactive.value(
         pd.DataFrame(columns=["level", "hp", "atk", "def", "spa", "spd", "spe"], dtype=int))
+
+    empty_table = reactive.value(pd.DataFrame(index=["hp_biv", "atk_biv", "def_biv", "spa_biv", "spd_biv", "spe_biv"],
+                                              columns=["min", "mid", "max"], dtype=int))
 
     current_bst = reactive.value(int(385))  # initial mon is Lickitung with 385 BST
 
@@ -288,46 +528,102 @@ def server(input: Inputs, output: Outputs, session: Session):
         df = calc_biv_table()
         base_as_biv = current_bst() * 2
 
-        total_ivs = [df["min"].sum() - base_as_biv, df["max"].sum() - base_as_biv]
-        total_ivs_avg = [f"{total_ivs[0] / 6:.2f}", f"{total_ivs[1] / 6:.2f}"]
+        total_biv_min = df["min"].sum()
+        total_iv_min = total_biv_min - base_as_biv
+        total_biv_max = df["max"].sum()
+        total_iv_max = total_biv_max - base_as_biv
+        total_iv_avg = (total_iv_min + total_iv_max) / 2
 
-        result = pd.DataFrame(columns=["min", "max"], dtype=int)
-        result.loc["Base HP:"] = [biv_to_base_min(df.loc["hp_biv", "min"]), biv_to_base_max(df.loc["hp_biv", "max"])]
-        result.loc["Base ATK:"] = [biv_to_base_min(df.loc["atk_biv", "min"]), biv_to_base_max(df.loc["atk_biv", "max"])]
-        result.loc["Base DEF:"] = [biv_to_base_min(df.loc["def_biv", "min"]), biv_to_base_max(df.loc["def_biv", "max"])]
-        result.loc["Base SPA:"] = [biv_to_base_min(df.loc["spa_biv", "min"]), biv_to_base_max(df.loc["spa_biv", "max"])]
-        result.loc["Base SPD:"] = [biv_to_base_min(df.loc["spd_biv", "min"]), biv_to_base_max(df.loc["spd_biv", "max"])]
-        result.loc["Base SPE"] = [biv_to_base_min(df.loc["spe_biv", "min"]), biv_to_base_max(df.loc["spe_biv", "max"])]
+        base_hp_min, base_hp_max = (biv_to_base_min(df.loc["hp_biv", "min"]),
+                                    biv_to_base_max(df.loc["hp_biv", "max"]))
+        base_hp_gap = base_hp_max - base_hp_min
+        hp_error_free = df.loc["hp_biv", "min"] <= df.loc["hp_biv", "max"]
+
+        base_atk_min, base_atk_max = (biv_to_base_min(df.loc["atk_biv", "min"]),
+                                      biv_to_base_max(df.loc["atk_biv", "max"]))
+        base_atk_gap = base_atk_max - base_atk_min
+        atk_error_free = df.loc["atk_biv", "min"] <= df.loc["atk_biv", "max"]
+
+        base_def_min, base_def_max = (biv_to_base_min(df.loc["def_biv", "min"]),
+                                      biv_to_base_max(df.loc["def_biv", "max"]))
+        base_def_gap = base_def_max - base_def_min
+        def_error_free = df.loc["def_biv", "min"] <= df.loc["def_biv", "max"]
+
+        base_spa_min, base_spa_max = (biv_to_base_min(df.loc["spa_biv", "min"]),
+                                      biv_to_base_max(df.loc["spa_biv", "max"]))
+        base_spa_gap = base_spa_max - base_spa_min
+        spa_error_free = df.loc["spa_biv", "min"] <= df.loc["spa_biv", "max"]
+
+        base_spd_min, base_spd_max = (biv_to_base_min(df.loc["spd_biv", "min"]),
+                                      biv_to_base_max(df.loc["spd_biv", "max"]))
+        base_spd_gap = base_spd_max - base_spd_min
+        spd_error_free = df.loc["spd_biv", "min"] <= df.loc["spd_biv", "max"]
+
+        base_spe_min, base_spe_max = (biv_to_base_min(df.loc["spe_biv", "min"]),
+                                      biv_to_base_max(df.loc["spe_biv", "max"]))
+        base_spe_gap = base_spe_max - base_spe_min
+        spe_error_free = df.loc["spe_biv", "min"] <= df.loc["spe_biv", "max"]
+
+        error_free = hp_error_free and atk_error_free and def_error_free and spa_error_free and spd_error_free and spe_error_free
+        total_ivs = [total_iv_min, total_iv_avg, total_iv_max, error_free]
+        total_ivs_avg = [f"{total_ivs[0] / 6:.2f}", f"{total_ivs[1] / 6:.2f}", f"{total_ivs[2] / 6:.2f}", error_free]
+
+        base_gap_sum = base_hp_gap + base_atk_gap + base_def_gap + base_spa_gap + base_spd_gap + base_spe_gap
+        base_min_sum = base_hp_min + base_atk_min + base_def_min + base_spa_min + base_spd_min + base_spe_min
+        biv_gap_sum = base_gap_sum * 2
+        if biv_gap_sum == 0:
+            base_gap_sum = 1
+        missing_base_stats = current_bst() - base_min_sum
+
+        base_hp_med = round(base_hp_min + missing_base_stats/base_gap_sum*base_hp_gap)
+        base_atk_med = round(base_atk_min + missing_base_stats/base_gap_sum*base_atk_gap)
+        base_def_med = round(base_def_min + missing_base_stats/base_gap_sum*base_def_gap)
+        base_spa_med = round(base_spa_min + missing_base_stats/base_gap_sum*base_spa_gap)
+        base_spd_med = round(base_spd_min + missing_base_stats/base_gap_sum*base_spd_gap)
+        base_spe_med = round(base_spe_min + missing_base_stats/base_gap_sum*base_spe_gap)
+
+        result = pd.DataFrame(columns=["min", "mid", "max", "error-free?"])
         result.loc["Total IVs"] = total_ivs
         result.loc["Average IVs"] = total_ivs_avg
+        result.loc["Base HP:"] = [base_hp_min, base_hp_med, base_hp_max, hp_error_free]
+        result.loc["Base ATK:"] = [base_atk_min, base_atk_med, base_atk_max, atk_error_free]
+        result.loc["Base DEF:"] = [base_def_min, base_def_med, base_def_max, def_error_free]
+        result.loc["Base SPA:"] = [base_spa_min, base_spa_med, base_spa_max, spa_error_free]
+        result.loc["Base SPD:"] = [base_spd_min, base_spd_med, base_spd_max, spd_error_free]
+        result.loc["Base SPE:"] = [base_spe_min, base_spe_med, base_spe_max, spe_error_free]
 
-        return result
+        return result.transpose()
 
     def calc_biv_table():
         if stat_history().size < 1:
-            raise SilentException()
+            return empty_table()
 
-        df = pd.DataFrame(columns=["min", "max"],
+        biv_table = pd.DataFrame(columns=["min", "max"],
                           index=["hp_biv", "atk_biv", "def_biv", "spa_biv", "spd_biv", "spe_biv"])
 
         for row in stat_history.get().itertuples():
-
             level, hp, atk, deff, spa, spd, spe = row[1:8]
 
             hp_biv_min, hp_biv_max = biv_range_hp(level, hp, 0)
-            df.loc["hp_biv"] = [hp_biv_min, hp_biv_max]
+            biv_table.loc["hp_biv"] = [max(hp_biv_min, biv_table.loc["hp_biv"]["min"]),
+                                         min(hp_biv_max, biv_table.loc["hp_biv"]["max"])]
             atk_biv_min, atk_biv_max = biv_range(level, atk, 0, atk_nature_modifier.get())
-            df.loc["atk_biv"] = [atk_biv_min, atk_biv_max]
+            biv_table.loc["atk_biv"] = [max(atk_biv_min, biv_table.loc["atk_biv"]["min"]),
+                                         min(atk_biv_max, biv_table.loc["atk_biv"]["max"])]
             def_biv_min, def_biv_max = biv_range(level, deff, 0, def_nature_modifier.get())
-            df.loc["def_biv"] = [def_biv_min, def_biv_max]
+            biv_table.loc["def_biv"] = [max(def_biv_min, biv_table.loc["def_biv"]["min"]),
+                                          min(def_biv_max, biv_table.loc["def_biv"]["max"])]
             spa_biv_min, spa_biv_max = biv_range(level, spa, 0, spa_nature_modifier.get())
-            df.loc["spa_biv"] = [spa_biv_min, spa_biv_max]
+            biv_table.loc["spa_biv"] = [max(spa_biv_min, biv_table.loc["spa_biv"]["min"]),
+                                          min(spa_biv_max, biv_table.loc["spa_biv"]["max"])]
             spd_biv_min, spd_biv_max = biv_range(level, spd, 0, spd_nature_modifier.get())
-            df.loc["spd_biv"] = [spd_biv_min, spd_biv_max]
+            biv_table.loc["spd_biv"] = [max(spd_biv_min, biv_table.loc["spd_biv"]["min"]),
+                                          min(spd_biv_max, biv_table.loc["spd_biv"]["max"])]
             spe_biv_min, spe_biv_max = biv_range(level, spe, 0, spe_nature_modifier.get())
-            df.loc["spe_biv"] = [spe_biv_min, spe_biv_max]
+            biv_table.loc["spe_biv"] = [max(spe_biv_min, biv_table.loc["spe_biv"]["min"]),
+                                          min(spe_biv_max, biv_table.loc["spe_biv"]["max"])]
 
-        return df
+        return biv_table
 
     @render.text
     def pokemon_bst_iv():
@@ -341,7 +637,7 @@ def server(input: Inputs, output: Outputs, session: Session):
             pd.DataFrame(columns=["level", "hp", "atk", "def", "spa", "spd", "spe"], dtype=int)))
 
     @render.data_frame
-    @reactive.event(input.save_stats_iv, input.clear_all_iv, input.delete_row_iv ,ignore_none=False)
+    @reactive.event(input.save_stats_iv, input.clear_all_iv, input.delete_row_iv, ignore_none=False)
     def history_iv():
         return render.DataTable(
             stat_history(),
@@ -367,7 +663,6 @@ def server(input: Inputs, output: Outputs, session: Session):
         stat_history_copy.drop(stat_history_copy.index[[selected_row_number]], inplace=True)
         stat_history_copy.reset_index(drop=True, inplace=True)
         stat_history.set(stat_history_copy)
-
 
     @reactive.effect
     @reactive.event(input.save_stats_iv)
@@ -400,8 +695,10 @@ def server(input: Inputs, output: Outputs, session: Session):
             raise SilentException()
         spe = input.spe_iv()
 
-        stat_history.get().loc[-1] = [level, hp, atk, deff, spa, spd, spe]
-        stat_history.get().index = stat_history.get().index + 1
+        stat_history_copy = stat_history.get().copy()
+        stat_history_copy.loc[-1] = [level, hp, atk, deff, spa, spd, spe]
+        stat_history_copy.index = stat_history_copy.index + 1
+        stat_history.set(stat_history_copy)
 
     """
     ---------------------- XP Page ----------------------
@@ -436,6 +733,8 @@ def server(input: Inputs, output: Outputs, session: Session):
     @reactive.effect
     @reactive.event(input.clear_all)
     def clear_all():
+        print(app_dir)
+        print(listdir(app_dir / "images"))
         clear_visible_inputs()
         clear_dropdowns()
 
@@ -609,6 +908,12 @@ def server(input: Inputs, output: Outputs, session: Session):
             new_values = []
             for i in range(0, max_offense - min_offense + 1):
                 new_values.append(i)
+
+                try:
+                    new_values[i] = (np.unique_counts(values[i]))
+                except:
+                    raise SilentException()
+
                 new_values[i] = (np.unique_counts(values[i]))
 
             rows = []
@@ -657,6 +962,7 @@ def server(input: Inputs, output: Outputs, session: Session):
             else:
                 plot.set_xticks(range(0, max_offense - min_offense + 1), range(min_offense, max_offense + 1))
 
+            if not plot: raise SilentException()
             return plot
         else:
             raise SilentException()
@@ -764,7 +1070,7 @@ def server(input: Inputs, output: Outputs, session: Session):
         result = floor(floor(floor(floor(base_damage * flash_fire_modifier)
                                    * current_weather_modifier) * barrier_lightscreen_modifier) * burned_modifier)
 
-        result = max(result, 1 if is_physical else 0) # minimum dmg of 1 only for physical moves at this point
+        result = max(result, 1 if is_physical else 0)  # minimum dmg of 1 only for physical moves at this point
         return result + 2
 
     def calc_obm_damage_no_randomness(base_damage: int, crit_modifier: int, double_damage_charge_modifier: int,
@@ -792,7 +1098,8 @@ def server(input: Inputs, output: Outputs, session: Session):
     def apply(*args, dmg_val: int):
         result = dmg_val
         for arg in args:
-            result = max(1, floor(result * arg))
+            result = floor(result * arg)
+        result = max(1, result)
         return int(result)
 
     def get_pokemon_types(pokemon):
@@ -813,10 +1120,10 @@ def server(input: Inputs, output: Outputs, session: Session):
             else:
                 return type_2_effectiveness, type_1_effectiveness
 
-    def biv_range_hp(level: int, current_stat: int, evs:int):
+    def biv_range_hp(level: int, current_stat: int, evs: int):
         return biv_range(level, current_stat - 5 - level, evs, 1)
 
-    def biv_range(level:int, current_stat:int, evs:int, nature:float):
+    def biv_range(level: int, current_stat: int, evs: int, nature: float):
         biv_maximum = biv_max(level, current_stat, evs, nature)
         biv_minimum = biv_min(level, current_stat, evs, nature)
 
@@ -837,8 +1144,7 @@ def server(input: Inputs, output: Outputs, session: Session):
 
         return biv_minimum, biv_maximum
 
-
-    def biv_min_hp(level: int, current_stat: int, evs: int,):
+    def biv_min_hp(level: int, current_stat: int, evs: int, ):
         return int(biv_min(level, current_stat - 5 - level, evs, 1))
 
     def biv_min(level: int, current_stat: int, evs: int, nature: float):
@@ -846,11 +1152,11 @@ def server(input: Inputs, output: Outputs, session: Session):
         # i use it as it is easier to get both as a package than directly calc the base stat
         # (and it does not make a difference for the resulting stat anyway)
         biv = min(541, max(22,
-                            int(floor(floor(floor(current_stat / nature) - 4
-                                            - (1 if nature == 1 or (nature == 1.1 and current_stat % 11 == 0) else 0))
-                                      * 100 / level) + (0 if not (nature == 0.9 and current_stat % 10 == 0)
-                                                                                        else 100 % level)
-                                - floor(evs / 4))))
+                           int(floor(floor(floor(current_stat / nature) - 4
+                                           - (1 if nature == 1 or (nature == 1.1 and current_stat % 11 == 0) else 0))
+                                     * 100 / level) + (0 if not (nature == 0.9 and current_stat % 10 == 0)
+                                                       else 100 % level)
+                               - floor(evs / 4))))
         result = calc_stat(level, 0, biv, 0, nature)
         return biv
 
@@ -859,17 +1165,25 @@ def server(input: Inputs, output: Outputs, session: Session):
 
     def biv_max(level: int, current_stat: int, evs: int, nature: float):
         biv = max(22, min(541, int(ceil(ceil((
-            (current_stat + (1 if (nature == 1.1 and current_stat % 11 == 0) else 0)) / nature
-            - (5 if nature == 1 else 4)) * 100 + 99) / level) - floor(evs / 4))))
+                                                     (current_stat + (1 if (
+                                                             nature == 1.1 and current_stat % 11 == 0) else 0)) / nature
+                                                     - (5 if nature == 1 else 4)) * 100 + 99) / level) - floor(
+            evs / 4))))
 
         result = calc_stat(level, 0, biv, 0, nature)
         return biv
 
     def biv_to_base_min(biv):
-        return int(ceil((biv - 31) / 2))
+        if type(biv) != int:
+            return 0
+        else:
+            return int(ceil((biv - 31) / 2))
 
     def biv_to_base_max(biv):
-        return int(floor(biv / 2))
+        if type(biv) != int:
+            return 0
+        else:
+            return int(floor(biv / 2))
 
     def calc_dmg_base(level: int, move_power: int, offense: int, defense: int):
         return floor(floor(2 * level / 5 + 2) * move_power * offense / defense)
@@ -881,7 +1195,8 @@ def server(input: Inputs, output: Outputs, session: Session):
     def get_weather_modifier(current_weather, move_type):
         if (current_weather == "Sunny" and move_type == "Fire") or (current_weather == "Rain" and move_type == "Water"):
             return 1.5
-        elif (current_weather == "Sunny" and move_type == "Water") or (current_weather == "Rain" and move_type == "Fire"):
+        elif (current_weather == "Sunny" and move_type == "Water") or (
+                current_weather == "Rain" and move_type == "Fire"):
             return 0.5
         return 1
 
@@ -897,10 +1212,11 @@ def server(input: Inputs, output: Outputs, session: Session):
 
     # Formula: https://bulbapedia.bulbagarden.net/wiki/Stat#Generation_III_onward
     def calc_stat(level: int, base: int, iv: int, ev: int, nature: float):
-        return int(floor((floor(floor(2*base + iv + floor(ev/4)) * level / 100) + 5) * nature))
+        return int(floor((floor(floor(2 * base + iv + floor(ev / 4)) * level / 100) + 5) * nature))
 
     def calc_hp(level: int, base: int, iv: int, ev: int):
-        return int(floor(floor(2*base + iv + floor(ev/4)) * level / 100) + 10 + level)
+        return int(floor(floor(2 * base + iv + floor(ev / 4)) * level / 100) + 10 + level)
 
 
-app = App(app_ui, server)
+app = App(app_ui, server,
+          static_assets=Path(app_dir / "images"))
