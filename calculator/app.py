@@ -1,10 +1,10 @@
 from math import floor, ceil
-from os import listdir
 
 import matplotlib.pyplot as plt
 from shiny.types import SilentException
 
 from shared import *
+from number_input import *
 
 from shiny import *
 
@@ -37,7 +37,7 @@ def iv_calculation_page():
                         ui.input_action_button("prefill_next_level_iv", "Prefill Next Level"),
                         ui.input_action_button("prefill_current_level_iv", "Prefill Current Level"),
                         ui.input_action_button("delete_row_iv", "Delete Selected Row"),
-                        ui.input_action_button("clear_all_iv", "Clear All"),
+                        ui.input_action_button("reset_all_iv", "Clear All"),
                     ),
                     ui.page_fluid(
                         ui.h5("Stats at specific Level"),
@@ -67,11 +67,11 @@ def iv_calculation_page():
     ),
 
 
-def xp_ev_info_page():
+def pokemon_xp_info_page():
     return ui.nav_panel(
-        "XP / EV Info",
+        "Pokemon / XP Info",
         ui.layout_columns(
-            ui.h2("XP / EV Information"),
+            ui.h2("Pokemon / XP Information"),
         ),
         ui.layout_columns(
             ui.page_fluid(
@@ -82,6 +82,7 @@ def xp_ev_info_page():
                     ui.input_switch("is_trainer_info", "Trainer Fight"),
                     ui.h4("You will get the following XP / EVs:"),
                     ui.output_table("calculate_xp_ev_info"),
+                    ui.output_ui("get_weight_info"),
                 ),
             ),
             ui.page_fluid(),
@@ -91,8 +92,10 @@ def xp_ev_info_page():
                                    selected="Fluctuating"),
                 ui.input_numeric("level_from_info", "Level From:", min=1, max=100, value=5),
                 ui.input_numeric("level_to_info", "Level To:", min=1, max=100, value=8),
-                "XP required: ",
-                ui.output_code("calc_xp_from_to"),
+                ui.layout_columns(
+                    "XP required: ",
+                    ui.output_code("calc_xp_from_to"),
+                ),
             ),
             col_widths=(4, 4, 4),
         )
@@ -107,10 +110,10 @@ def atk_spa_calculator_page():
         ),
         ui.layout_columns(
             ui.page_fluid(
-                ui.input_numeric("enemy_level", "Enemy Level:", 8, min=1, max=100),
-                ui.input_numeric("move_power", "Move Power:", 50, step=5, min=5, max=999),
-                ui.input_numeric("own_defense", "Own Defense:", 20, min=1, max=999),
-                ui.input_numeric("damage_received", "DMG Taken:", 5, min=1, max=999),
+                number_input(id="enemy_level", label="Enemy Level:", init=8),
+                number_input(id="move_power", label="Move Power:", init=50, step=5, min_value=5, max_value=999),
+                number_input(id="own_defense", label="Own Defense:", init=20, min_value=1, max_value=999),
+                number_input(id="damage_received", label="DMG Taken:", init=5, min_value=1, max_value=999),
                 ui.layout_columns(
                     ui.input_switch("is_stab", "STAB Move"),
                     ui.input_switch("is_crit", "Critical Hit"),
@@ -119,7 +122,7 @@ def atk_spa_calculator_page():
                 ui.input_radio_buttons(
                     "effectiveness",
                     ui.tooltip(
-                        ui.span("Effectiveness:   ", question_circle_fill),
+                        ui.span("Effectiveness:", question_circle_fill),
                         typing_tooltip(),
                         placement="right",
                         id="effectiveness_tooltip_advanced",
@@ -136,7 +139,7 @@ def atk_spa_calculator_page():
                             style="display: inline-flex; align-items: center; gap: 2rem;",
                             id="enemy_modifiers_title"
                         ),
-                        ui.input_numeric("atk_spa_stage", "ATK/SPA Stage:", 0, min=-6, max=6),
+                        number_input(id="atk_spa_stage", label="ATK/SPA Stage:", init=0, min_value=-6, max_value=6),
                         ui.input_switch("is_burned", "Enemy Burned"),
                         ui.tooltip(
                             ui.input_switch("ff_active", "Flashfire Bonus"),
@@ -165,7 +168,7 @@ def atk_spa_calculator_page():
                             style="display: inline-flex; align-items: center; gap: 2rem;",
                             id="own_modifiers_title",
                         ),
-                        ui.input_numeric("def_spd_stage", "DEF/SPD Stage:", 0, min=-6, max=6),
+                        number_input(id="def_spd_stage", label="DEF/SPD Stage:", init=0, min_value=-6, max_value=6),
                         ui.input_switch("has_reflect_lightscreen", "Reflect / Lightscreen"),
                         ui.input_switch("has_def_spd_badge", "DEF/SPD Badge"),
                         ui.input_switch("has_thick_fat", "Thick Fat"),
@@ -211,8 +214,8 @@ def atk_spa_calculator_page():
                             ui.h5("Reset Buttons:"),
                         ),
                         ui.layout_columns(
-                            ui.input_action_button("clear_all", "Clear All Inputs"),
-                            ui.input_action_button("clear_dropdowns", "Clear Inputs In Dropdowns"),
+                            ui.input_action_button("reset_all", "Reset All Inputs"),
+                            ui.input_action_button("reset_dropdowns", "Reset Inputs In Dropdowns"),
                             col_widths=(6, 6),
                         ),
                     ),
@@ -451,9 +454,12 @@ app_ui = (
     ui.page_navbar(
         ui.nav_spacer(),
         atk_spa_calculator_page(),
-        xp_ev_info_page(),
+        pokemon_xp_info_page(),
         iv_calculation_page(),
-        ui.head_content(ui.include_css(app_dir / "styles.css")),
+        ui.head_content(
+            ui.include_css(app_dir / "styles.css"),
+            ui.include_css(app_dir / "number_input_style.css"),
+        ),
         id="mode",
         title="Pokemon Generation 3 Calculator",
         window_title="Gen 3 Calculator",
@@ -522,7 +528,7 @@ def server(input: Inputs, output: Outputs, session: Session):
         spe_nature_modifier.set(1.1 if nature_plus == "+ SPE" else 0.9 if nature_minus == "- SPE" else 1)
 
     @render.table(index=True)
-    @reactive.event(input.save_stats_iv, input.clear_all_iv, input.pokemon_iv,
+    @reactive.event(input.save_stats_iv, input.reset_all_iv, input.pokemon_iv,
                     input.nature_plus_iv, input.nature_minus_iv, stat_history)
     def result_iv():
         df = calc_biv_table()
@@ -575,12 +581,12 @@ def server(input: Inputs, output: Outputs, session: Session):
             base_gap_sum = 1
         missing_base_stats = current_bst() - base_min_sum
 
-        base_hp_med = round(base_hp_min + missing_base_stats/base_gap_sum*base_hp_gap)
-        base_atk_med = round(base_atk_min + missing_base_stats/base_gap_sum*base_atk_gap)
-        base_def_med = round(base_def_min + missing_base_stats/base_gap_sum*base_def_gap)
-        base_spa_med = round(base_spa_min + missing_base_stats/base_gap_sum*base_spa_gap)
-        base_spd_med = round(base_spd_min + missing_base_stats/base_gap_sum*base_spd_gap)
-        base_spe_med = round(base_spe_min + missing_base_stats/base_gap_sum*base_spe_gap)
+        base_hp_med = round(base_hp_min + missing_base_stats / base_gap_sum * base_hp_gap)
+        base_atk_med = round(base_atk_min + missing_base_stats / base_gap_sum * base_atk_gap)
+        base_def_med = round(base_def_min + missing_base_stats / base_gap_sum * base_def_gap)
+        base_spa_med = round(base_spa_min + missing_base_stats / base_gap_sum * base_spa_gap)
+        base_spd_med = round(base_spd_min + missing_base_stats / base_gap_sum * base_spd_gap)
+        base_spe_med = round(base_spe_min + missing_base_stats / base_gap_sum * base_spe_gap)
 
         result = pd.DataFrame(columns=["min", "mid", "max", "error-free?"])
         result.loc["Total IVs"] = total_ivs
@@ -599,29 +605,29 @@ def server(input: Inputs, output: Outputs, session: Session):
             return empty_table()
 
         biv_table = pd.DataFrame(columns=["min", "max"],
-                          index=["hp_biv", "atk_biv", "def_biv", "spa_biv", "spd_biv", "spe_biv"])
+                                 index=["hp_biv", "atk_biv", "def_biv", "spa_biv", "spd_biv", "spe_biv"])
 
         for row in stat_history.get().itertuples():
             level, hp, atk, deff, spa, spd, spe = row[1:8]
 
             hp_biv_min, hp_biv_max = biv_range_hp(level, hp, 0)
             biv_table.loc["hp_biv"] = [max(hp_biv_min, biv_table.loc["hp_biv"]["min"]),
-                                         min(hp_biv_max, biv_table.loc["hp_biv"]["max"])]
+                                       min(hp_biv_max, biv_table.loc["hp_biv"]["max"])]
             atk_biv_min, atk_biv_max = biv_range(level, atk, 0, atk_nature_modifier.get())
             biv_table.loc["atk_biv"] = [max(atk_biv_min, biv_table.loc["atk_biv"]["min"]),
-                                         min(atk_biv_max, biv_table.loc["atk_biv"]["max"])]
+                                        min(atk_biv_max, biv_table.loc["atk_biv"]["max"])]
             def_biv_min, def_biv_max = biv_range(level, deff, 0, def_nature_modifier.get())
             biv_table.loc["def_biv"] = [max(def_biv_min, biv_table.loc["def_biv"]["min"]),
-                                          min(def_biv_max, biv_table.loc["def_biv"]["max"])]
+                                        min(def_biv_max, biv_table.loc["def_biv"]["max"])]
             spa_biv_min, spa_biv_max = biv_range(level, spa, 0, spa_nature_modifier.get())
             biv_table.loc["spa_biv"] = [max(spa_biv_min, biv_table.loc["spa_biv"]["min"]),
-                                          min(spa_biv_max, biv_table.loc["spa_biv"]["max"])]
+                                        min(spa_biv_max, biv_table.loc["spa_biv"]["max"])]
             spd_biv_min, spd_biv_max = biv_range(level, spd, 0, spd_nature_modifier.get())
             biv_table.loc["spd_biv"] = [max(spd_biv_min, biv_table.loc["spd_biv"]["min"]),
-                                          min(spd_biv_max, biv_table.loc["spd_biv"]["max"])]
+                                        min(spd_biv_max, biv_table.loc["spd_biv"]["max"])]
             spe_biv_min, spe_biv_max = biv_range(level, spe, 0, spe_nature_modifier.get())
             biv_table.loc["spe_biv"] = [max(spe_biv_min, biv_table.loc["spe_biv"]["min"]),
-                                          min(spe_biv_max, biv_table.loc["spe_biv"]["max"])]
+                                        min(spe_biv_max, biv_table.loc["spe_biv"]["max"])]
 
         return biv_table
 
@@ -631,13 +637,13 @@ def server(input: Inputs, output: Outputs, session: Session):
         return "BST: " + str(current_bst.get())
 
     @reactive.effect
-    @reactive.event(input.clear_all_iv)
-    def clear_all_iv():
+    @reactive.event(input.reset_all_iv)
+    def reset_all_iv():
         stat_history.set(pd.DataFrame(
             pd.DataFrame(columns=["level", "hp", "atk", "def", "spa", "spd", "spe"], dtype=int)))
 
     @render.data_frame
-    @reactive.event(input.save_stats_iv, input.clear_all_iv, input.delete_row_iv, ignore_none=False)
+    @reactive.event(input.save_stats_iv, input.reset_all_iv, input.delete_row_iv, ignore_none=False)
     def history_iv():
         return render.DataTable(
             stat_history(),
@@ -701,7 +707,7 @@ def server(input: Inputs, output: Outputs, session: Session):
         stat_history.set(stat_history_copy)
 
     """
-    ---------------------- XP Page ----------------------
+    ---------------------- Info Page ----------------------
     """
 
     @render.text
@@ -716,6 +722,8 @@ def server(input: Inputs, output: Outputs, session: Session):
     def calculate_xp_ev_info():
         # returns XP and EVs for a mon in a specific situation
         pokemon = input.pokemon_info()
+        if not pokemons.index.values.tolist().__contains__(pokemon):
+            raise SilentException()
         is_trainer = input.is_trainer_info()
         enemy_level = input.enemy_level_info()
 
@@ -726,41 +734,70 @@ def server(input: Inputs, output: Outputs, session: Session):
         table.insert(0, "XP", [xp])
         return table
 
+    @render.ui
+    def get_weight_info():
+        pokemon = input.pokemon_info()
+        if not pokemons.index.values.tolist().__contains__(pokemon):
+            raise SilentException()
+        weight = pokemons["Weight"][pokemon]
+        power = 0
+
+        if weight < 100:
+            power = 20
+        elif weight < 250:
+            power = 40
+        elif weight < 500:
+            power = 60
+        elif weight < 1000:
+            power = 80
+        elif weight < 2000:
+            power = 100
+        else:
+            power = 120
+
+        return ui.TagList(
+            ui.layout_columns(
+                "Weight: ",
+                str(weight / 10) + "kg",
+                "Low Kick Power: ",
+                str(power),
+                col_widths=(6, 6)
+            ),
+        )
+
     """
     ---------------------- ATK / SPA Page ----------------------
     """
 
     @reactive.effect
-    @reactive.event(input.clear_all)
-    def clear_all():
-        print(app_dir)
-        print(listdir(app_dir / "images"))
-        clear_visible_inputs()
-        clear_dropdowns()
+    @reactive.event(input.reset_all)
+    def reset_all():
+        reset_visible_inputs()
+        reset_dropdowns()
 
     @reactive.effect
-    @reactive.event(input.clear_dropdowns, input.clear_all)
-    def clear_dropdowns_only():
-        clear_dropdowns()
+    @reactive.event(input.reset_dropdowns, input.reset_all)
+    def reset_dropdowns_only():
+        reset_dropdowns()
 
-    def clear_visible_inputs():
-        session.send_input_message("enemy_level", {"value": ""})
-        session.send_input_message("move_power", {"value": ""})
-        session.send_input_message("own_defense", {"value": ""})
-        session.send_input_message("damage_received", {"value": ""})
+    def reset_visible_inputs():
+        ui.update_numeric("enemy_level-number_value", value=8)
+        ui.update_numeric("move_power-number_value", value=50)
+        ui.update_numeric("own_defense-number_value", value=20)
+        ui.update_numeric("damage_received-number_value", value=5)
         session.send_input_message("is_stab", {"value": False})
         session.send_input_message("is_crit", {"value": False})
         session.send_input_message("effectiveness", {"value": "1"})
 
-    def clear_dropdowns():
-        session.send_input_message("atk_spa_stage", {"value": 0})
+    def reset_dropdowns():
+        ui.update_numeric("atk_spa_stage-number_value", value= 0)
         session.send_input_message("is_burned", {"value": False})
         session.send_input_message("ff_active", {"value": False})
         session.send_input_message("has_dd_charge", {"value": False})
         session.send_input_message("is_physical", {"value": False})
         session.send_input_message("enemy_ability", {"value": 1})
         session.send_input_message("effectiveness", {"value": 1})
-        session.send_input_message("def_spd_stage", {"value": 0})
+        ui.update_numeric("def_spd_stage-number_value", value= 0)
         session.send_input_message("has_reflect_lightscreen", {"value": False})
         session.send_input_message("has_def_spd_badge", {"value": False})
         session.send_input_message("has_thick_fat", {"value": False})
@@ -771,18 +808,18 @@ def server(input: Inputs, output: Outputs, session: Session):
     def calculate_offense():
         # the formula used to determine ATK / SPA of the opponent in the ATK / SPA calculator
 
-        if not input.enemy_level():
+        if not enemy_level_input():
             raise SilentException()
-        enemy_level = int(input.enemy_level())
-        if not input.move_power():
+        enemy_level = int(enemy_level_input())
+        if not enemy_move_power_input():
             raise SilentException()
-        move_power = int(input.move_power())
-        if not input.own_defense():
+        move_power = int(enemy_move_power_input())
+        if not own_defense_input():
             raise SilentException()
-        own_defense = int(input.own_defense())
-        if not input.damage_received():
+        own_defense = int(own_defense_input())
+        if not damage_received_input():
             raise SilentException()
-        damage_received = int(input.damage_received())
+        damage_received = int(damage_received_input())
 
         is_stab = input.is_stab()
         stab_modifier = 1.5 if is_stab else 1
@@ -827,14 +864,14 @@ def server(input: Inputs, output: Outputs, session: Session):
         has_reflect_lightscreen = input.has_reflect_lightscreen()
         reflect_lightscreen_modifier = 1 if (is_crit or not has_reflect_lightscreen) else 0.5
 
-        if not (input.atk_spa_stage() or input.atk_spa_stage() == 0):
+        if not (atk_spa_stage_input() or atk_spa_stage_input() == 0):
             raise SilentException()
-        atk_spa_stage = int(input.atk_spa_stage())
+        atk_spa_stage = int(atk_spa_stage_input())
         applied_atk_spa_stage = 0 if (is_crit and atk_spa_stage < 0) else atk_spa_stage
 
-        if not (input.def_spd_stage() or input.def_spd_stage() == 0):
+        if not (def_spd_stage_input() or def_spd_stage_input() == 0):
             raise SilentException()
-        def_spd_stage = int(input.def_spd_stage())
+        def_spd_stage = int(def_spd_stage_input())
         applied_def_spd_stage = 0 if (is_crit and def_spd_stage > 0) else def_spd_stage
         effective_def_spd = calc_defensive_stat_modifiers(own_defense, badge_def_spd_modifier, applied_def_spd_stage)
 
@@ -969,7 +1006,7 @@ def server(input: Inputs, output: Outputs, session: Session):
 
     @render.text
     def own_modifiers_counter():
-        stage_modifier = int(input.def_spd_stage() != 0)
+        stage_modifier = int(def_spd_stage_input() != 0)
         screen_modifier = int(input.has_reflect_lightscreen())
         badge_modifier = int(input.has_def_spd_badge())
         thick_fat_modifier = int(input.has_thick_fat())
@@ -982,7 +1019,7 @@ def server(input: Inputs, output: Outputs, session: Session):
 
     @render.text
     def enemy_modifiers_counter():
-        stage_modifier = int(input.atk_spa_stage() != 0)
+        stage_modifier = int(atk_spa_stage_input() != 0)
         burned_modifier = int(input.is_burned())
         ff_modifier = int(input.ff_active())
         dd_charge_modifier = int(input.has_dd_charge())
@@ -1216,6 +1253,22 @@ def server(input: Inputs, output: Outputs, session: Session):
 
     def calc_hp(level: int, base: int, iv: int, ev: int):
         return int(floor(floor(2 * base + iv + floor(ev / 4)) * level / 100) + 10 + level)
+
+    """
+    ---------------------- Module Server ----------------------
+    """
+
+    enemy_level_input = number_input_server("enemy_level")
+    enemy_move_power_input = number_input_server(id="move_power", label="Move Power:",
+                                                 init=50, step=5, min_value=5, max_value=999)
+    own_defense_input = number_input_server(id="own_defense", label="Own Defense:",
+                                            init=20, min_value=1, max_value=999)
+    damage_received_input = number_input_server(id="damage_received", label="DMG Taken:",
+                                                init=5, min_value=1, max_value=999)
+    atk_spa_stage_input = number_input_server(id="atk_spa_stage", label="ATK/SPA Stage:",
+                                             init=0, min_value=-6, max_value=6)
+    def_spd_stage_input = number_input_server(id="def_spd_stage", label="DEF/SPD Stage:",
+                                              init=0, min_value=-6, max_value=6)
 
 
 app = App(app_ui, server,
