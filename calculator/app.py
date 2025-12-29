@@ -1,7 +1,7 @@
 from math import floor, ceil
 
 import matplotlib.pyplot as plt
-from shiny.types import SilentException
+from shiny.types import SilentException, SafeException
 
 from shared import *
 from number_input import *
@@ -16,89 +16,92 @@ def iv_calculation_page():
             ui.h2("IV Calculator"),
         ),
         ui.layout_columns(
-            ui.page_fluid(
-                ui.page_fluid(
-                    ui.layout_columns(
-                        ui.page_fluid(
-                            ui.input_selectize("pokemon_iv", "Select Pokemon:",
-                                               sorted(pokemons.index), selected="Lickitung"),
-                        ),
-                        ui.output_code("pokemon_bst_iv"),
-                        col_widths=(8, 4),
-                    ),
-                    ui.input_radio_buttons("nature_plus_iv", "Nature + :",
-                                           ["neutral", "+ ATK", "+ DEF", "+ SPA", "+ SPD", "+ SPE"], inline=True),
-                    ui.input_radio_buttons("nature_minus_iv", "Nature - :",
-                                           ["neutral", "- ATK", "- DEF", "- SPA", "- SPD", "- SPE"], inline=True)
+            ui.div(
+                ui.div(
+                    "Select Pokemon:",
+                    ui.input_selectize("pokemon_iv", "",
+                                       sorted(pokemons.index), selected="Lickitung"),
+                    ui.output_code("pokemon_bst_iv"),
+                    class_="io_row",
                 ),
+                ui.input_radio_buttons("nature_plus_iv", "Nature + :",
+                                       ["neutral", "+ ATK", "+ DEF", "+ SPA", "+ SPD", "+ SPE"], inline=True),
+                ui.input_radio_buttons("nature_minus_iv", "Nature - :",
+                                       ["neutral", "- ATK", "- DEF", "- SPA", "- SPD", "- SPE"], inline=True),
                 ui.layout_columns(
-                    ui.page_fillable(
+                    ui.div(
                         ui.input_action_button("save_stats_iv", "Save Stats"),
                         ui.input_action_button("prefill_next_level_iv", "Prefill Next Level"),
                         ui.input_action_button("prefill_current_level_iv", "Prefill Current Level"),
                         ui.input_action_button("delete_row_iv", "Delete Selected Row"),
                         ui.input_action_button("reset_all_iv", "Clear All"),
+                        class_="button_column"
                     ),
                     ui.page_fluid(
                         ui.h5("Stats at specific Level"),
-                        ui.input_numeric("level_iv", "Level:", 5, min=1, max=100),
-                        ui.input_numeric("hp_iv", "HP:", 22, min=11, max=999),
-                        ui.input_numeric("atk_iv", "ATK:", 12, min=4, max=999),
-                        ui.input_numeric("def_iv", "DEF:", 12, min=4, max=999),
-                        ui.input_numeric("spa_iv", "SPA:", 12, min=4, max=999),
-                        ui.input_numeric("spd_iv", "SPD:", 12, min=4, max=999),
-                        ui.input_numeric("spe_iv", "SPE:", 12, min=4, max=999),
-                        # ui.input_selectize("mons_defeated_iv", "Mons Defeated at this Level:", sorted(pokemons.index), multiple=True),
+                        number_input(id="level_iv", label="Level:", init=5, min_value=1, max_value=100),
+                        number_input(id="hp_iv", label="HP:", init=22, min_value=11, max_value=999),
+                        number_input(id="atk_iv", label="ATK:", init=12, min_value=4, max_value=999),
+                        number_input(id="def_iv", label="DEF:", init=12, min_value=4, max_value=999),
+                        number_input(id="spa_iv", label="SPA:", init=12, min_value=4, max_value=999),
+                        number_input(id="spd_iv", label="SPD:", init=12, min_value=4, max_value=999),
+                        number_input(id="spe_iv", label="SPE:", init=12, min_value=4, max_value=999),
+                        # ui.input_selectize("mons_defeated_iv", "Mons Defeated at this Level:", sorted(pokemons.index), multiple=True, class_="io_row"),
                     ),
-                    col_widths=(6, 6),
                 ),
+                class_="io_column",
             ),
             ui.page_fluid(
-                ui.page_fillable(
+                ui.div(
                     ui.output_table("result_iv"),
                 ),
-                ui.page_fluid(
+                ui.div(
                     ui.layout_columns(ui.h5("Stat History (editable)")),
                     ui.output_data_frame("history_iv")
                 ),
             ),
             col_widths=(5, 7),
         ),
-    ),
+    )
 
 
 def pokemon_xp_info_page():
     return ui.nav_panel(
         "Pokemon / XP Info",
-        ui.layout_columns(
-            ui.h2("Pokemon / XP Information"),
-        ),
-        ui.layout_columns(
-            ui.page_fluid(
-                ui.page_fluid(
-                    ui.h4("Pokemon Yields"),
-                    ui.input_selectize("pokemon_info", "Select Pokemon:", sorted(pokemons.index)),
-                    ui.input_numeric("enemy_level_info", "Level:", 8, min=1, max=100),
-                    ui.input_switch("is_trainer_info", "Trainer Fight"),
-                    ui.h4("You will get the following XP / EVs:"),
-                    ui.output_table("calculate_xp_ev_info"),
-                    ui.output_ui("get_weight_info"),
+        ui.h2("Pokemon / XP Information"),
+        ui.page_fluid(
+            ui.div(
+                ui.h4("Pokemon Yields"),
+                ui.div(
+                    "Select Pokemon:",
+                    ui.input_selectize("pokemon_info", "", sorted(pokemons.index)),
+                    class_="io_row",
                 ),
+                number_input(id="enemy_level_info", label="Level:", init=8, min_value=1, max_value=100),
+                ui.div(
+                    ui.input_switch("is_trainer_info", "Trainer Fight"),
+                    ui.input_switch("has_lucky_egg_info", "Lucky Egg"),
+                    ui.input_switch("is_traded_pokemon_info", "Not Original Trainer"),
+                    class_="spread_row",
+                ),
+                ui.output_table("calculate_xp_ev_info"),
+                class_="io_column"
             ),
-            ui.page_fluid(),
-            ui.page_fluid(
+            ui.div(
                 ui.h4("XP requirement"),
                 ui.input_selectize("xp_curve_info", "XP Curve:", choices=list(experience.head()),
                                    selected="Fluctuating"),
-                ui.input_numeric("level_from_info", "Level From:", min=1, max=100, value=5),
-                ui.input_numeric("level_to_info", "Level To:", min=1, max=100, value=8),
-                ui.layout_columns(
+                number_input(id="level_from_info", label="Level From:", min_value=1, max_value=100, init=5),
+                number_input(id="level_to_info", label="Level To:", min_value=1, max_value=100, init=8),
+                ui.div(
                     "XP required: ",
                     ui.output_code("calc_xp_from_to"),
+                    class_="label_io_row",
                 ),
+                class_="io_column",
             ),
-            col_widths=(4, 4, 4),
-        )
+            class_="spread_row",
+        ),
     )
 
 
@@ -114,10 +117,10 @@ def atk_spa_calculator_page():
                 number_input(id="move_power", label="Move Power:", init=50, step=5, min_value=5, max_value=999),
                 number_input(id="own_defense", label="Own Defense:", init=20, min_value=1, max_value=999),
                 number_input(id="damage_received", label="DMG Taken:", init=5, min_value=1, max_value=999),
-                ui.layout_columns(
+                ui.div(
                     ui.input_switch("is_stab", "STAB Move"),
                     ui.input_switch("is_crit", "Critical Hit"),
-                    id="stab_crit",
+                    class_="spread_row",
                 ),
                 ui.input_radio_buttons(
                     "effectiveness",
@@ -136,16 +139,16 @@ def atk_spa_calculator_page():
                         ui.span(
                             ui.h5("Enemy Pokemon Modifiers:"),
                             ui.output_text_verbatim("enemy_modifiers_counter"),
-                            style="display: inline-flex; align-items: center; gap: 2rem;",
-                            id="enemy_modifiers_title"
+                            id="enemy_modifiers_title",
+                            class_="accordion_title",
                         ),
                         number_input(id="atk_spa_stage", label="ATK/SPA Stage:", init=0, min_value=-6, max_value=6),
                         ui.input_switch("is_burned", "Enemy Burned"),
                         ui.tooltip(
                             ui.input_switch("ff_active", "Flashfire Bonus"),
                             ui.card(
-                                "Getting hit by a fire move gives this bonus for the whole fight. "
-                                "\nWhile frozen, Flash Fire does not work."
+                                "Getting hit by a fire move gives this bonus for the whole fight.",
+                                class_="tooltip_card",
                             ),
                         ),
                         ui.tooltip(
@@ -154,32 +157,36 @@ def atk_spa_calculator_page():
                         ),
                         ui.tooltip(
                             ui.input_switch("is_physical", "Move is Physical"),
-                            ui.card("Only used for determining minimum DMG (physical DMG has higher minimum DMG)"),
+                            ui.card("Only used for determining minimum DMG (physical DMG has higher minimum DMG)",
+                                    class_="tooltip_card",
+                                    ),
                         ),
                         ui.input_select("enemy_ability", "Enemy Ability: ",
                                         {"1": "1x (irrelevant)", "1.5": "1.5x (e.g. Hustle, Swarm)",
                                          "2": "2x (Huge Power)"}),
                         value="enemy_modifiers_counter",
+                        class_="io_column",
                     ),
                     ui.accordion_panel(
                         ui.span(
                             ui.h5("Own Pokemon Modifiers:"),
                             ui.output_text_verbatim("own_modifiers_counter"),
-                            style="display: inline-flex; align-items: center; gap: 2rem;",
                             id="own_modifiers_title",
+                            class_="accordion_title",
                         ),
                         number_input(id="def_spd_stage", label="DEF/SPD Stage:", init=0, min_value=-6, max_value=6),
                         ui.input_switch("has_reflect_lightscreen", "Reflect / Lightscreen"),
                         ui.input_switch("has_def_spd_badge", "DEF/SPD Badge"),
                         ui.input_switch("has_thick_fat", "Thick Fat"),
                         value="own_modifiers_counter",
+                        class_="io_column"
                     ),
                     ui.accordion_panel(
                         ui.span(
                             ui.h5("Field Effects:"),
                             ui.output_text_verbatim("field_effects_counter"),
-                            style="display: inline-flex; align-items: center; gap: 2rem;",
                             id="field_effects_title",
+                            class_="accordion_title",
                         ),
                         ui.input_radio_buttons(
                             "weather_modifier",
@@ -190,36 +197,34 @@ def atk_spa_calculator_page():
                         ),
                         ui.input_switch("mud_or_water_sport_active", "Mud/Water Sport"),
                         value="field_effects_counter",
+                        class_="io_column"
                     ),
                     open=False,
                 ),
+                class_="io_column",
             ),
             ui.page_fluid(
                 ui.output_plot("calculate_offense"),
-                ui.layout_columns(
-                    ui.page_fluid(
-                        ui.layout_columns(
-                            ui.h5("Graph Style:"),
-                        ),
+                ui.page_fluid(
+                    ui.card(
+                        ui.card_header("Graph Style:"),
                         ui.input_radio_buttons(
                             "graph_style",
-                            None,
+                            "",
                             {"only_dmg_received": "Only DMG Received", "all_dmg_values": "All DMG Values"},
                             inline=True,
                             selected="only_dmg_received",
                         ),
                     ),
-                    ui.page_fluid(
-                        ui.layout_columns(
-                            ui.h5("Reset Buttons:"),
-                        ),
-                        ui.layout_columns(
+                    ui.card(
+                        ui.card_header("Reset Buttons:"),
+                        ui.card_body(
                             ui.input_action_button("reset_all", "Reset All Inputs"),
                             ui.input_action_button("reset_dropdowns", "Reset Inputs In Dropdowns"),
-                            col_widths=(6, 6),
+                            {"style": "display: inline"},
                         ),
                     ),
-                    col_widths=(-1, 3, -4, 3, -1)
+                    class_="spread_row",
                 ),
                 id="right_side",
             ),
@@ -250,6 +255,7 @@ def double_damage_tooltip():
                 col_widths=(6, 6),
             )
         ),
+        class_="tooltip_card",
     )
 
 
@@ -261,193 +267,184 @@ def typing_tooltip():
             "the case with: "
         ),
         ui.card_body(
-            ui.row(
-                ui.layout_columns(
-                    ui.column(12, ui.h6("Move Type")),
-                    ui.column(1, ui.h1(">")),
-                    ui.column(12, ui.h6("Defending Types")),
-                    col_widths=(1, 1, 2, 8),
-                ),
+            ui.layout_columns(
+                "Move Type",
+                ui.h1(">"),
+                "Defending Types",
+                col_widths=(2, 1, 3, -6),
+                class_="centered_img_row",
+                style_="align-self: normal",
             ),
-            ui.row(
-                ui.layout_columns(
-                    ui.column(1, bug_type()),
-                    ui.column(1, ui.h1(">")),
-                    ui.column(1, fire_type(), dark_type()),
-                    ui.column(1, fighting_type(), psychic_type()),
-                    ui.column(1, flying_type(), psychic_type()),
-                    ui.column(1, flying_type(), dark_type()),
-                    ui.column(1, ghost_type(), dark_type()),
-                    col_widths=type_tooltip_col_width,
-                ),
+            ui.layout_columns(
+                bug_type(),
+                ui.h1(">"),
+                ui.div(fire_type(), dark_type()),
+                ui.div(fighting_type(), psychic_type()),
+                ui.div(flying_type(), psychic_type()),
+                ui.div(flying_type(), dark_type()),
+                ui.div(ghost_type(), dark_type()),
+                col_widths=type_tooltip_col_width,
+                class_="centered_img_row"
             ),
-            ui.row(
-                ui.layout_columns(
-                    ui.column(1, electric_type()),
-                    ui.column(1, ui.h1(">")),
-                    ui.column(1, electric_type(), flying_type()),
-                    col_widths=type_tooltip_col_width,
-                ),
+            ui.layout_columns(
+                electric_type(),
+                ui.h1(">"),
+                ui.div(electric_type(), flying_type()),
+                col_widths=type_tooltip_col_width,
+                class_="centered_img_row"
             ),
-            ui.row(
-                ui.layout_columns(
-                    ui.column(1, fighting_type()),
-                    ui.column(1, ui.h1(">")),
-                    ui.column(1, flying_type(), dark_type()),
-                    ui.column(1, flying_type(), steel_type()),
-                    ui.column(1, psychic_type(), rock_type()),
-                    ui.column(1, bug_type(), rock_type()),
-                    ui.column(1, bug_type(), steel_type()),
-                    col_widths=type_tooltip_col_width,
-                ),
+            ui.layout_columns(
+                fighting_type(),
+                ui.h1(">"),
+                ui.div(flying_type(), dark_type()),
+                ui.div(flying_type(), steel_type()),
+                ui.div(psychic_type(), rock_type()),
+                ui.div(bug_type(), rock_type()),
+                ui.div(bug_type(), steel_type()),
+                col_widths=type_tooltip_col_width,
+                class_="centered_img_row"
             ),
-            ui.row(
-                ui.layout_columns(
-                    ui.column(1, fire_type()),
-                    ui.column(1, ui.h1(">")),
-                    ui.column(1, water_type(), grass_type()),
-                    ui.column(1, water_type(), ice_type()),
-                    ui.column(1, water_type(), bug_type()),
-                    ui.column(1, rock_type(), steel_type()),
-                    col_widths=type_tooltip_col_width,
-                ),
+            ui.layout_columns(
+                fire_type(),
+                ui.h1(">"),
+                ui.div(water_type(), grass_type()),
+                ui.div(water_type(), ice_type()),
+                ui.div(water_type(), bug_type()),
+                ui.div(rock_type(), steel_type()),
+                col_widths=type_tooltip_col_width,
+                class_="centered_img_row"
             ),
-            ui.row(
-                ui.layout_columns(
-                    ui.column(1, grass_type()),
-                    ui.column(1, ui.h1(">")),
-                    ui.column(1, fire_type(), ground_type()),
-                    ui.column(1, fire_type(), rock_type()),
-                    ui.column(1, grass_type(), rock_type()),
-                    ui.column(1, flying_type(), rock_type()),
-                    ui.column(1, bug_type(), rock_type()),
-                    col_widths=type_tooltip_col_width,
-                ),
+            ui.layout_columns(
+                grass_type(),
+                ui.h1(">"),
+                ui.div(fire_type(), ground_type()),
+                ui.div(fire_type(), rock_type()),
+                ui.div(grass_type(), rock_type()),
+                ui.div(flying_type(), rock_type()),
+                ui.div(bug_type(), rock_type()),
+                col_widths=type_tooltip_col_width,
+                class_="centered_img_row"
             ),
-            ui.row(
-                ui.layout_columns(
-                    ui.column(1, ground_type()),
-                    ui.column(1, ui.h1(">")),
-                    ui.column(1, grass_type(), poison_type()),
-                    ui.column(1, bug_type(), rock_type()),
-                    ui.column(1, bug_type(), steel_type()),
-                    col_widths=type_tooltip_col_width,
-                ),
+            ui.layout_columns(
+                ground_type(),
+                ui.h1(">"),
+                ui.div(grass_type(), poison_type()),
+                ui.div(bug_type(), rock_type()),
+                ui.div(bug_type(), steel_type()),
+                col_widths=type_tooltip_col_width,
+                class_="centered_img_row"
             ),
-            ui.row(
-                ui.layout_columns(
-                    ui.column(1, ice_type()),
-                    ui.column(1, ui.h1(">")),
-                    ui.column(1, fire_type(), ground_type()),
-                    ui.column(1, fire_type(), rock_type()),
-                    ui.column(1, fire_type(), flying_type()),
-                    ui.column(1, water_type(), grass_type()),
-                    ui.column(1, water_type(), ground_type()),
-                    ui.column(1, water_type(), flying_type()),
-                    ui.column(1, water_type(), dragon_type()),
-                    ui.column(1, ice_type(), ground_type()),
-                    ui.column(1, ice_type(), flying_type()),
-                    col_widths=type_tooltip_col_width,
-                ),
+            ui.layout_columns(
+                ice_type(),
+                ui.h1(">"),
+                ui.div(fire_type(), ground_type()),
+                ui.div(fire_type(), rock_type()),
+                ui.div(fire_type(), flying_type()),
+                ui.div(water_type(), grass_type()),
+                ui.div(water_type(), ground_type()),
+                ui.div(water_type(), flying_type()),
+                ui.div(water_type(), dragon_type()),
+                ui.div(ice_type(), ground_type()),
+                ui.div(ice_type(), flying_type()),
+                col_widths=type_tooltip_col_width,
+                class_="centered_img_row"
             ),
-            ui.row(
-                ui.layout_columns(
-                    ui.column(1, rock_type()),
-                    ui.column(1, ui.h1(">")),
-                    ui.column(1, ground_type(), flying_type()),
-                    ui.column(1, ground_type(), bug_type()),
-                    col_widths=type_tooltip_col_width,
-                ),
+            ui.layout_columns(
+                rock_type(),
+                ui.h1(">"),
+                ui.div(ground_type(), flying_type()),
+                ui.div(ground_type(), bug_type()),
+                col_widths=type_tooltip_col_width,
+                class_="centered_img_row"
             ),
-            ui.row(
-                ui.layout_columns(
-                    ui.column(1, steel_type()),
-                    ui.column(1, ui.h1(">")),
-                    ui.column(1, fire_type(), rock_type()),
-                    ui.column(1, water_type(), ice_type()),
-                    ui.column(1, water_type(), rock_type()),
-                    col_widths=type_tooltip_col_width,
-                ),
+            ui.layout_columns(
+                steel_type(),
+                ui.h1(">"),
+                ui.div(fire_type(), rock_type()),
+                ui.div(water_type(), ice_type()),
+                ui.div(water_type(), rock_type()),
+                col_widths=type_tooltip_col_width,
+                class_="centered_img_row"
             ),
-            ui.row(
-                ui.layout_columns(
-                    ui.column(1, water_type()),
-                    ui.column(1, ui.h1(">")),
-                    ui.column(1, water_type(), rock_type()),
-                    ui.column(1, water_type(), ground_type()),
-                    col_widths=type_tooltip_col_width,
-                ),
+            ui.layout_columns(
+                water_type(),
+                ui.h1(">"),
+                ui.div(water_type(), rock_type()),
+                ui.div(water_type(), ground_type()),
+                col_widths=type_tooltip_col_width,
+                class_="centered_img_row"
             ),
         ),
+        class_="tooltip_card",
     ),
 
 
 def dark_type():
-    return ui.tags.img(src="dark_type.png", width=type_image_size)
+    return ui.tags.img(src="dark_type.png", width=type_image_size, class_="tooltip_img")
 
 
 def bug_type():
-    return ui.tags.img(src="bug_type.png", width=type_image_size)
+    return ui.tags.img(src="bug_type.png", width=type_image_size, class_="tooltip_img")
 
 
 def fire_type():
-    return ui.tags.img(src="fire_type.png", width=type_image_size)
+    return ui.tags.img(src="fire_type.png", width=type_image_size, class_="tooltip_img")
 
 
 def normal_type():
-    return ui.tags.img(src="normal_type.png", width=type_image_size)
+    return ui.tags.img(src="normal_type.png", width=type_image_size, class_="tooltip_img")
 
 
 def water_type():
-    return ui.tags.img(src="water_type.png", width=type_image_size)
+    return ui.tags.img(src="water_type.png", width=type_image_size, class_="tooltip_img")
 
 
 def electric_type():
-    return ui.tags.img(src="electric_type.png", width=type_image_size)
+    return ui.tags.img(src="electric_type.png", width=type_image_size, class_="tooltip_img")
 
 
 def grass_type():
-    return ui.tags.img(src="grass_type.png", width=type_image_size)
+    return ui.tags.img(src="grass_type.png", width=type_image_size, class_="tooltip_img")
 
 
 def ice_type():
-    return ui.tags.img(src="ice_type.png", width=type_image_size)
+    return ui.tags.img(src="ice_type.png", width=type_image_size, class_="tooltip_img")
 
 
 def fighting_type():
-    return ui.tags.img(src="fighting_type.png", width=type_image_size)
+    return ui.tags.img(src="fighting_type.png", width=type_image_size, class_="tooltip_img")
 
 
 def poison_type():
-    return ui.tags.img(src="poison_type.png", width=type_image_size)
+    return ui.tags.img(src="poison_type.png", width=type_image_size, class_="tooltip_img")
 
 
 def ground_type():
-    return ui.tags.img(src="ground_type.png", width=type_image_size)
+    return ui.tags.img(src="ground_type.png", width=type_image_size, class_="tooltip_img")
 
 
 def flying_type():
-    return ui.tags.img(src="flying_type.png", width=type_image_size)
+    return ui.tags.img(src="flying_type.png", width=type_image_size, class_="tooltip_img")
 
 
 def psychic_type():
-    return ui.tags.img(src="psychic_type.png", width=type_image_size)
+    return ui.tags.img(src="psychic_type.png", width=type_image_size, class_="tooltip_img")
 
 
 def rock_type():
-    return ui.tags.img(src="rock_type.png", width=type_image_size)
+    return ui.tags.img(src="rock_type.png", width=type_image_size, class_="tooltip_img")
 
 
 def ghost_type():
-    return ui.tags.img(src="ghost_type.png", width=type_image_size)
+    return ui.tags.img(src="ghost_type.png", width=type_image_size, class_="tooltip_img")
 
 
 def dragon_type():
-    return ui.tags.img(src="dragon_type.png", width=type_image_size)
+    return ui.tags.img(src="dragon_type.png", width=type_image_size, class_="tooltip_img")
 
 
 def steel_type():
-    return ui.tags.img(src="steel_type.png", width=type_image_size)
+    return ui.tags.img(src="steel_type.png", width=type_image_size, class_="tooltip_img")
 
 
 app_ui = (
@@ -474,8 +471,9 @@ def server(input: Inputs, output: Outputs, session: Session):
     stat_history = reactive.value(
         pd.DataFrame(columns=["level", "hp", "atk", "def", "spa", "spd", "spe"], dtype=int))
 
-    empty_table = reactive.value(pd.DataFrame(index=["hp_biv", "atk_biv", "def_biv", "spa_biv", "spd_biv", "spe_biv"],
-                                              columns=["min", "mid", "max"], dtype=int))
+    empty_table = reactive.value(
+        pd.DataFrame(index=["hp_biv", "atk_biv", "def_biv", "spa_biv", "spd_biv", "spe_biv"],
+                     columns=["min", "mid", "max"], dtype=int))
 
     current_bst = reactive.value(int(385))  # initial mon is Lickitung with 385 BST
 
@@ -489,15 +487,17 @@ def server(input: Inputs, output: Outputs, session: Session):
     @reactive.effect
     @reactive.event(input.prefill_next_level_iv)
     def prefill_next_level_iv():
-        prefill_level_iv(input.level_iv() + 1)
+        prefill_level_iv(level_iv_input() + 1)
 
     @reactive.effect
     @reactive.event(input.prefill_current_level_iv)
     def prefill_current_level_iv():
-        prefill_level_iv(input.level_iv())
+        prefill_level_iv(level_iv_input())
 
     def prefill_level_iv(level: int):
         biv_table = calc_biv_table()
+        if biv_table.equals(empty_table()):
+            raise SilentException
 
         hp_biv = ceil(biv_table.loc["hp_biv"].mean())
         atk_biv = ceil(biv_table.loc["atk_biv"].mean())
@@ -506,13 +506,19 @@ def server(input: Inputs, output: Outputs, session: Session):
         spd_biv = ceil(biv_table.loc["spd_biv"].mean())
         spe_biv = ceil(biv_table.loc["spe_biv"].mean())
 
-        ui.update_numeric("level_iv", value=level)
-        ui.update_numeric("hp_iv", value=calc_hp(level, 0, hp_biv, 0))
-        ui.update_numeric("atk_iv", value=calc_stat(level, 0, atk_biv, 0, atk_nature_modifier()))
-        ui.update_numeric("def_iv", value=calc_stat(level, 0, def_biv, 0, def_nature_modifier()))
-        ui.update_numeric("spa_iv", value=calc_stat(level, 0, spa_biv, 0, spa_nature_modifier()))
-        ui.update_numeric("spd_iv", value=calc_stat(level, 0, spd_biv, 0, spd_nature_modifier()))
-        ui.update_numeric("spe_iv", value=calc_stat(level, 0, spe_biv, 0, spe_nature_modifier()))
+        ui.update_numeric("level_iv-number_value", value=level)
+        ui.update_numeric("hp_iv-number_value", value=calc_hp(level, 0,
+                                                              hp_biv, 0))
+        ui.update_numeric("atk_iv-number_value", value=calc_stat(level, 0,
+                                                                 atk_biv, 0, atk_nature_modifier()))
+        ui.update_numeric("def_iv-number_value", value=calc_stat(level, 0,
+                                                                 def_biv, 0, def_nature_modifier()))
+        ui.update_numeric("spa_iv-number_value", value=calc_stat(level, 0,
+                                                                 spa_biv, 0, spa_nature_modifier()))
+        ui.update_numeric("spd_iv-number_value", value=calc_stat(level, 0,
+                                                                 spd_biv, 0, spd_nature_modifier()))
+        ui.update_numeric("spe_iv-number_value", value=calc_stat(level, 0,
+                                                                 spe_biv, 0, spe_nature_modifier()))
 
     @reactive.effect
     @reactive.event(input.nature_plus_iv, input.nature_minus_iv)
@@ -572,7 +578,8 @@ def server(input: Inputs, output: Outputs, session: Session):
 
         error_free = hp_error_free and atk_error_free and def_error_free and spa_error_free and spd_error_free and spe_error_free
         total_ivs = [total_iv_min, total_iv_avg, total_iv_max, error_free]
-        total_ivs_avg = [f"{total_ivs[0] / 6:.2f}", f"{total_ivs[1] / 6:.2f}", f"{total_ivs[2] / 6:.2f}", error_free]
+        total_ivs_avg = [f"{total_ivs[0] / 6:.2f}", f"{total_ivs[1] / 6:.2f}", f"{total_ivs[2] / 6:.2f}",
+                         error_free]
 
         base_gap_sum = base_hp_gap + base_atk_gap + base_def_gap + base_spa_gap + base_spd_gap + base_spe_gap
         base_min_sum = base_hp_min + base_atk_min + base_def_min + base_spa_min + base_spd_min + base_spe_min
@@ -634,7 +641,7 @@ def server(input: Inputs, output: Outputs, session: Session):
     @render.text
     def pokemon_bst_iv():
         current_bst.set(pokemons["BST"][input.pokemon_iv()])
-        return "BST: " + str(current_bst.get())
+        return str(current_bst.get()) + " BST"
 
     @reactive.effect
     @reactive.event(input.reset_all_iv)
@@ -673,33 +680,33 @@ def server(input: Inputs, output: Outputs, session: Session):
     @reactive.effect
     @reactive.event(input.save_stats_iv)
     def save_stats_iv():
-        if not input.level_iv():
+        if not level_iv_input():
             raise SilentException()
-        level = input.level_iv()
+        level = level_iv_input()
 
-        if not input.hp_iv():
+        if not hp_iv_input():
             raise SilentException()
-        hp = input.hp_iv()
+        hp = hp_iv_input()
 
-        if not input.atk_iv():
+        if not atk_iv_input():
             raise SilentException()
-        atk = input.atk_iv()
+        atk = atk_iv_input()
 
-        if not input.def_iv():
+        if not def_iv_input():
             raise SilentException()
-        deff = input.def_iv()
+        deff = def_iv_input()
 
-        if not input.spa_iv():
+        if not spa_iv_input():
             raise SilentException()
-        spa = input.spa_iv()
+        spa = spa_iv_input()
 
-        if not input.spd_iv():
+        if not spd_iv_input():
             raise SilentException()
-        spd = input.spd_iv()
+        spd = spd_iv_input()
 
-        if not input.spe_iv():
+        if not spe_iv_input():
             raise SilentException()
-        spe = input.spe_iv()
+        spe = spe_iv_input()
 
         stat_history_copy = stat_history.get().copy()
         stat_history_copy.loc[-1] = [level, hp, atk, deff, spa, spd, spe]
@@ -713,35 +720,28 @@ def server(input: Inputs, output: Outputs, session: Session):
     @render.text
     def calc_xp_from_to():
         xp_curve = input.xp_curve_info()
-        lvl_from = input.level_from_info()
-        lvl_to = input.level_to_info()
+        lvl_from = level_from_info_input()
+        lvl_to = level_to_info_input()
 
-        return experience[xp_curve][lvl_from:lvl_to].sum()
+        xp_required = experience[xp_curve][lvl_from:lvl_to].sum()
 
-    @render.table
+        return str(xp_required) + " XP"
+
+    @render.table(index=True)
     def calculate_xp_ev_info():
         # returns XP and EVs for a mon in a specific situation
         pokemon = input.pokemon_info()
         if not pokemons.index.values.tolist().__contains__(pokemon):
             raise SilentException()
         is_trainer = input.is_trainer_info()
-        enemy_level = input.enemy_level_info()
+        has_lucky_egg = input.has_lucky_egg_info()
+        is_original_trainer = not input.is_traded_pokemon_info()
+        enemy_level = enemy_level_info_input()
 
-        xp = calc_xp_yield(pokemon, enemy_level, is_trainer)
-        table = pokemons.loc[[pokemon], ["HP", "ATK", "DEF", "SPA", "SPD", "SPE"]]
-        table = table.loc[:, (table != 0).any(axis=0)]
+        xp = calc_xp_yield(pokemon, enemy_level, is_trainer, has_lucky_egg, is_original_trainer)
 
-        table.insert(0, "XP", [xp])
-        return table
-
-    @render.ui
-    def get_weight_info():
-        pokemon = input.pokemon_info()
-        if not pokemons.index.values.tolist().__contains__(pokemon):
-            raise SilentException()
         weight = pokemons["Weight"][pokemon]
         power = 0
-
         if weight < 100:
             power = 20
         elif weight < 250:
@@ -755,15 +755,14 @@ def server(input: Inputs, output: Outputs, session: Session):
         else:
             power = 120
 
-        return ui.TagList(
-            ui.layout_columns(
-                "Weight: ",
-                str(weight / 10) + "kg",
-                "Low Kick Power: ",
-                str(power),
-                col_widths=(6, 6)
-            ),
-        )
+        table = pokemons.loc[[pokemon], ["HP", "ATK", "DEF", "SPA", "SPD", "SPE"]]
+        table = table.loc[:, (table != 0).any(axis=0)]
+        table.insert(0, "XP", xp)
+        table["Low Kick Power"] = power
+        table["Weight"] = str(weight / 10) + "kg"
+        table = table.transpose()
+        table.columns = [''] * len(table.columns)
+        return table
 
     """
     ---------------------- ATK / SPA Page ----------------------
@@ -790,14 +789,14 @@ def server(input: Inputs, output: Outputs, session: Session):
         session.send_input_message("effectiveness", {"value": "1"})
 
     def reset_dropdowns():
-        ui.update_numeric("atk_spa_stage-number_value", value= 0)
+        ui.update_numeric("atk_spa_stage-number_value", value=0)
         session.send_input_message("is_burned", {"value": False})
         session.send_input_message("ff_active", {"value": False})
         session.send_input_message("has_dd_charge", {"value": False})
         session.send_input_message("is_physical", {"value": False})
         session.send_input_message("enemy_ability", {"value": 1})
         session.send_input_message("effectiveness", {"value": 1})
-        ui.update_numeric("def_spd_stage-number_value", value= 0)
+        ui.update_numeric("def_spd_stage-number_value", value=0)
         session.send_input_message("has_reflect_lightscreen", {"value": False})
         session.send_input_message("has_def_spd_badge", {"value": False})
         session.send_input_message("has_thick_fat", {"value": False})
@@ -873,7 +872,8 @@ def server(input: Inputs, output: Outputs, session: Session):
             raise SilentException()
         def_spd_stage = int(def_spd_stage_input())
         applied_def_spd_stage = 0 if (is_crit and def_spd_stage > 0) else def_spd_stage
-        effective_def_spd = calc_defensive_stat_modifiers(own_defense, badge_def_spd_modifier, applied_def_spd_stage)
+        effective_def_spd = calc_defensive_stat_modifiers(own_defense, badge_def_spd_modifier,
+                                                          applied_def_spd_stage)
 
         enemy_ability_modifier = float(input.enemy_ability())
 
@@ -963,7 +963,8 @@ def server(input: Inputs, output: Outputs, session: Session):
             df = pd.DataFrame(rows).fillna(0)
             plot = df.plot(kind="bar", stacked=True)
 
-            plot.set_yticks([0, 2, 4, 6, 8, 10, 12, 14, 16], labels=["0", "2", "4", "6", "8", "10", "12", "14", "16"])
+            plot.set_yticks([0, 2, 4, 6, 8, 10, 12, 14, 16],
+                            labels=["0", "2", "4", "6", "8", "10", "12", "14", "16"])
             plot.set_ylim(0, 16)
             plot.set_title("ATK/SPA Value Likelihood, DMG values shown on bars")
             plot.set_ylabel("The 16 different Options")
@@ -1069,7 +1070,8 @@ def server(input: Inputs, output: Outputs, session: Session):
         is_physical = is_type_physical(move_type) == "Physical"
         return move_type, move_power, is_physical
 
-    def calc_offense_backwards(dmg_dealt: int, is_physical: bool, obm: list, ibm: list, defense: int, base_power: int,
+    def calc_offense_backwards(dmg_dealt: int, is_physical: bool, obm: list, ibm: list, defense: int,
+                               base_power: int,
                                offense_stage: int, sport_modifier: float, thick_fat_modifier: float,
                                enemy_ability_modifier: float):
         # ibm = "inside bracket modifier", the modifiers before the +2 in the formula
@@ -1190,7 +1192,8 @@ def server(input: Inputs, output: Outputs, session: Session):
         # (and it does not make a difference for the resulting stat anyway)
         biv = min(541, max(22,
                            int(floor(floor(floor(current_stat / nature) - 4
-                                           - (1 if nature == 1 or (nature == 1.1 and current_stat % 11 == 0) else 0))
+                                           - (1 if nature == 1 or (
+                                   nature == 1.1 and current_stat % 11 == 0) else 0))
                                      * 100 / level) + (0 if not (nature == 0.9 and current_stat % 10 == 0)
                                                        else 100 % level)
                                - floor(evs / 4))))
@@ -1230,7 +1233,8 @@ def server(input: Inputs, output: Outputs, session: Session):
         return floor(2 * level / 5 + 2) * move_power
 
     def get_weather_modifier(current_weather, move_type):
-        if (current_weather == "Sunny" and move_type == "Fire") or (current_weather == "Rain" and move_type == "Water"):
+        if (current_weather == "Sunny" and move_type == "Fire") or (
+                current_weather == "Rain" and move_type == "Water"):
             return 1.5
         elif (current_weather == "Sunny" and move_type == "Water") or (
                 current_weather == "Rain" and move_type == "Fire"):
@@ -1240,7 +1244,8 @@ def server(input: Inputs, output: Outputs, session: Session):
     def calc_stat_stages(stat: int, stages: int):
         return floor(stat * (2 + (stages if stages > 0 else 0)) / (2 - (stages if stages < 0 else 0)))
 
-    def calc_xp_yield(pokemon, level: int, opponent_is_trainer: bool, lucky_egg_held=False, is_original_trainer=True):
+    def calc_xp_yield(pokemon, level: int, opponent_is_trainer: bool, lucky_egg_held=False,
+                      is_original_trainer=True):
         # the generation 3 XP formula from https://bulbapedia.bulbagarden.net/wiki/Experience
         xp_pokemon = floor(pokemons["XP"][pokemon] * level / 7)
         xp = floor(floor(floor(xp_pokemon * (1.5 if lucky_egg_held else 1)) * (1.5 if opponent_is_trainer else 1))
@@ -1266,9 +1271,25 @@ def server(input: Inputs, output: Outputs, session: Session):
     damage_received_input = number_input_server(id="damage_received", label="DMG Taken:",
                                                 init=5, min_value=1, max_value=999)
     atk_spa_stage_input = number_input_server(id="atk_spa_stage", label="ATK/SPA Stage:",
-                                             init=0, min_value=-6, max_value=6)
+                                              init=0, min_value=-6, max_value=6)
     def_spd_stage_input = number_input_server(id="def_spd_stage", label="DEF/SPD Stage:",
                                               init=0, min_value=-6, max_value=6)
+
+    level_iv_input = number_input_server(id="level_iv", label="Level:", init=5, min_value=1, max_value=100)
+    hp_iv_input = number_input_server(id="hp_iv", label="HP:", init=22, min_value=11, max_value=999)
+    atk_iv_input = number_input_server(id="atk_iv", label="ATK:", init=12, min_value=4, max_value=999)
+    def_iv_input = number_input_server(id="def_iv", label="DEF:", init=12, min_value=4, max_value=999)
+    spa_iv_input = number_input_server(id="spa_iv", label="SPA:", init=12, min_value=4, max_value=999)
+    spd_iv_input = number_input_server(id="spd_iv", label="SPD:", init=12, min_value=4, max_value=999)
+    spe_iv_input = number_input_server(id="spe_iv", label="SPE:", init=12, min_value=4, max_value=999)
+
+    level_from_info_input = number_input_server(id="level_from_info", label="Level From:", min_value=1,
+                                                max_value=100,
+                                                init=5)
+    level_to_info_input = number_input_server(id="level_to_info", label="Level To:", min_value=1, max_value=100,
+                                              init=8)
+    enemy_level_info_input = number_input_server(id="enemy_level_info", label="Level:", init=8, min_value=1,
+                                                 max_value=100)
 
 
 app = App(app_ui, server,

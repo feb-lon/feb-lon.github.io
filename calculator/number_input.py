@@ -3,18 +3,16 @@ from shiny import Inputs, Outputs, Session, module, reactive, ui
 
 @module.ui
 def number_input(label: str, init: int, min_value: int = 1, max_value: int = 100, step: int = 1) -> ui.TagChild:
-    return ui.page_fluid(
+    return ui.div(
         {"class": "number_input"},
+        ui.div(label, class_="number_input_label"),
         ui.div(
-            ui.div(label, class_="number_input_label"),
-            ui.div(
-                ui.input_action_button("decrement", "-", class_="button_minus", tabindex_="-1"),
-                ui.input_numeric("number_value", label="", value=init, min=min_value, max=max_value, step=step),
-                ui.input_action_button("increment", "+", class_="button_plus", tabindex_="-1"),
-                class_="number_input_controls",
-            ),
-            class_="number_input_row",
+            ui.input_action_button("decrement", "-", class_="button_minus", tabindex_="-1"),
+            ui.input_numeric("number_value", label="", value=init, min=min_value, max=max_value, step=step),
+            ui.input_action_button("increment", "+", class_="button_plus", tabindex_="-1"),
+            class_="number_input_controls",
         ),
+        class_="number_input_row",
     )
 
 
