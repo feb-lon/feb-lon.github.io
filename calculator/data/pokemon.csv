@@ -16,7 +16,7 @@
 15,Beedrill,159,0,2,0,0,1,0,3,385,Bug,Poison,295
 16,Pidgey,55,0,0,0,0,0,1,1,251,Normal,Flying,18
 17,Pidgeotto,113,0,0,0,0,0,2,2,349,Normal,Flying,300
-18,Pidgeot,172,0,0,0,0,0,3,3,469,Normal,Flying,300
+18,Pidgeot,172,0,0,0,0,0,3,3,469,Normal,Flying,395
 19,Rattata,57,0,0,0,0,0,1,1,253,Normal,,35
 20,Raticate,116,0,0,0,0,0,2,2,413,Normal,,185
 21,Spearow,58,0,0,0,0,0,1,1,262,Normal,Flying,20
@@ -149,7 +149,7 @@
 148,Dragonair,144,0,2,0,0,0,0,2,420,Dragon,,165
 149,Dragonite,218,0,3,0,0,0,0,3,600,Dragon,Flying,2100
 150,Mewtwo,220,0,0,0,3,0,0,3,680,Psychic,,1220
-151,Mew,64,3,0,0,0,0,0,3,600,Psychic,,1220
+151,Mew,64,3,0,0,0,0,0,3,600,Psychic,,40
 152,Chikorita,64,0,0,0,0,1,0,1,318,Grass,,64
 153,Bayleef,141,0,0,1,0,1,0,2,405,Grass,,158
 154,Meganium,208,0,0,1,0,2,0,3,525,Grass,,1005
