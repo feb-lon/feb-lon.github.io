@@ -49,11 +49,28 @@
   margin: auto;
 }
 
+.spread_row, .whole_row {
+  display: flex;
+  padding: .5rem;
+}
+
 .spread_row {
   justify-content: space-evenly;
-  display: inline-flex;
   align-items: center;
-  padding: .5rem;
+}
+
+.whole_row {
+  justify-content: space-between;
+  align-items: top;
+}
+
+.top_layer_row {
+  display: flex;
+  justify-content: space-between;
+  gap: 2rem;
+  align-items: top;
+  text-align: center;
+  gap: 7%;
 }
 
 /* override default */
@@ -63,7 +80,7 @@
 
 /* width: auto is sometimes too small */
 div:has(.selectize-control) {
-  min-width: 200px;
+  min-width: 150px;
 }
 
 .bslib-gap-spacing  {
@@ -156,6 +173,10 @@ input[type="checkbox"]:hover +label {
   margin-top: .1rem;
   margin-bottom: .5rem;
   align-content: space-between;
+}
+
+.radio-inline:has([value="1-"]) span {
+  padding: .1rem;
 }
 
 .shiny-input-radiogroup .control-label {
