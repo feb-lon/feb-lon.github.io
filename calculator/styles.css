@@ -10,8 +10,8 @@
   align-items: center;
 }
 
-.container-fluid {
-  padding-left, padding-right: 0;
+.io_row.top {
+  align-items: top;
 }
 
 .accordion {
@@ -32,14 +32,23 @@
   padding-left: 2rem;
 }
 
-.io_column {
+.io_column, io_column_small {
   display: flex;
   flex-direction: column;
   justify-content: flex-start;
-  align-self: start;
   margin: .5rem;
   padding: .5rem;
   gap: .2rem;
+}
+
+.io_column_small {
+  padding-top: 0.2rem;
+  gap: .1rem;
+  justify-content: space-evenly;
+}
+
+.io_column.reverse {
+  flex-direction: column-reverse;
 }
 
 .button_column {
@@ -47,6 +56,17 @@
   flex-direction: column;
   gap: 1rem;
   margin: auto;
+}
+
+.spread_column {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-around;
+  align-content: center;
+}
+
+.big_buttons>div>div>label {
+  font-size: 1.3rem;
 }
 
 .spread_row, .whole_row {
@@ -57,6 +77,10 @@
 .spread_row {
   justify-content: space-evenly;
   align-items: center;
+}
+
+.spread_row.top {
+  align-items: start;
 }
 
 .whole_row {
@@ -73,9 +97,24 @@
   gap: 7%;
 }
 
+.top_layer_column {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: 2rem;
+  align-items: top;
+  text-align: center;
+  gap: 7%;
+}
+
 /* override default */
 .shiny-input-container:not(.shiny-input-container-inline) {
   width: auto;
+}
+.shiny-input-container:not(.shiny-input-container-inline)>.shiny-options-group>.radio {
+  margin-top: 0;
+  margin-bottom: 0;
+  padding: 0;
 }
 
 /* width: auto is sometimes too small */
@@ -88,9 +127,9 @@ div:has(.selectize-control) {
 }
 
 .action-button {
-  --bs-btn-padding-x: 1em;
-  --bs-btn-padding-y: .5em;
-  --bs-btn-font-size: .9rem;
+  padding-x: 1em;
+  padding-y: .5em;
+  font-size: .9rem;
 }
 
 pre {
@@ -119,16 +158,29 @@ input[type="radio"], input[type="checkbox"]{
 }
 
 input[type="radio"]:checked +span, .form-check-input:checked +label {
-  color: white !important;
-  border-color: #007bc2 !important;
+  color: white;
+  border-color: #007bc2;
+}
+
+input[type="radio"]:checked:hover +span, .form-check-input:checked:hover +label {
+  color: black;
+  border-color: black;
 }
 
 input[type="radio"]:checked +span {
-  background: #007bc2 !important;
+  background: #007bc2;
+}
+
+#graph_style>div>.radio {
+  margin: 1rem;
 }
 
 .form-check-input:checked +label {
-  background:#009456 !important;
+  background:#009456;
+}
+
+label[for="is_stab"], label[for="is_crit"] {
+  width: 5rem;
 }
 
 input[type="radio"] +span, .form-check-input +label {
@@ -140,16 +192,101 @@ input[type="radio"] +span, .form-check-input +label {
   transition: 0.2s;
 }
 
+.radio-inline>label, .radio>label {
+  font-size: .85rem;
+  padding: 0;
+  margin: 0;
+}
+
+#effectiveness>div>.radio>label>span {
+  display: block;
+  width: 4rem;
+}
+
 input[type="radio"]:hover +span {
   background: #BFDEF0;
+}
+
+#effectiveness>div>.radio>label>span {
+  border-radius: 0px;
 }
 
 input[type="checkbox"]:hover +label {
   background: #BFEEDA;
 }
 
+input[type="radio"][value="1-"] + span {
+  padding: .1rem;
+}
+
+input[type="radio"][value="4"]:checked + span{
+  background: #009456 !important;
+  color: white;
+  border-color: black;
+}
+
+input[type="radio"][value="4"]:hover + span{
+  background: #80CAAB !important;
+  color: black;
+}
+
+input[type="radio"][value="4"] + span{
+  border-start-end-radius: 5rem !important;
+  border-start-start-radius: 5rem !important;
+}
+
+input[type="radio"][value="2"]:checked + span, input[type="radio"][value="1.5"]:checked + span{
+  background: #4E9E3A !important;
+  color: white;
+  border-color: black;
+}
+
+input[type="radio"][value="2"]:hover + span, input[type="radio"][value="1.5"]:hover + span{
+  background: #A7CF9D !important;
+  color: black;
+}
+
+input[type="radio"][value="1-"]:checked + span{
+  background: #B38F00 !important;
+  color: white;
+  border-color: black;
+}
+
+input[type="radio"][value="1-"]:hover + span{
+  background: #D9C780 !important;
+  color: black;
+}
+
+input[type="radio"][value="0.5"]:checked + span{
+  background: #C65A1E !important;
+  color: white;
+  border-color: black;
+}
+
+input[type="radio"][value="0.5"]:hover + span{
+  background: #E3AD8F !important;
+  color: black;
+}
+
+input[type="radio"][value="0.25"]:checked + span{
+  background: #B3262E !important;
+  color: white;
+  border-color: black;
+}
+
+input[type="radio"][value="0.25"]:hover + span{
+  background: #D99397 !important;
+  color: black;
+}
+
+input[type="radio"][value="0.25"] + span{
+  border-end-end-radius: 5rem !important;
+  border-end-start-radius: 5rem !important;
+}
+
 .shiny-options-group {
   justify-content: space-between;
+  margin-top: 0rem !important;
 }
 
 .form-switch {
@@ -165,7 +302,7 @@ input[type="checkbox"]:hover +label {
   margin: 0;
 }
 
-.radio-inline, .bslib-input-switch {
+.radio-inline, .bslib-input-switch, .radio {
   padding: 0;
   padding-left: .5rem !important;
   padding-right: .5rem;
@@ -173,16 +310,6 @@ input[type="checkbox"]:hover +label {
   margin-top: .1rem;
   margin-bottom: .5rem;
   align-content: space-between;
-}
-
-.radio-inline:has([value="1-"]) span {
-  padding: .1rem;
-}
-
-.shiny-input-radiogroup .control-label {
-  display: flex;
-  justify-content: center;
-  padding-top: .5rem;
 }
 
 .shiny-input-container:not(.shiny-input-radiogroup):not(:has(.form-check-label)), .label_io_row {
@@ -236,4 +363,17 @@ input[type="checkbox"]:hover +label {
 
 .selectize-dropdown-content {
   max-height: 500px;
+}
+
+.close_distance {
+  padding: 0;
+  margin: 0;
+}
+
+.big_gap {
+  gap: 6rem;
+}
+
+.small_gap {
+  gap: 1rem;
 }

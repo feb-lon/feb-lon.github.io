@@ -1,7 +1,8 @@
 from math import floor, ceil
 
 import matplotlib.pyplot as plt
-from shiny.types import SilentException, SafeException
+from shiny.express.ui import card_header
+from shiny.types import SilentException
 
 from shared import *
 from number_input import *
@@ -38,13 +39,19 @@ def iv_calculation_page():
                         class_="io_column",
                     ),
                     ui.div(
-                        number_input(id="level_iv", label=" Stats at Level:", init=5, min_value=1, max_value=100),
-                        number_input(id="hp_iv", label="HP:", init=22, min_value=11, max_value=999),
-                        number_input(id="atk_iv", label="ATK:", init=12, min_value=4, max_value=999),
-                        number_input(id="def_iv", label="DEF:", init=12, min_value=4, max_value=999),
-                        number_input(id="spa_iv", label="SPA:", init=12, min_value=4, max_value=999),
-                        number_input(id="spd_iv", label="SPD:", init=12, min_value=4, max_value=999),
-                        number_input(id="spe_iv", label="SPE:", init=12, min_value=4, max_value=999),
+                        number_input(id="level_iv", id_passed="level_iv", label=" Stats at Level:", init=5, min_value=1,
+                                     max_value=100),
+                        number_input(id="hp_iv", id_passed="hp_iv", label="HP:", init=22, min_value=11, max_value=999),
+                        number_input(id="atk_iv", id_passed="atk_iv", label="ATK:", init=12, min_value=4,
+                                     max_value=999),
+                        number_input(id="def_iv", id_passed="def_iv", label="DEF:", init=12, min_value=4,
+                                     max_value=999),
+                        number_input(id="spa_iv", id_passed="spa_iv", label="SPA:", init=12, min_value=4,
+                                     max_value=999),
+                        number_input(id="spd_iv", id_passed="spd_iv", label="SPD:", init=12, min_value=4,
+                                     max_value=999),
+                        number_input(id="spe_iv", id_passed="spe_iv", label="SPE:", init=12, min_value=4,
+                                     max_value=999),
                         # ui.input_selectize("mons_defeated_iv", "Mons Defeated at this Level:", sorted(pokemons.index), multiple=True, class_="io_row"),
                         class_="io_column",
                     ),
@@ -78,7 +85,8 @@ def pokemon_info_page():
                     "Pokemon:",
                     ui.input_selectize("pokemon_info", "", sorted(pokemons.index)),
                     "at Level",
-                    number_input(id="enemy_level_info", label="", init=8, min_value=1, max_value=100),
+                    number_input(id="enemy_level_info", id_passed="enemy_level_info",
+                                 label="", init=8, min_value=1, max_value=100),
                     class_="io_row",
                 ),
                 ui.div(
@@ -94,9 +102,11 @@ def pokemon_info_page():
                 ui.h4("XP requirement"),
                 ui.div(
                     "From Level",
-                    number_input(id="level_from_info", label="", min_value=1, max_value=100, init=5),
+                    number_input(id="level_from_info", id_passed="level_from_info",
+                                 label="", min_value=1, max_value=100, init=5),
                     "to",
-                    number_input(id="level_to_info", label="", min_value=1, max_value=100, init=8),
+                    number_input(id="level_to_info", id_passed="level_to_info",
+                                 label="", min_value=1, max_value=100, init=8),
                     class_="spread_row",
                 ),
                 ui.div(
@@ -107,24 +117,25 @@ def pokemon_info_page():
                     ui.output_code("calc_xp_from_to"),
                     class_="spread_row",
                 ),
-                class_="spread_column",
+                class_="io_column",
             ),
             ui.page_fluid(
                 ui.h4("Confusion Damage"),
                 ui.div(
-                    number_input(id="own_level_info", label="Level:", init=8, layout="short_input"),
+                    number_input(id="own_level_info", id_passed="own_level_info",
+                                 label="Level:", init=8, layout="short_input"),
                     ui.div(
-                        number_input(id="atk_info", label="ATK:",
+                        number_input(id="atk_info", id_passed="atk_info", label="ATK:",
                                      init=20, min_value=1, max_value=999, layout="short_input"),
-                        number_input(id="atk_stage_info", label="",
-                                     init=0, min_value=-6, max_value=6, layout="stages"),
+                        number_input(id="atk_stage_info", id_passed="atk_stage_info", label="",
+                                     init=0, min_value=-6, max_value=6, layout="stages_small", tabbable=False),
                         class_="io_row",
                     ),
                     ui.div(
-                        number_input(id="def_info", label="DEF:",
+                        number_input(id="def_info", id_passed="def_info", label="DEF:",
                                      init=20, min_value=1, max_value=999, layout="short_input"),
-                        number_input(id="def_stage_info", label="",
-                                     init=0, min_value=-6, max_value=6, layout="stages"),
+                        number_input(id="def_stage_info", id_passed="def_stage_info", label="",
+                                     init=0, min_value=-6, max_value=6, layout="stages_small", tabbable=False),
                         class_="io_row",
                     ),
                     class_="spread_row",
@@ -163,132 +174,217 @@ def atk_spa_calculator_page():
         ),
         ui.div(
             ui.page_fluid(
-                {"style": "width:40%;"},
-                ui.div(
-                    number_input(id="enemy_level", label="Enemy Level:",
-                                 init=8, layout="spread"),
-                    number_input(id="move_power", label="Move Power:",
-                                 init=50, step=5, min_value=5, max_value=999, layout="spread"),
-                    number_input(id="own_defense", label="Own Defense:",
-                                 init=20, min_value=1, max_value=999, layout="spread"),
-                    number_input(id="damage_received", label="DMG Taken:",
-                                 init=5, min_value=1, max_value=999, layout="spread"),
-                ),
-                ui.div(
-                    ui.input_switch("is_stab", "STAB Move"),
-                    ui.input_switch("is_crit", "Critical Hit"),
-                    class_="spread_row",
-                ),
-                ui.input_radio_buttons(
-                    "effectiveness",
-                    ui.tooltip(
-                        ui.span("Effectiveness:", question_circle_fill),
-                        typing_tooltip(),
-                        placement="right",
-                        id="effectiveness_tooltip_advanced",
+                ui.card(
+                    {"style": "margin-left: 5%;"},
+                    ui.card_header(
+                        "Graph Style"
                     ),
-                    {"0.25": "0.25x", "0.5": "0.5x", "1-": "1x-", "1": "1x", "2": "2x", "4": "4x"},
-                    inline=True,
-                    selected="1",
+                    ui.input_radio_buttons(
+                        "graph_style",
+                        "",
+                        {"only_dmg_received": "Only DMG Received", "all_dmg_values": "All DMG Values"},
+                        inline=False,
+                        selected="only_dmg_received",
+                    ),
+                    class_="io_row",
                 ),
-                ui.accordion(
-                    ui.accordion_panel(
-                        ui.span(
-                            ui.h5("Enemy Pokemon Modifiers:"),
-                            ui.output_text_verbatim("enemy_modifiers_counter"),
-                            id="enemy_modifiers_title",
-                            class_="accordion_title",
-                        ),
-                        number_input(id="atk_spa_stage", label="ATK/SPA Stage:", init=0, min_value=-6, max_value=6),
-                        ui.input_switch("is_burned", "Enemy Burned"),
-                        ui.tooltip(
-                            ui.input_switch("ff_active", "Flashfire Bonus"),
-                            ui.card(
-                                "Getting hit by a fire move gives this bonus for the whole fight.",
-                                class_="tooltip_card",
+                ui.div(
+                    ui.card(
+                        {"style": "border-color: green;"},
+                        ui.card_body(
+                            ui.div(
+                                {"style": "display: flex;"},
+                                ui.div(
+                                    ui.div(
+                                        number_input(id="enemy_level", id_passed="enemy_level", label="",
+                                                     init=8, layout="big"),
+                                        "Enemy LVL",
+                                        class_="io_column close_distance",
+                                    ),
+                                    ui.div(
+                                        number_input(id="move_power", id_passed="move_power", label="",
+                                                     init=95, step=5, min_value=5, max_value=999, layout="big"),
+                                        "Power",
+                                        class_="io_column close_distance",
+                                    ),
+                                    ui.div(
+                                        number_input(id="own_defense", id_passed="own_defense", label="",
+                                                     init=20, min_value=1, max_value=999, layout="big"),
+                                        "DEF/SPD",
+                                        class_="io_column close_distance",
+                                    ),
+                                    ui.div(
+                                        number_input(id="damage_received", id_passed="damage_received", label="",
+                                                     init=10, min_value=1, max_value=999, layout="big"),
+                                        "DMG",
+                                        class_="io_column close_distance",
+                                    ),
+                                    class_="io_row",
+                                ),
+                                ui.div(
+                                    ui.div(
+                                        number_input(id="atk_spa_stage", id_passed="atk_spa_stage", label="",
+                                                     init=0, min_value=-6, max_value=6, layout="stages",
+                                                     tabbable=False),
+                                        ui.div(
+                                            {"style": "width:3.7rem;font-size: .8rem;"},
+                                            "ATK/SPA Stage",
+                                        ),
+                                        class_="io_column close_distance",
+                                    ),
+                                    ui.div(
+                                        number_input(id="def_spd_stage", id_passed="def_spd_stage", label="",
+                                                     init=0, min_value=-6, max_value=6, layout="stages",
+                                                     tabbable=False),
+                                        ui.div(
+                                            {"style": "width:3.7rem;font-size: .8rem;"},
+                                            "DEF/SPD Stage",
+                                        ),
+                                        class_="io_column close_distance",
+                                    ),
+                                    ui.div(
+                                        ui.input_switch("is_crit", "CRIT"),
+                                        ui.input_switch("is_stab", "STAB"),
+                                        class_="spread_column big_buttons close_distance",
+                                    ),
+                                    ui.div(
+                                        {"style": "margin-top: -1rem; margin-bottom: -1rem;"},
+                                        ui.input_radio_buttons(
+                                            "effectiveness",
+                                            "",
+                                            {"4": "4x", "2": "2x", "1": "1x", "1-": "1x-", "0.5": "0.5x",
+                                             "0.25": "0.25x"},
+                                            selected="1",
+                                        ),
+                                    ),
+                                    ui.tooltip(
+                                        ui.div(
+                                            ui.card({"style":
+                                                         "line-break: anywhere;"
+                                                         "width: 0;"
+                                                         "font-size: 1.6rem;"
+                                                         "margin-left: -1rem;"
+                                                         "padding: 0rem;"
+                                                         "margin-top: 0rem;"
+                                                         "margin-bottom: 0rem;"
+                                                         "border-color: transparent;"
+                                                     }, "EFF")
+                                        ),
+                                        typing_tooltip(),
+                                        id="effectiveness_tooltip_advanced",
+                                    ),
+                                    class_="spread_row small_gap",
+                                ),
+                                class_="spread_row big_gap",
                             ),
                         ),
-                        ui.tooltip(
-                            ui.input_switch("has_dd_charge", "Double Damage / Charge Bonus"),
-                            double_damage_tooltip(),
-                        ),
-                        ui.tooltip(
-                            ui.input_switch("is_physical", "Move is Physical"),
-                            ui.card("Only used for determining minimum DMG (physical DMG has higher minimum DMG)",
-                                    class_="tooltip_card",
-                                    ),
-                        ),
-                        ui.input_radio_buttons("enemy_ability", "Enemy Ability: ",
-                                               {"1": "1x (none)", "1.5": "1.5x (e.g. Hustle)",
-                                                "2": "2x (Huge Power)"},
-                                               selected="1",
-                                               inline=True,
-                                               ),
-                        value="enemy_modifiers_counter",
-                        class_="io_column",
                     ),
-                    ui.accordion_panel(
-                        ui.span(
-                            ui.h5("Own Pokemon Modifiers:"),
-                            ui.output_text_verbatim("own_modifiers_counter"),
-                            id="own_modifiers_title",
-                            class_="accordion_title",
-                        ),
-                        number_input(id="def_spd_stage", label="DEF/SPD Stage:", init=0, min_value=-6, max_value=6),
-                        ui.input_switch("has_reflect_lightscreen", "Reflect / Lightscreen"),
-                        ui.input_switch("has_def_spd_badge", "DEF/SPD Badge"),
-                        ui.input_switch("has_thick_fat", "Thick Fat"),
-                        value="own_modifiers_counter",
-                        class_="io_column"
-                    ),
-                    ui.accordion_panel(
-                        ui.span(
-                            ui.h5("Field Effects:"),
-                            ui.output_text_verbatim("field_effects_counter"),
-                            id="field_effects_title",
-                            class_="accordion_title",
-                        ),
-                        ui.input_radio_buttons(
-                            "weather_modifier",
-                            "Weather Modifier:",
-                            {"0.5": "0.5x", "1": "1x", "1.5": "1.5x"},
-                            inline=True,
-                            selected="1",
-                        ),
-                        ui.input_switch("mud_or_water_sport_active", "Mud/Water Sport"),
-                        value="field_effects_counter",
-                        class_="io_column"
-                    ),
-                    open=False,
                 ),
-                class_="io_column",
+                ui.div(
+                    {"style": "gap: 1rem;margin-right: 5%"},
+                    ui.card(
+                        ui.card_header("Reset Input Buttons"),
+                        ui.input_action_button("reset_all", "Reset All Inputs"),
+                        ui.input_action_button("reset_dropdowns", "Reset Inputs Below Graph"),
+                        class_="spread_column",
+                    ),
+                ),
+                class_="io_row",
             ),
             ui.page_fluid(
                 ui.output_plot("calculate_offense"),
                 ui.page_fluid(
-                    ui.card(
-                        ui.card_header("Graph Style:"),
-                        ui.input_radio_buttons(
-                            "graph_style",
-                            "",
-                            {"only_dmg_received": "Only DMG Received", "all_dmg_values": "All DMG Values"},
-                            inline=True,
-                            selected="only_dmg_received",
+                    ui.accordion(
+                        {"style": "width: 30%"},
+                        ui.accordion_panel(
+                            ui.div(
+                                ui.h5("Enemy Pokemon Modifiers:"),
+                                ui.output_text_verbatim("enemy_modifiers_counter"),
+                                id="enemy_modifiers_title",
+                                class_="accordion_title",
+                            ),
+                            ui.div(
+                                ui.div(
+                                    ui.input_switch("is_burned", "Enemy Burned"),
+                                    ui.tooltip(
+                                        ui.input_switch("ff_active", "Flashfire Bonus"),
+                                        ui.card(
+                                            "Getting hit by a fire move gives this bonus for the whole fight.",
+                                            class_="tooltip_card",
+                                        ),
+                                    ),
+                                    class_="io_row"
+                                ),
+                                ui.div(
+                                    ui.tooltip(
+                                        ui.input_switch("has_dd_charge", "Double Damage / Charge Bonus"),
+                                        double_damage_tooltip(),
+                                    ),
+                                    ui.tooltip(
+                                        ui.input_switch("is_physical", "Move is Physical"),
+                                        ui.card(
+                                            "Only used for determining minimum DMG (physical DMG has higher minimum DMG)",
+                                            class_="tooltip_card",
+                                        ),
+                                    ),
+                                    class_="io_row"
+                                ),
+                                class_="io_column",
+                            ),
+                            ui.input_radio_buttons("enemy_ability", "Enemy Ability: ",
+                                                   {"1": "generic", "1.5": "1.5x atk/spa", "2": "2x atk",
+                                                    "1.5x power": "1.5x move power"},
+                                                   selected="1",
+                                                   inline=True,
+                                                   ),
+                            value="enemy_modifiers_counter",
                         ),
+                        open=False,
                     ),
-                    ui.card(
-                        ui.card_header("Reset Buttons:"),
-                        ui.card_body(
-                            ui.input_action_button("reset_all", "Reset All Inputs"),
-                            ui.input_action_button("reset_dropdowns", "Reset Inputs In Dropdowns"),
-                            {"style": "display: inline"},
+                    ui.accordion(
+                        {"style": "width: 20%"},
+                        ui.accordion_panel(
+                            ui.div(
+                                ui.h5("Own Pokemon Modifiers:"),
+                                ui.output_text_verbatim("own_modifiers_counter"),
+                                id="own_modifiers_title",
+                                class_="accordion_title",
+                            ),
+                            ui.input_switch("has_def_spd_badge", "DEF/SPD Badge"),
+                            ui.input_switch("has_thick_fat", "Thick Fat"),
+                            ui.input_switch("has_reflect_lightscreen", "Reflect / Lightscreen"),
+                            value="own_modifiers_counter",
                         ),
+                        open=False,
                     ),
-                    class_="spread_row",
+                    ui.accordion(
+                        {"style": "width: 20%"},
+                        ui.accordion_panel(
+                            ui.div(
+                                ui.h5("Field Effects:"),
+                                ui.output_text_verbatim("field_effects_counter"),
+                                id="field_effects_title",
+                                class_="accordion_title",
+                            ),
+                            ui.div(
+                                ui.input_switch("mud_or_water_sport_active", "Mud/Water Sport"),
+                                ui.input_radio_buttons(
+                                    "weather_modifier",
+                                    "Weather Modifier:",
+                                    {"0.5": "0.5x", "1": "1x", "1.5": "1.5x"},
+                                    inline=True,
+                                    selected="1",
+                                ),
+                                class_="io_column_small",
+                            ),
+                            value="field_effects_counter",
+                        ),
+                        open=False,
+                    ),
+                    class_="spread_row top",
                 ),
-                id="right_side",
             ),
-            class_="top_layer_row",
+            class_="top_layer_column",
         )
     )
 
@@ -505,6 +601,14 @@ def dragon_type():
 
 def steel_type():
     return ui.tags.img(src="steel_type.png", width=type_image_size, class_="tooltip_img")
+
+
+def empty_text():
+    return ui.tags.div({"style": "height:1.5rem;"})
+
+
+def spacer(width: float, height: float):
+    return ui.tags.div({"style": f"width:{width}rem;height:{height}rem;"})
 
 
 app_ui = (
@@ -880,9 +984,9 @@ def server(input: Inputs, output: Outputs, session: Session):
 
     def reset_visible_inputs():
         ui.update_numeric("enemy_level-number_value", value=8)
-        ui.update_numeric("move_power-number_value", value=50)
+        ui.update_numeric("move_power-number_value", value=95)
         ui.update_numeric("own_defense-number_value", value=20)
-        ui.update_numeric("damage_received-number_value", value=5)
+        ui.update_numeric("damage_received-number_value", value=10)
         session.send_input_message("is_stab", {"value": False})
         session.send_input_message("is_crit", {"value": False})
         session.send_input_message("effectiveness", {"value": "1"})
@@ -893,8 +997,8 @@ def server(input: Inputs, output: Outputs, session: Session):
         session.send_input_message("ff_active", {"value": False})
         session.send_input_message("has_dd_charge", {"value": False})
         session.send_input_message("is_physical", {"value": False})
-        session.send_input_message("enemy_ability", {"value": 1})
-        session.send_input_message("effectiveness", {"value": 1})
+        session.send_input_message("enemy_ability", {"value": "1"})
+        session.send_input_message("effectiveness", {"value": "1"})
         ui.update_numeric("def_spd_stage-number_value", value=0)
         session.send_input_message("has_reflect_lightscreen", {"value": False})
         session.send_input_message("has_def_spd_badge", {"value": False})
@@ -973,7 +1077,16 @@ def server(input: Inputs, output: Outputs, session: Session):
         effective_def_spd = calc_defensive_stat_modifiers(own_defense, has_def_spd_badge,
                                                           applied_def_spd_stage)
 
-        enemy_ability_modifier = float(input.enemy_ability())
+        enemy_ability_atk_spa_modifier = 1
+        has_power_modifying_ability = False
+        ability_input = input.enemy_ability()
+        if ability_input != "1.5x power":
+            enemy_ability_atk_spa_modifier = float(ability_input)
+        else:
+            has_power_modifying_ability = True
+
+        move_effective_power = calc_move_power_modifiers(move_power, False, has_sport,
+                                                         has_power_modifying_ability)
 
         # get rough lower / upper limits of possible ATK / SPA values to reduce calculations needed
         min_offense_guess, max_offense_guess = calc_offense_backwards(
@@ -981,14 +1094,14 @@ def server(input: Inputs, output: Outputs, session: Session):
             [eff2, eff1, stab_modifier, double_damage_or_charge_modifier, crit_modifier],
             [ff_modifier, weather_modifier,
              reflect_lightscreen_modifier, burned_modifier],
-            effective_def_spd, calc_base_power(enemy_level, move_power), applied_atk_spa_stage,
-            sport_modifier, thick_fat_modifier, enemy_ability_modifier
+            effective_def_spd, calc_base_power(enemy_level, move_effective_power), applied_atk_spa_stage,
+            thick_fat_modifier, enemy_ability_atk_spa_modifier
         )
 
         min_offense = -1
         max_offense = -1
 
-        base_power = calc_base_power(enemy_level, move_power)
+        base_power = calc_base_power(enemy_level, move_effective_power)
 
         dmg = []
         values = []
@@ -998,7 +1111,7 @@ def server(input: Inputs, output: Outputs, session: Session):
             values.append([])
             # calc the whole dmg formula except random factor for this specific ATK / SPA value
             full_damage = floor(floor(base_power
-                                      * calc_stat_stages(floor(floor(floor(x * enemy_ability_modifier)
+                                      * calc_stat_stages(floor(floor(floor(x * enemy_ability_atk_spa_modifier)
                                                                      * thick_fat_modifier) * sport_modifier),
                                                          applied_atk_spa_stage) / effective_def_spd) / 50)
             full_damage = calc_ibm_damage(int(full_damage), burned_modifier,
@@ -1105,11 +1218,10 @@ def server(input: Inputs, output: Outputs, session: Session):
 
     @render.text
     def own_modifiers_counter():
-        stage_modifier = int(def_spd_stage_input() != 0)
         screen_modifier = int(input.has_reflect_lightscreen())
         badge_modifier = int(input.has_def_spd_badge())
         thick_fat_modifier = int(input.has_thick_fat())
-        modifiers_changed = stage_modifier + screen_modifier + badge_modifier + thick_fat_modifier
+        modifiers_changed = screen_modifier + badge_modifier + thick_fat_modifier
 
         if modifiers_changed > 0:
             return modifiers_changed
@@ -1118,13 +1230,12 @@ def server(input: Inputs, output: Outputs, session: Session):
 
     @render.text
     def enemy_modifiers_counter():
-        stage_modifier = int(atk_spa_stage_input() != 0)
         burned_modifier = int(input.is_burned())
         ff_modifier = int(input.ff_active())
         dd_charge_modifier = int(input.has_dd_charge())
         is_physical_modifier = int(input.is_physical())
         enemy_ability_modifier = int(input.enemy_ability() != "1")
-        modifiers_changed = (stage_modifier + burned_modifier + ff_modifier + dd_charge_modifier
+        modifiers_changed = (burned_modifier + ff_modifier + dd_charge_modifier
                              + is_physical_modifier + enemy_ability_modifier)
 
         if modifiers_changed > 0:
@@ -1169,8 +1280,7 @@ def server(input: Inputs, output: Outputs, session: Session):
         return move_type, move_power, is_physical
 
     def calc_offense_backwards(dmg_dealt: int, is_physical: bool, obm: list, ibm: list, defense: int,
-                               base_power: int,
-                               offense_stage: int, sport_modifier: float, thick_fat_modifier: float,
+                               base_power: int, offense_stage: int, thick_fat_modifier: float,
                                enemy_ability_modifier: float):
         # ibm = "inside bracket modifier", the modifiers before the +2 in the formula
         # obm = "outside bracket modifier", the modifiers after the +2 in the formula
@@ -1192,13 +1302,13 @@ def server(input: Inputs, output: Outputs, session: Session):
             offense_guess_min = floor(offense_guess_min / factor)
             offense_guess_max = floor(offense_guess_max / factor) + (0 if factor == 1 else 1)
 
-        offense_guess_min = floor(floor(floor(calc_stat_stages_backwards(floor(int(offense_guess_min * 50 * defense)
-                                                                               / int(base_power)), offense_stage)[0]
-                                              / sport_modifier) / thick_fat_modifier) / enemy_ability_modifier)
-        offense_guess_max = floor(floor(floor(
+        offense_guess_min = floor(floor(calc_stat_stages_backwards(floor(int(offense_guess_min * 50 * defense)
+                                                                         / int(base_power)), offense_stage)[
+                                            0] / thick_fat_modifier) / enemy_ability_modifier)
+        offense_guess_max = floor(floor(
             calc_stat_stages_backwards(floor(int((offense_guess_max * 50 + 49) * defense + defense - 1)
-                                             / int(base_power)), offense_stage)[1] / sport_modifier + 1)
-                                        / thick_fat_modifier + 1) / enemy_ability_modifier + 1)
+                                             / int(base_power)), offense_stage)[1] / thick_fat_modifier + 1)
+                                  / enemy_ability_modifier + 1)
 
         return offense_guess_min, offense_guess_max
 
@@ -1395,41 +1505,51 @@ def server(input: Inputs, output: Outputs, session: Session):
     """
 
     enemy_level_input = number_input_server("enemy_level")
-    enemy_move_power_input = number_input_server(id="move_power", label="Move Power:",
-                                                 init=50, step=5, min_value=5, max_value=999)
-    own_defense_input = number_input_server(id="own_defense", label="Own Defense:",
+    enemy_move_power_input = number_input_server(id="move_power", id_passed="move_power", label="Move Power:",
+                                                 init=95, step=5, min_value=5, max_value=999)
+    own_defense_input = number_input_server(id="own_defense", id_passed="own_defense", label="Own Defense:",
                                             init=20, min_value=1, max_value=999)
-    damage_received_input = number_input_server(id="damage_received", label="DMG Taken:",
-                                                init=5, min_value=1, max_value=999)
-    atk_spa_stage_input = number_input_server(id="atk_spa_stage", label="ATK/SPA Stage:",
+    damage_received_input = number_input_server(id="damage_received", id_passed="damage_received", label="DMG Taken:",
+                                                init=10, min_value=1, max_value=999)
+    atk_spa_stage_input = number_input_server(id="atk_spa_stage", id_passed="atk_spa_stage", label="ATK/SPA Stage:",
                                               init=0, min_value=-6, max_value=6)
-    def_spd_stage_input = number_input_server(id="def_spd_stage", label="DEF/SPD Stage:",
+    def_spd_stage_input = number_input_server(id="def_spd_stage", id_passed="def_spd_stage", label="DEF/SPD Stage:",
                                               init=0, min_value=-6, max_value=6)
 
-    level_iv_input = number_input_server(id="level_iv", label="Level:", init=5, min_value=1, max_value=100)
-    hp_iv_input = number_input_server(id="hp_iv", label="HP:", init=22, min_value=11, max_value=999)
-    atk_iv_input = number_input_server(id="atk_iv", label="ATK:", init=12, min_value=4, max_value=999)
-    def_iv_input = number_input_server(id="def_iv", label="DEF:", init=12, min_value=4, max_value=999)
-    spa_iv_input = number_input_server(id="spa_iv", label="SPA:", init=12, min_value=4, max_value=999)
-    spd_iv_input = number_input_server(id="spd_iv", label="SPD:", init=12, min_value=4, max_value=999)
-    spe_iv_input = number_input_server(id="spe_iv", label="SPE:", init=12, min_value=4, max_value=999)
+    level_iv_input = number_input_server(id="level_iv", id_passed="level_iv", label="Level:", init=5, min_value=1,
+                                         max_value=100)
+    hp_iv_input = number_input_server(id="hp_iv", id_passed="hp_iv", label="HP:", init=22, min_value=11, max_value=999)
+    atk_iv_input = number_input_server(id="atk_iv", id_passed="atk_iv", label="ATK:", init=12, min_value=4,
+                                       max_value=999)
+    def_iv_input = number_input_server(id="def_iv", id_passed="def_iv", label="DEF:", init=12, min_value=4,
+                                       max_value=999)
+    spa_iv_input = number_input_server(id="spa_iv", id_passed="spa_iv", label="SPA:", init=12, min_value=4,
+                                       max_value=999)
+    spd_iv_input = number_input_server(id="spd_iv", id_passed="spd_iv", label="SPD:", init=12, min_value=4,
+                                       max_value=999)
+    spe_iv_input = number_input_server(id="spe_iv", id_passed="spe_iv", label="SPE:", init=12, min_value=4,
+                                       max_value=999)
 
-    level_from_info_input = number_input_server(id="level_from_info", label="Level From:", min_value=1,
+    level_from_info_input = number_input_server(id="level_from_info", id_passed="level_from_info", label="Level From:",
+                                                min_value=1,
                                                 max_value=100,
                                                 init=5)
-    level_to_info_input = number_input_server(id="level_to_info", label="Level To:", min_value=1, max_value=100,
+    level_to_info_input = number_input_server(id="level_to_info", id_passed="level_to_info", label="Level To:",
+                                              min_value=1, max_value=100,
                                               init=8)
-    enemy_level_info_input = number_input_server(id="enemy_level_info", label="Level:", init=8, min_value=1,
+    enemy_level_info_input = number_input_server(id="enemy_level_info", id_passed="enemy_level_info", label="Level:",
+                                                 init=8, min_value=1,
                                                  max_value=100)
 
-    own_level_info_input = number_input_server(id="own_level_info", label="Own Level:", init=8)
-    atk_info_input = number_input_server(id="atk_info", label="Own ATK:",
+    own_level_info_input = number_input_server(id="own_level_info", id_passed="own_level_info", label="Own Level:",
+                                               init=8)
+    atk_info_input = number_input_server(id="atk_info", id_passed="atk_info", label="Own ATK:",
                                          init=20, min_value=1, max_value=999)
-    atk_stage_info_input = number_input_server(id="atk_stage_info", label="ATK Stage:",
+    atk_stage_info_input = number_input_server(id="atk_stage_info", id_passed="atk_stage_info", label="ATK Stage:",
                                                init=0, min_value=-6, max_value=6)
-    def_info_input = number_input_server(id="def_info", label="Own DEF:",
+    def_info_input = number_input_server(id="def_info", id_passed="def_info", label="Own DEF:",
                                          init=20, min_value=1, max_value=999)
-    def_stage_info_input = number_input_server(id="def_stage_info", label="DEF Stage:",
+    def_stage_info_input = number_input_server(id="def_stage_info", id_passed="def_stage_info", label="DEF Stage:",
                                                init=0, min_value=-6, max_value=6)
 
 
