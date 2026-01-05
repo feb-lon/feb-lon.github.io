@@ -128,14 +128,14 @@ def pokemon_info_page():
                         number_input(id="atk_info", id_passed="atk_info", label="ATK:",
                                      init=20, min_value=1, max_value=999, layout="short_input"),
                         number_input(id="atk_stage_info", id_passed="atk_stage_info", label="",
-                                     init=0, min_value=-6, max_value=6, layout="stages_small", tabbable=False),
+                                     init=0, min_value=-6, max_value=6, layout="stages_small"),
                         class_="io_row",
                     ),
                     ui.div(
                         number_input(id="def_info", id_passed="def_info", label="DEF:",
                                      init=20, min_value=1, max_value=999, layout="short_input"),
                         number_input(id="def_stage_info", id_passed="def_stage_info", label="",
-                                     init=0, min_value=-6, max_value=6, layout="stages_small", tabbable=False),
+                                     init=0, min_value=-6, max_value=6, layout="stages_small"),
                         class_="io_row",
                     ),
                     class_="spread_row",
@@ -224,8 +224,7 @@ def atk_spa_calculator_page():
                                 ui.div(
                                     ui.div(
                                         number_input(id="atk_spa_stage", id_passed="atk_spa_stage", label="",
-                                                     init=0, min_value=-6, max_value=6, layout="stages",
-                                                     tabbable=False),
+                                                     init=0, min_value=-6, max_value=6, layout="stages"),
                                         ui.div(
                                             {"style": "width:3.7rem;font-size: .8rem;"},
                                             "ATK/SPA Stage",
@@ -234,8 +233,7 @@ def atk_spa_calculator_page():
                                     ),
                                     ui.div(
                                         number_input(id="def_spd_stage", id_passed="def_spd_stage", label="",
-                                                     init=0, min_value=-6, max_value=6, layout="stages",
-                                                     tabbable=False),
+                                                     init=0, min_value=-6, max_value=6, layout="stages"),
                                         ui.div(
                                             {"style": "width:3.7rem;font-size: .8rem;"},
                                             "DEF/SPD Stage",
@@ -257,21 +255,24 @@ def atk_spa_calculator_page():
                                             selected="1",
                                         ),
                                     ),
-                                    ui.tooltip(
-                                        ui.div(
-                                            ui.card({"style":
-                                                         "line-break: anywhere;"
-                                                         "width: 0;"
-                                                         "font-size: 1.6rem;"
-                                                         "margin-left: -1rem;"
-                                                         "padding: 0rem;"
-                                                         "margin-top: 0rem;"
-                                                         "margin-bottom: 0rem;"
-                                                         "border-color: transparent;"
-                                                     }, "EFF")
+                                    ui.span(
+                                        {
+                                            "style":
+                                                "line-break: anywhere;"
+                                                "width: 0;"
+                                                "font-size: 1.6rem;"
+                                                "margin-left: 0rem;"
+                                                "padding: 0rem;"
+                                                "margin-top: 0rem;"
+                                                "margin-bottom: 0rem;"
+                                                "border-color: transparent;"
+                                        },
+                                        "EFF",
+                                        ui.tooltip(
+                                            question_circle_fill,
+                                            typing_tooltip(),
+                                            id="effectiveness_tooltip_advanced",
                                         ),
-                                        typing_tooltip(),
-                                        id="effectiveness_tooltip_advanced",
                                     ),
                                     class_="spread_row small_gap",
                                 ),
@@ -293,96 +294,94 @@ def atk_spa_calculator_page():
             ),
             ui.page_fluid(
                 ui.output_plot("calculate_offense"),
-                ui.page_fluid(
-                    ui.accordion(
-                        {"style": "width: 30%"},
-                        ui.accordion_panel(
-                            ui.div(
-                                ui.h5("Enemy Pokemon Modifiers:"),
-                                ui.output_text_verbatim("enemy_modifiers_counter"),
-                                id="enemy_modifiers_title",
-                                class_="accordion_title",
+            ),
+            ui.page_fluid(
+                ui.accordion(
+                    {"style": "width: 35%"},
+                    ui.accordion_panel(
+                        ui.div(
+                            ui.h5("Enemy Pokemon Modifiers:"),
+                            ui.output_text_verbatim("enemy_modifiers_counter"),
+                            id="enemy_modifiers_title",
+                            class_="accordion_title",
+                        ),
+                        ui.div(
+                            ui.input_switch("is_burned", "Enemy Burned"),
+                            ui.tooltip(
+                                ui.input_switch("ff_active", "Flashfire Bonus"),
+                                ui.card(
+                                    "Getting hit by a fire move gives this bonus for the whole fight.",
+                                    class_="tooltip_card",
+                                ),
                             ),
-                            ui.div(
-                                ui.div(
-                                    ui.input_switch("is_burned", "Enemy Burned"),
-                                    ui.tooltip(
-                                        ui.input_switch("ff_active", "Flashfire Bonus"),
-                                        ui.card(
-                                            "Getting hit by a fire move gives this bonus for the whole fight.",
-                                            class_="tooltip_card",
-                                        ),
-                                    ),
-                                    class_="io_row"
+                            ui.tooltip(
+                                ui.input_switch("has_dd_charge", "Double Damage / Charge Bonus"),
+                                double_damage_tooltip(),
+                            ),
+                            class_="io_row"
+                        ),
+                        ui.div(
+                            ui.tooltip(
+                                ui.input_switch("is_physical", "Move is Physical"),
+                                ui.card(
+                                    "Only used for determining minimum DMG (physical DMG has higher minimum DMG)",
+                                    class_="tooltip_card",
                                 ),
-                                ui.div(
-                                    ui.tooltip(
-                                        ui.input_switch("has_dd_charge", "Double Damage / Charge Bonus"),
-                                        double_damage_tooltip(),
-                                    ),
-                                    ui.tooltip(
-                                        ui.input_switch("is_physical", "Move is Physical"),
-                                        ui.card(
-                                            "Only used for determining minimum DMG (physical DMG has higher minimum DMG)",
-                                            class_="tooltip_card",
-                                        ),
-                                    ),
-                                    class_="io_row"
-                                ),
-                                class_="io_column",
                             ),
                             ui.input_radio_buttons("enemy_ability", "Enemy Ability: ",
-                                                   {"1": "generic", "1.5": "1.5x atk/spa", "2": "2x atk",
-                                                    "1.5x power": "1.5x move power"},
+                                                   {"1": "generic", "1.5x power": "1.5x move power",
+                                                    "1.5": "1.5x atk/spa", "2": "2x atk"},
                                                    selected="1",
                                                    inline=True,
                                                    ),
-                            value="enemy_modifiers_counter",
+                            class_="io_row align_bottom"
                         ),
-                        open=False,
+                        value="enemy_modifiers_counter",
                     ),
-                    ui.accordion(
-                        {"style": "width: 20%"},
-                        ui.accordion_panel(
-                            ui.div(
-                                ui.h5("Own Pokemon Modifiers:"),
-                                ui.output_text_verbatim("own_modifiers_counter"),
-                                id="own_modifiers_title",
-                                class_="accordion_title",
-                            ),
-                            ui.input_switch("has_def_spd_badge", "DEF/SPD Badge"),
-                            ui.input_switch("has_thick_fat", "Thick Fat"),
-                            ui.input_switch("has_reflect_lightscreen", "Reflect / Lightscreen"),
-                            value="own_modifiers_counter",
-                        ),
-                        open=False,
-                    ),
-                    ui.accordion(
-                        {"style": "width: 20%"},
-                        ui.accordion_panel(
-                            ui.div(
-                                ui.h5("Field Effects:"),
-                                ui.output_text_verbatim("field_effects_counter"),
-                                id="field_effects_title",
-                                class_="accordion_title",
-                            ),
-                            ui.div(
-                                ui.input_switch("mud_or_water_sport_active", "Mud/Water Sport"),
-                                ui.input_radio_buttons(
-                                    "weather_modifier",
-                                    "Weather Modifier:",
-                                    {"0.5": "0.5x", "1": "1x", "1.5": "1.5x"},
-                                    inline=True,
-                                    selected="1",
-                                ),
-                                class_="io_column_small",
-                            ),
-                            value="field_effects_counter",
-                        ),
-                        open=False,
-                    ),
-                    class_="spread_row top",
+                    open=False,
                 ),
+                ui.accordion(
+                    {"style": "width: 30%"},
+                    ui.accordion_panel(
+                        ui.div(
+                            ui.h5("Own Pokemon Modifiers:"),
+                            ui.output_text_verbatim("own_modifiers_counter"),
+                            id="own_modifiers_title",
+                            class_="accordion_title",
+                        ),
+                        ui.input_switch("has_def_spd_badge", "DEF/SPD Badge"),
+                        ui.input_switch("has_thick_fat", "Thick Fat"),
+                        ui.input_switch("has_reflect_lightscreen", "Reflect / Lightscreen"),
+                        value="own_modifiers_counter",
+                        class_="io_row",
+                    ),
+                    open=False,
+                ),
+                ui.accordion(
+                    {"style": "width: 25%"},
+                    ui.accordion_panel(
+                        ui.div(
+                            ui.h5("Field Effects:"),
+                            ui.output_text_verbatim("field_effects_counter"),
+                            id="field_effects_title",
+                            class_="accordion_title",
+                        ),
+                        ui.div(
+                            ui.input_switch("mud_or_water_sport_active", "Mud/Water Sport"),
+                            ui.input_radio_buttons(
+                                "weather_modifier",
+                                "Weather Modifier:",
+                                {"0.5": "0.5x", "1": "1x", "1.5": "1.5x"},
+                                inline=True,
+                                selected="1",
+                            ),
+                            class_="io_row align_bottom",
+                        ),
+                        value="field_effects_counter",
+                    ),
+                    open=False,
+                ),
+                class_="spread_row top",
             ),
             class_="top_layer_column",
         )

@@ -1,3 +1,7 @@
+.form-group {
+  margin-bottom: inherit;
+}
+
 .bslib-grid {
   padding: 0.2rem;
   margin: 0.2rem;
@@ -111,11 +115,6 @@
 .shiny-input-container:not(.shiny-input-container-inline) {
   width: auto;
 }
-.shiny-input-container:not(.shiny-input-container-inline)>.shiny-options-group>.radio {
-  margin-top: 0;
-  margin-bottom: 0;
-  padding: 0;
-}
 
 /* width: auto is sometimes too small */
 div:has(.selectize-control) {
@@ -127,8 +126,9 @@ div:has(.selectize-control) {
 }
 
 .action-button {
-  padding-x: 1em;
-  padding-y: .5em;
+  padding-inline: .8em;
+  padding-top: .4em;
+  padding-bottom: .4em;
   font-size: .9rem;
 }
 
@@ -196,92 +196,137 @@ input[type="radio"] +span, .form-check-input +label {
   font-size: .85rem;
   padding: 0;
   margin: 0;
+  padding: 0;
 }
 
-#effectiveness>div>.radio>label>span {
+.radio>label>span, .radio-inline>label>span {
   display: block;
-  width: 4rem;
+  border-radius: 0;
+}
+
+input[name="effectiveness"] +span {
+ width: 4rem;
+}
+
+input[name="graph_style"] +span {
+ width: 10rem;
+}
+
+.radio-inline, .radio  {
+  padding: 0 !important;
+  margin: 0 !important;
+}
+
+.bslib-input-switch, .shiny-input-container-inline {
+  padding: 0;
+  padding-left: .5rem !important;
+  padding-right: .5rem;
+  margin: auto;
+  margin-top: .1rem;
+  margin-bottom: .5rem;
+  align-content: space-between;
+}
+
+.shiny-options-group:has(.radio), .shiny-options-group:has(.radio-inline) {
+  display: flex;
+  justify-content: center;
+  align-content: center;
+  margin: 0;
+  padding: 0;
+  gap: 0;
+}
+
+.shiny-options-group:has(.radio) {
+  display: flex;
+  flex-direction: column;
+}
+
+.shiny-options-group>.radio:first-child>label>span {
+  border-start-start-radius: 2rem !important;
+  border-start-end-radius: 2rem !important;
+}
+
+.shiny-options-group>.radio:last-child>label>span {
+  border-end-start-radius: 2rem !important;
+  border-end-end-radius: 2rem !important;
+}
+
+.shiny-options-group>.radio-inline:first-child>span {
+  border-start-start-radius: 2rem !important;
+  border-end-start-radius: 2rem !important;
+}
+
+.shiny-options-group>.radio-inline:last-child>span {
+  border-start-end-radius: 2rem !important;
+  border-end-end-radius: 2rem !important;
+}
+
+.radio-inline>span {
+  display: block;
+  border-radius: 0 !important;
 }
 
 input[type="radio"]:hover +span {
   background: #BFDEF0;
 }
 
-#effectiveness>div>.radio>label>span {
-  border-radius: 0px;
-}
-
 input[type="checkbox"]:hover +label {
   background: #BFEEDA;
 }
 
-input[type="radio"][value="1-"] + span {
-  padding: .1rem;
-}
-
-input[type="radio"][value="4"]:checked + span{
+input[name="effectiveness"][value="4"]:checked +span{
   background: #009456 !important;
   color: white;
   border-color: black;
 }
 
-input[type="radio"][value="4"]:hover + span{
+input[name="effectiveness"][value="4"]:hover +span{
   background: #80CAAB !important;
   color: black;
 }
 
-input[type="radio"][value="4"] + span{
-  border-start-end-radius: 5rem !important;
-  border-start-start-radius: 5rem !important;
-}
-
-input[type="radio"][value="2"]:checked + span, input[type="radio"][value="1.5"]:checked + span{
+input[name="effectiveness"][value="2"]:checked +span, input[name="weather_modifier"][value="1.5"]:checked +span{
   background: #4E9E3A !important;
   color: white;
   border-color: black;
 }
 
-input[type="radio"][value="2"]:hover + span, input[type="radio"][value="1.5"]:hover + span{
+input[name="effectiveness"][value="2"]:hover +span, input[name="weather_modifier"][value="1.5"]:hover +span{
   background: #A7CF9D !important;
   color: black;
 }
 
-input[type="radio"][value="1-"]:checked + span{
+input[name="effectiveness"][value="1-"]:checked +span{
   background: #B38F00 !important;
   color: white;
   border-color: black;
 }
 
-input[type="radio"][value="1-"]:hover + span{
+input[name="effectiveness"][value="1-"]:hover +span{
   background: #D9C780 !important;
   color: black;
 }
 
-input[type="radio"][value="0.5"]:checked + span{
+input[name="effectiveness"][value="0.5"]:checked +span, input[name="weather_modifier"][value="0.5"]:checked +span{
   background: #C65A1E !important;
   color: white;
   border-color: black;
 }
 
-input[type="radio"][value="0.5"]:hover + span{
+input[name="effectiveness"][value="0.5"]:hover +span, input[name="weather_modifier"][value="0.5"]:hover +span{
   background: #E3AD8F !important;
   color: black;
 }
 
-input[type="radio"][value="0.25"]:checked + span{
+input[name="effectiveness"][value="0.25"]:checked +span{
   background: #B3262E !important;
   color: white;
   border-color: black;
 }
 
-input[type="radio"][value="0.25"]:hover + span{
+input[name="effectiveness"][value="0.25"]:hover +span{
   background: #D99397 !important;
   color: black;
-}
-
-input[type="radio"][value="0.25"] + span{
-  border-end-end-radius: 5rem !important;
-  border-end-start-radius: 5rem !important;
 }
 
 .shiny-options-group {
@@ -296,20 +341,6 @@ input[type="radio"][value="0.25"] + span{
 
 .form-control {
   width: fit-content;
-}
-
-.form-group {
-  margin: 0;
-}
-
-.radio-inline, .bslib-input-switch, .radio {
-  padding: 0;
-  padding-left: .5rem !important;
-  padding-right: .5rem;
-  margin: auto;
-  margin-top: .1rem;
-  margin-bottom: .5rem;
-  align-content: space-between;
 }
 
 .shiny-input-container:not(.shiny-input-radiogroup):not(:has(.form-check-label)), .label_io_row {
@@ -376,4 +407,8 @@ input[type="radio"][value="0.25"] + span{
 
 .small_gap {
   gap: 1rem;
+}
+
+.align_bottom {
+  align-items: end;
 }
