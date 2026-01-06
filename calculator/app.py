@@ -13,61 +13,59 @@ from shiny import *
 def iv_calculation_page():
     return ui.nav_panel(
         "IV Calculator",
-        ui.layout_columns(
-            ui.h2("IV Calculator"),
-        ),
-        ui.layout_columns(
+        ui.h2("IV Calculator"),
+        ui.div(
             ui.div(
-                ui.div(
-                    "Select Pokemon:",
-                    ui.input_selectize("pokemon_iv", "",
-                                       sorted(pokemons.index), selected="Lickitung"),
-                    ui.output_code("pokemon_bst_iv"),
-                    class_="io_row",
+                {"style": "width: 30%"},
+                ui.card(
+                    ui.div(
+                        "Select Pokemon:",
+                        ui.input_selectize("pokemon_iv", "",
+                                           sorted(pokemons.index), selected="Lickitung"),
+                        ui.output_code("pokemon_bst_iv"),
+                        class_="io_row",
+                    ),
+                    ui.div(
+                        ui.input_radio_buttons("nature_plus_iv", "Nature + :",
+                                               ["=", "+ ATK", "+ DEF", "+ SPA", "+ SPD", "+ SPE"]),
+                        ui.input_radio_buttons("nature_minus_iv", "Nature - :",
+                                               ["=", "- ATK", "- DEF", "- SPA", "- SPD", "- SPE"]),
+                        class_="spread_row",
+                    ),
                 ),
-                ui.input_radio_buttons("nature_plus_iv", "Nature + :",
-                                       ["neutral", "+ ATK", "+ DEF", "+ SPA", "+ SPD", "+ SPE"], inline=True),
-                ui.input_radio_buttons("nature_minus_iv", "Nature - :",
-                                       ["neutral", "- ATK", "- DEF", "- SPA", "- SPD", "- SPE"], inline=True),
-                ui.div(
-                    ui.div(
-                        ui.input_action_button("save_stats_iv", "Save Stats"),
-                        ui.input_action_button("prefill_next_level_iv", "Prefill Next Level"),
-                        ui.input_action_button("prefill_current_level_iv", "Prefill Current Level"),
-                        ui.input_action_button("delete_row_iv", "Delete Selected Row"),
-                        ui.input_action_button("reset_all_iv", "Clear All"),
-                        class_="io_column",
-                    ),
-                    ui.div(
-                        number_input(id="level_iv", id_passed="level_iv", label=" Stats at Level:", init=5, min_value=1,
-                                     max_value=100),
-                        number_input(id="hp_iv", id_passed="hp_iv", label="HP:", init=22, min_value=11, max_value=999),
-                        number_input(id="atk_iv", id_passed="atk_iv", label="ATK:", init=12, min_value=4,
-                                     max_value=999),
-                        number_input(id="def_iv", id_passed="def_iv", label="DEF:", init=12, min_value=4,
-                                     max_value=999),
-                        number_input(id="spa_iv", id_passed="spa_iv", label="SPA:", init=12, min_value=4,
-                                     max_value=999),
-                        number_input(id="spd_iv", id_passed="spd_iv", label="SPD:", init=12, min_value=4,
-                                     max_value=999),
-                        number_input(id="spe_iv", id_passed="spe_iv", label="SPE:", init=12, min_value=4,
-                                     max_value=999),
-                        # ui.input_selectize("mons_defeated_iv", "Mons Defeated at this Level:", sorted(pokemons.index), multiple=True, class_="io_row"),
-                        class_="io_column",
-                    ),
-                    class_="io_row",
+                ui.card(
+                    ui.input_action_button("save_stats_iv", "Save Stats"),
+                    ui.input_action_button("prefill_next_level_iv", "Prefill Next Level"),
+                    ui.input_action_button("prefill_current_level_iv", "Prefill Current Level"),
+                    ui.input_action_button("delete_row_iv", "Delete Selected Row"),
+                    ui.input_action_button("reset_all_iv", "Clear All"),
+                    class_="io_column",
                 ),
             ),
-            ui.page_fluid(
-                ui.div(
+            ui.div(
+                {"style": "width: 60%"},
+                ui.card(
                     ui.output_table("result_iv"),
+                ),
+                ui.card(
+                    ui.div(
+                        number_input(id="level_iv", label="Level:", init=5, min_value=1, max_value=100),
+                        number_input(id="hp_iv", label="HP:", init=22, min_value=11, max_value=999),
+                        number_input(id="atk_iv", label="ATK:", init=12, min_value=4, max_value=999),
+                        number_input(id="def_iv", label="DEF:", init=12, min_value=4, max_value=999),
+                        number_input(id="spa_iv", label="SPA:", init=12, min_value=4, max_value=999),
+                        number_input(id="spd_iv", label="SPD:", init=12, min_value=4, max_value=999),
+                        number_input(id="spe_iv", label="SPE:", init=12, min_value=4, max_value=999),
+                        # ui.input_selectize("mons_defeated_iv", "Mons Defeated at this Level:", sorted(pokemons.index), multiple=True, class_="io_row"),
+                        class_="io_row",
+                    ),
                 ),
                 ui.div(
                     ui.layout_columns(ui.h5("Stat History (editable)")),
                     ui.output_data_frame("history_iv")
                 ),
             ),
-            col_widths=(5, 7),
+            class_="top_layer_row",
         ),
     )
 
@@ -75,18 +73,16 @@ def iv_calculation_page():
 def pokemon_info_page():
     return ui.nav_panel(
         "Pokemon / XP Info",
-        ui.layout_columns(
-            ui.h2("Pokemon / XP Information"),
-        ),
+        ui.h2("Pokemon / XP Information"),
         ui.page_fluid(
-            ui.page_fluid(
-                ui.h4("Pokemon Information"),
+            ui.card(
+                {"style": "width: 30%"},
+                ui.card_header("Pokemon Information"),
                 ui.div(
                     "Pokemon:",
                     ui.input_selectize("pokemon_info", "", sorted(pokemons.index)),
                     "at Level",
-                    number_input(id="enemy_level_info", id_passed="enemy_level_info",
-                                 label="", init=8, min_value=1, max_value=100),
+                    number_input(id="enemy_level_info", label="", init=8, min_value=1, max_value=100),
                     class_="io_row",
                 ),
                 ui.div(
@@ -98,15 +94,14 @@ def pokemon_info_page():
                 ui.output_table("calculate_xp_ev_info"),
                 class_="io_column"
             ),
-            ui.page_fluid(
-                ui.h4("XP requirement"),
+            ui.card(
+                {"style": "width: 30%"},
+                ui.card_header("XP requirement"),
                 ui.div(
                     "From Level",
-                    number_input(id="level_from_info", id_passed="level_from_info",
-                                 label="", min_value=1, max_value=100, init=5),
+                    number_input(id="level_from_info", label="", min_value=1, max_value=100, init=5),
                     "to",
-                    number_input(id="level_to_info", id_passed="level_to_info",
-                                 label="", min_value=1, max_value=100, init=8),
+                    number_input(id="level_to_info", label="", min_value=1, max_value=100, init=8),
                     class_="spread_row",
                 ),
                 ui.div(
@@ -119,22 +114,22 @@ def pokemon_info_page():
                 ),
                 class_="io_column",
             ),
-            ui.page_fluid(
-                ui.h4("Confusion Damage"),
+            ui.card(
+                {"style": "width: 30%"},
+                ui.card_header("Confusion Damage"),
                 ui.div(
-                    number_input(id="own_level_info", id_passed="own_level_info",
-                                 label="Level:", init=8, layout="short_input"),
+                    number_input(id="own_level_info", label="Level:", init=8, layout="short_input"),
                     ui.div(
-                        number_input(id="atk_info", id_passed="atk_info", label="ATK:",
+                        number_input(id="atk_info", label="ATK:",
                                      init=20, min_value=1, max_value=999, layout="short_input"),
-                        number_input(id="atk_stage_info", id_passed="atk_stage_info", label="",
+                        number_input(id="atk_stage_info", label="",
                                      init=0, min_value=-6, max_value=6, layout="stages_small"),
                         class_="io_row",
                     ),
                     ui.div(
-                        number_input(id="def_info", id_passed="def_info", label="DEF:",
+                        number_input(id="def_info", label="DEF:",
                                      init=20, min_value=1, max_value=999, layout="short_input"),
-                        number_input(id="def_stage_info", id_passed="def_stage_info", label="",
+                        number_input(id="def_stage_info", label="",
                                      init=0, min_value=-6, max_value=6, layout="stages_small"),
                         class_="io_row",
                     ),
@@ -169,9 +164,7 @@ def pokemon_info_page():
 def atk_spa_calculator_page():
     return ui.nav_panel(
         "ATK / SPA Calculator",
-        ui.layout_columns(
-            ui.h2("ATK / SPA Calculator"),
-        ),
+        ui.h2("ATK / SPA Calculator"),
         ui.div(
             ui.page_fluid(
                 ui.card(
@@ -190,31 +183,31 @@ def atk_spa_calculator_page():
                 ),
                 ui.div(
                     ui.card(
-                        {"style": "border-color: green;"},
+                        {"style": "border-color: black; border-width: 0.1rem; background-color: #FFF;"},
                         ui.card_body(
                             ui.div(
                                 {"style": "display: flex;"},
                                 ui.div(
                                     ui.div(
-                                        number_input(id="enemy_level", id_passed="enemy_level", label="",
+                                        number_input(id="enemy_level", label="",
                                                      init=8, layout="big"),
                                         "Enemy LVL",
                                         class_="io_column close_distance",
                                     ),
                                     ui.div(
-                                        number_input(id="move_power", id_passed="move_power", label="",
+                                        number_input(id="move_power", label="",
                                                      init=95, step=5, min_value=5, max_value=999, layout="big"),
                                         "Power",
                                         class_="io_column close_distance",
                                     ),
                                     ui.div(
-                                        number_input(id="own_defense", id_passed="own_defense", label="",
+                                        number_input(id="own_defense", label="",
                                                      init=20, min_value=1, max_value=999, layout="big"),
                                         "DEF/SPD",
                                         class_="io_column close_distance",
                                     ),
                                     ui.div(
-                                        number_input(id="damage_received", id_passed="damage_received", label="",
+                                        number_input(id="damage_received", label="",
                                                      init=10, min_value=1, max_value=999, layout="big"),
                                         "DMG",
                                         class_="io_column close_distance",
@@ -223,7 +216,7 @@ def atk_spa_calculator_page():
                                 ),
                                 ui.div(
                                     ui.div(
-                                        number_input(id="atk_spa_stage", id_passed="atk_spa_stage", label="",
+                                        number_input(id="atk_spa_stage", label="",
                                                      init=0, min_value=-6, max_value=6, layout="stages"),
                                         ui.div(
                                             {"style": "width:3.7rem;font-size: .8rem;"},
@@ -232,7 +225,7 @@ def atk_spa_calculator_page():
                                         class_="io_column close_distance",
                                     ),
                                     ui.div(
-                                        number_input(id="def_spd_stage", id_passed="def_spd_stage", label="",
+                                        number_input(id="def_spd_stage", label="",
                                                      init=0, min_value=-6, max_value=6, layout="stages"),
                                         ui.div(
                                             {"style": "width:3.7rem;font-size: .8rem;"},
@@ -817,6 +810,7 @@ def server(input: Inputs, output: Outputs, session: Session):
     def history_iv():
         return render.DataTable(
             stat_history(),
+            width="100%",
             editable=True,
             selection_mode="row",
         )
@@ -1504,51 +1498,51 @@ def server(input: Inputs, output: Outputs, session: Session):
     """
 
     enemy_level_input = number_input_server("enemy_level")
-    enemy_move_power_input = number_input_server(id="move_power", id_passed="move_power", label="Move Power:",
+    enemy_move_power_input = number_input_server(id="move_power", label="Move Power:",
                                                  init=95, step=5, min_value=5, max_value=999)
-    own_defense_input = number_input_server(id="own_defense", id_passed="own_defense", label="Own Defense:",
+    own_defense_input = number_input_server(id="own_defense", label="Own Defense:",
                                             init=20, min_value=1, max_value=999)
-    damage_received_input = number_input_server(id="damage_received", id_passed="damage_received", label="DMG Taken:",
+    damage_received_input = number_input_server(id="damage_received", label="DMG Taken:",
                                                 init=10, min_value=1, max_value=999)
-    atk_spa_stage_input = number_input_server(id="atk_spa_stage", id_passed="atk_spa_stage", label="ATK/SPA Stage:",
+    atk_spa_stage_input = number_input_server(id="atk_spa_stage", label="ATK/SPA Stage:",
                                               init=0, min_value=-6, max_value=6)
-    def_spd_stage_input = number_input_server(id="def_spd_stage", id_passed="def_spd_stage", label="DEF/SPD Stage:",
+    def_spd_stage_input = number_input_server(id="def_spd_stage", label="DEF/SPD Stage:",
                                               init=0, min_value=-6, max_value=6)
 
-    level_iv_input = number_input_server(id="level_iv", id_passed="level_iv", label="Level:", init=5, min_value=1,
+    level_iv_input = number_input_server(id="level_iv", label="Level:", init=5, min_value=1,
                                          max_value=100)
-    hp_iv_input = number_input_server(id="hp_iv", id_passed="hp_iv", label="HP:", init=22, min_value=11, max_value=999)
-    atk_iv_input = number_input_server(id="atk_iv", id_passed="atk_iv", label="ATK:", init=12, min_value=4,
+    hp_iv_input = number_input_server(id="hp_iv", label="HP:", init=22, min_value=11, max_value=999)
+    atk_iv_input = number_input_server(id="atk_iv", label="ATK:", init=12, min_value=4,
                                        max_value=999)
-    def_iv_input = number_input_server(id="def_iv", id_passed="def_iv", label="DEF:", init=12, min_value=4,
+    def_iv_input = number_input_server(id="def_iv", label="DEF:", init=12, min_value=4,
                                        max_value=999)
-    spa_iv_input = number_input_server(id="spa_iv", id_passed="spa_iv", label="SPA:", init=12, min_value=4,
+    spa_iv_input = number_input_server(id="spa_iv", label="SPA:", init=12, min_value=4,
                                        max_value=999)
-    spd_iv_input = number_input_server(id="spd_iv", id_passed="spd_iv", label="SPD:", init=12, min_value=4,
+    spd_iv_input = number_input_server(id="spd_iv", label="SPD:", init=12, min_value=4,
                                        max_value=999)
-    spe_iv_input = number_input_server(id="spe_iv", id_passed="spe_iv", label="SPE:", init=12, min_value=4,
+    spe_iv_input = number_input_server(id="spe_iv", label="SPE:", init=12, min_value=4,
                                        max_value=999)
 
-    level_from_info_input = number_input_server(id="level_from_info", id_passed="level_from_info", label="Level From:",
+    level_from_info_input = number_input_server(id="level_from_info", label="Level From:",
                                                 min_value=1,
                                                 max_value=100,
                                                 init=5)
-    level_to_info_input = number_input_server(id="level_to_info", id_passed="level_to_info", label="Level To:",
+    level_to_info_input = number_input_server(id="level_to_info", label="Level To:",
                                               min_value=1, max_value=100,
                                               init=8)
-    enemy_level_info_input = number_input_server(id="enemy_level_info", id_passed="enemy_level_info", label="Level:",
+    enemy_level_info_input = number_input_server(id="enemy_level_info", label="Level:",
                                                  init=8, min_value=1,
                                                  max_value=100)
 
-    own_level_info_input = number_input_server(id="own_level_info", id_passed="own_level_info", label="Own Level:",
+    own_level_info_input = number_input_server(id="own_level_info", label="Own Level:",
                                                init=8)
-    atk_info_input = number_input_server(id="atk_info", id_passed="atk_info", label="Own ATK:",
+    atk_info_input = number_input_server(id="atk_info", label="Own ATK:",
                                          init=20, min_value=1, max_value=999)
-    atk_stage_info_input = number_input_server(id="atk_stage_info", id_passed="atk_stage_info", label="ATK Stage:",
+    atk_stage_info_input = number_input_server(id="atk_stage_info", label="ATK Stage:",
                                                init=0, min_value=-6, max_value=6)
-    def_info_input = number_input_server(id="def_info", id_passed="def_info", label="Own DEF:",
+    def_info_input = number_input_server(id="def_info", label="Own DEF:",
                                          init=20, min_value=1, max_value=999)
-    def_stage_info_input = number_input_server(id="def_stage_info", id_passed="def_stage_info", label="DEF Stage:",
+    def_stage_info_input = number_input_server(id="def_stage_info", label="DEF Stage:",
                                                init=0, min_value=-6, max_value=6)
 
 

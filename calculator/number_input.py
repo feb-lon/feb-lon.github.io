@@ -3,7 +3,7 @@ from shiny.types import SilentException
 
 
 @module.ui
-def number_input(id_passed: str, label: str, init: int, min_value: int = 1, max_value: int = 100,
+def number_input(label: str, init: int, min_value: int = 1, max_value: int = 100,
                  step: int = 1, layout="") -> ui.TagChild:
     type = layout
     hastype = not (type == "")

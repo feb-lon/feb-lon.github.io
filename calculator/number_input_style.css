@@ -21,6 +21,7 @@
   margin-block: .1rem;
   box-shadow:none;
   border-color: transparent;
+  background-color: inherit;
 }
 
 .number_input>div, .short_input>div {
@@ -84,6 +85,8 @@ text_bottom>div {
   display: flex;
   align-items: center;
   justify-content: center;
+  color: #000;
+  background: whitesmoke;
 }
 
 .stages_small_controls>button, .stages_controls>button {

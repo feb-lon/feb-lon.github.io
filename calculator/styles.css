@@ -1,3 +1,11 @@
+.bslib-page-navbar {
+  background: whitesmoke;
+}
+
+.w-auto {
+  width: 100% !important
+}
+
 .form-group {
   margin-bottom: inherit;
 }
@@ -121,10 +129,6 @@ div:has(.selectize-control) {
   min-width: 150px;
 }
 
-.bslib-gap-spacing  {
-  align-items: center;
-}
-
 .action-button {
   padding-inline: .8em;
   padding-top: .4em;
@@ -204,7 +208,7 @@ input[type="radio"] +span, .form-check-input +label {
   border-radius: 0;
 }
 
-input[name="effectiveness"] +span {
+input[name="effectiveness"] +span, input[name="nature_plus_iv"] +span, input[name="nature_minus_iv"] +span {
  width: 4rem;
 }
 
