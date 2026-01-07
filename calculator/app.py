@@ -1,12 +1,11 @@
 from math import floor, ceil
 
 import matplotlib.pyplot as plt
-import numpy as np
-from shiny.express.ui import card_header
 from shiny.types import SilentException
 
 from shared import *
 from number_input import *
+from xp_requirement_input import *
 
 from shiny import *
 
@@ -14,7 +13,15 @@ from shiny import *
 def iv_calculation_page():
     return ui.nav_panel(
         "IV Calculator",
-        ui.h2("IV Calculator"),
+        element_and_tooltip(
+            ui.h2("IV Calculator"),
+            ui.card(
+                "As there is currently no method to track EVs, i would "
+                "not recommend using this when having no idea what to do about EVs",
+                class_="tooltip_card",
+            ),
+            True,
+        ),
         ui.div(
             ui.div(
                 {"style": "width: 30%"},
@@ -27,6 +34,7 @@ def iv_calculation_page():
                         class_="io_row",
                     ),
                     ui.div(
+                        {"style": "text-align: center"},
                         ui.input_radio_buttons("nature_plus_iv", "Nature + :",
                                                ["=", "+ ATK", "+ DEF", "+ SPA", "+ SPD", "+ SPE"]),
                         ui.input_radio_buttons("nature_minus_iv", "Nature - :",
@@ -73,51 +81,79 @@ def iv_calculation_page():
 
 def pokemon_info_page():
     return ui.nav_panel(
-        "Pokemon / XP Info",
-        ui.h2("Pokemon / XP Information"),
+        "Pokemon / XP / Confusion Info",
         ui.page_fluid(
-            ui.card(
+            ui.div(
                 {"style": "width: 30%"},
-                ui.card_header("Pokemon Information"),
-                ui.div(
-                    "Pokemon:",
-                    ui.input_selectize("pokemon_info", "", sorted(pokemons.index)),
-                    "at Level",
-                    number_input(id="enemy_level_info", label="", init=8, min_value=1, max_value=100),
-                    class_="io_row",
+                ui.card(
+                    ui.card_header(
+                        element_and_tooltip(
+                            ui.h3("Pokemon Information"),
+                            ui.card(
+                                "XP information valid for Generations 2 - 4",
+                                style_="tooltip_card",
+                            ),
+                            True,
+                        ),
+                    ),
+                    ui.div(
+                        "Pokemon:",
+                        ui.input_selectize("pokemon_info", "", sorted(pokemons.index)),
+                        "at Level",
+                        number_input(id="enemy_level_info", label="", init=8, min_value=1, max_value=100),
+                        class_="io_row",
+                    ),
+                    ui.div(
+                        ui.input_switch("is_trainer_info", "Trainer Fight"),
+                        ui.input_switch("has_lucky_egg_info", "Lucky Egg"),
+                        ui.input_switch("is_traded_pokemon_info", "Not Original Trainer"),
+                        class_="spread_row",
+                    ),
+                    ui.output_table("calculate_xp_ev_info"),
+                    class_="io_column"
                 ),
-                ui.div(
-                    ui.input_switch("is_trainer_info", "Trainer Fight"),
-                    ui.input_switch("has_lucky_egg_info", "Lucky Egg"),
-                    ui.input_switch("is_traded_pokemon_info", "Not Original Trainer"),
-                    class_="spread_row",
+            ),
+            ui.div(
+                {"style": "width: 30%"},
+                ui.card(
+                    element_and_tooltip(
+                        ui.card_header("XP Information 1"),
+                        ui.card(
+                            "Valid for all Generations.",
+                            class_="tooltip_card",
+                        ),
+                    ),
+                    xp_requirement_input(id="xp_requirement_1", from_level=5, to_level=8),
+                    class_="io_column",
                 ),
-                ui.output_table("calculate_xp_ev_info"),
-                class_="io_column"
+                ui.card(
+                    ui.card_header("XP Information 2"),
+                    xp_requirement_input(id="xp_requirement_2", from_level=8, to_level=10),
+                    class_="io_column",
+                ),
+                ui.card(
+                    ui.card_header("XP Information 3"),
+                    xp_requirement_input(id="xp_requirement_3", from_level=5, to_level=8, curve="Slow"),
+                    class_="io_column",
+                ),
             ),
             ui.card(
                 {"style": "width: 30%"},
-                ui.card_header("XP requirement"),
-                ui.div(
-                    "From Level",
-                    number_input(id="level_from_info", label="", min_value=1, max_value=100, init=5),
-                    "to",
-                    number_input(id="level_to_info", label="", min_value=1, max_value=100, init=8),
-                    class_="spread_row",
+                ui.card_header(
+                    element_and_tooltip(
+                        ui.h3("Confusion Information"),
+                        ui.card(
+                            ui.span("When using only inputs above the graph, output usable for every Generation."),
+                            ui.span(),
+                            ui.span("HOWEVER in Generations 1 - 2, there is no random factor for Confusion. "),
+                            ui.span("This means the result is always the highest DMG value (furthest to the right)"),
+                            ui.span(),
+                            ui.span("Inputs below the graph should only be used in Generation 3"),
+                            class_="tooltip_card"
+                        ),
+                        True,
+                    ),
                 ),
-                ui.div(
-                    "XP Curve:",
-                    ui.input_selectize("xp_curve_info", "", choices=list(experience.head()),
-                                       selected="Fluctuating"),
-                    "XP required:",
-                    ui.output_code("calc_xp_from_to"),
-                    class_="spread_row",
-                ),
-                class_="io_column",
-            ),
-            ui.card(
-                {"style": "width: 30%"},
-                ui.card_header("Confusion Damage"),
                 ui.div(
                     number_input(id="own_level_info", label="Level:", init=8, layout="short_input"),
                     ui.div(
@@ -138,20 +174,54 @@ def pokemon_info_page():
                 ),
                 ui.output_plot(id="confusion_damage_info"),
                 ui.accordion(
-                    {"style": "visibility:hidden;"},
                     ui.accordion_panel(
                         "Situational Effects",
-                        ui.input_radio_buttons("enemy_ability_info", "Enemy Ability: ",
-                                               {"1": "generic", "1.5": "1.5x atk/spa", "2": "2x atk",
-                                                "1.5x power": "1.5x move power"},
-                                               selected="1",
-                                               inline=True,
-                                               ),
-                        ui.input_switch("is_burned_info", "Burned"),
-                        ui.input_switch("is_explosion_selfdestruct_info", "Explosion/Selfdestruct"),
-                        ui.input_switch("has_silk_scarf_info", "Silk Scarf"),
-                        ui.input_switch("has_choice_band", "Choice Band"),
-                        ui.input_switch("has_thick_club_info", "Thick Club"),
+                        ui.div(
+                            ui.div(
+                                "More Relevant:",
+                                ui.div(
+                                    ui.input_switch("is_burned_info", "Burned"),
+                                    ui.input_switch("has_atk_badge", "ATK Badge"),
+                                    ui.input_switch("has_def_badge", "DEF Badge"),
+                                    class_="right_bound_row",
+                                ),
+                                class_="io_row",
+                            ),
+                            ui.div(
+                                "General Item:",
+                                ui.div(
+                                    ui.input_switch("has_choice_band_info", "Choice Band"),
+                                    ui.input_switch("has_silk_scarf_info", "Silk Scarf"),
+                                    class_="right_bound_row",
+                                ),
+                                class_="io_row",
+                            ),
+                            ui.div(
+                                "Pokemon-specific Items:",
+                                ui.div(
+                                    ui.input_switch("has_thick_club_info", "Thick Club"),
+                                    ui.input_switch("has_metal_powder_info", "Metal Powder"),
+                                    class_="right_bound_row",
+                                ),
+                                class_="io_row",
+                            ),
+                            ui.div(
+                                "Other:",
+                                ui.div(
+                                    ui.input_switch("is_explosion_selfdestruct_info", "Explosion/Selfdestruct"),
+                                    class_="right_bound_row",
+                                ),
+                                class_="io_row",
+                            ),
+                            ui.input_radio_buttons("own_ability_info", "Own Ability:",
+                                                   {"1": "generic",
+                                                    "1.5": "Hustle/Guts",
+                                                    "2": "Huge/Pure Power",
+                                                    "1.5xDEF": "Marvel Scale"},
+                                                   selected="1",
+                                                   inline=True,
+                                                   ),
+                        ),
                     ),
                     open=False,
                 ),
@@ -182,7 +252,15 @@ def atk_spa_calculator_page():
                     ),
                     ui.input_radio_buttons(
                         "simulate_generation",
-                        "Using DMG calc of Gen:",
+                        element_and_tooltip(
+                            "Using DMG calc of Gen:",
+                            ui.card(
+                                ui.span("Inputs under the graph currently only work for Generation 3."),
+                                ui.span("\nEffectiveness 1x- is only relevant in Generations 1 - 4"),
+                                class_="tooltip_card",
+                            ),
+                            True,
+                        ),
                         {3: "3", 4: "4", 5: "5", 6: "6+"},
                         inline=True,
                         selected=3,
@@ -308,30 +386,34 @@ def atk_spa_calculator_page():
                         ),
                         ui.div(
                             ui.input_switch("is_burned", "Enemy Burned"),
-                            ui.tooltip(
+                            element_and_tooltip(
                                 ui.input_switch("ff_active", "Flashfire Bonus"),
                                 ui.card(
                                     "Getting hit by a fire move gives this bonus for the whole fight.",
-                                    class_="tooltip_card",
+                                    class_="tooltip_card"
                                 ),
                             ),
-                            ui.tooltip(
+                            element_and_tooltip(
                                 ui.input_switch("has_dd_charge", "Double Damage / Charge Bonus"),
                                 double_damage_tooltip(),
                             ),
                             class_="io_row"
                         ),
                         ui.div(
-                            ui.tooltip(
+                            element_and_tooltip(
                                 ui.input_switch("is_physical", "Move is Physical"),
                                 ui.card(
                                     "Only used for determining minimum DMG (physical DMG has higher minimum DMG)",
-                                    class_="tooltip_card",
+                                    class_="tooltip_card"
                                 ),
                             ),
-                            ui.input_radio_buttons("enemy_ability", "Enemy Ability: ",
-                                                   {"1": "generic", "1.5x power": "1.5x move power",
-                                                    "1.5": "1.5x atk/spa", "2": "2x atk"},
+                            ui.input_radio_buttons("enemy_ability",
+                                                   element_and_tooltip(
+                                                       ("Enemy Ability: ", spacer(1, 0)),
+                                                       ability_tooltip(),
+                                                   ),
+                                                   {"1": "generic", "1.5x power": "1.5x Move Power",
+                                                    "1.5": "1.5x ATK/SPA", "2": "2x ATK"},
                                                    selected="1",
                                                    inline=True,
                                                    ),
@@ -389,6 +471,23 @@ def atk_spa_calculator_page():
     )
 
 
+def ability_tooltip():
+    return ui.card(
+        ui.card_body(
+            ui.layout_columns(
+                ui.page_fluid("1.5x Move Power"),
+                ui.page_fluid("Swarm, Overgrow, Blaze or Torrent"),
+                ui.page_fluid("1.5x ATK/SPA"),
+                ui.page_fluid("Hustle, Guts, Plus/Minus"),
+                ui.page_fluid("2x ATK"),
+                ui.page_fluid("Huge Power, Pure Power"),
+                col_widths=(5, 7),
+            )
+        ),
+        class_="tooltip_card",
+    )
+
+
 def double_damage_tooltip():
     return ui.card(
         ui.card_header("Double Damage Situations:"),
@@ -424,6 +523,7 @@ def typing_tooltip():
             "With Pokemon up to generation 3, this is relevant for the following move / defensive typing combinations:"
         ),
         ui.card_body(
+            {"style": "align-text: center"},
             ui.layout_columns(
                 "Move Type",
                 ui.h1(">"),
@@ -610,6 +710,21 @@ def empty_text():
 
 def spacer(width: float, height: float):
     return ui.tags.div({"style": f"width:{width}rem;height:{height}rem;"})
+
+
+def element_and_tooltip(tag, tooltip_content, use_spacer=False):
+    space = "" if not use_spacer else spacer(1, 0)
+
+    return ui.div(
+        tag,
+        space,
+        ui.tooltip(
+            question_circle_fill,
+            tooltip_content,
+            class_="tooltip_card",
+        ),
+        class_="tag_and_tooltip",
+    )
 
 
 app_ui = (
@@ -883,16 +998,6 @@ def server(input: Inputs, output: Outputs, session: Session):
     ---------------------- Info Page ----------------------
     """
 
-    @render.text
-    def calc_xp_from_to():
-        xp_curve = input.xp_curve_info()
-        lvl_from = level_from_info_input()
-        lvl_to = level_to_info_input()
-
-        xp_required = experience[xp_curve][lvl_from:lvl_to].sum()
-
-        return str(xp_required) + " XP"
-
     @render.table(index=True)
     def calculate_xp_ev_info():
         # returns XP and EVs for a mon in a specific situation
@@ -907,7 +1012,6 @@ def server(input: Inputs, output: Outputs, session: Session):
         xp = calc_xp_yield(pokemon, enemy_level, is_trainer, has_lucky_egg, is_original_trainer)
 
         weight = pokemons["Weight"][pokemon]
-        power = 0
         if weight < 100:
             power = 20
         elif weight < 250:
@@ -939,11 +1043,40 @@ def server(input: Inputs, output: Outputs, session: Session):
         deff = def_info_input()
         def_stage = def_stage_info_input()
 
-        effective_atk = calc_stat_stages(atk, atk_stage)
-        effective_def = calc_stat_stages(deff, def_stage)
+        atk_badge = input.has_atk_badge()
+        def_badge = input.has_def_badge()
+        is_burned = input.is_burned_info()
+        burned_modifier = 1.5 if is_burned else 1
 
-        base_dmg = calc_dmg_base(level, 40, effective_atk, effective_def)
-        ibm_dmg = calc_ibm_damage(base_dmg, burned_modifier=1)
+        has_choice_band = input.has_choice_band_info()
+        has_silk_scarf = input.has_silk_scarf_info()
+        has_thick_club = input.has_thick_club_info()
+        has_metal_powder = input.has_metal_powder_info()
+
+        is_explosion_selfdestruct = input.is_explosion_selfdestruct_info()
+
+        has_huge_pure_power = False
+        has_hustle_guts = False
+        marvel_scale_active = False
+        ability = input.own_ability_info()
+        if ability == "1.5": has_hustle_guts = True
+        if ability == "1.5xDEF": marvel_scale_active = True
+        if ability == "2": has_huge_pure_power = True
+
+        effective_atk = calc_offense_stat_modifiers(stat=atk, has_offense_badge=atk_badge, offense_stage=atk_stage,
+                                                    has_huge_pure_power=has_huge_pure_power,
+                                                    has_choice_band=has_choice_band,
+                                                    is_marowak_cubone_with_thick_club=has_thick_club,
+                                                    has_hustle_plus_minus_guts=has_hustle_guts)
+        effective_def = calc_defensive_stat_modifiers(stat=deff, has_defensive_badge=def_badge,
+                                                      defensive_stage=def_stage,
+                                                      is_ditto_with_metal_powder=has_metal_powder,
+                                                      marvel_scale_active=marvel_scale_active,
+                                                      move_is_explosion_selfdestruct=is_explosion_selfdestruct)
+        effective_power = calc_move_power_modifiers(power=40, type_bonus_item=has_silk_scarf)
+
+        base_dmg = calc_dmg_base(level, effective_power, effective_atk, effective_def)
+        ibm_dmg = calc_ibm_damage(base_dmg, burned_modifier=burned_modifier)
 
         dmg_values = []
         for i in range(0, 16):
@@ -992,16 +1125,16 @@ def server(input: Inputs, output: Outputs, session: Session):
         session.send_input_message("is_stab", {"value": False})
         session.send_input_message("is_crit", {"value": False})
         session.send_input_message("effectiveness", {"value": "1"})
+        ui.update_numeric("atk_spa_stage-number_value", value=0)
+        ui.update_numeric("def_spd_stage-number_value", value=0)
 
     def reset_dropdowns():
-        ui.update_numeric("atk_spa_stage-number_value", value=0)
         session.send_input_message("is_burned", {"value": False})
         session.send_input_message("ff_active", {"value": False})
         session.send_input_message("has_dd_charge", {"value": False})
         session.send_input_message("is_physical", {"value": False})
         session.send_input_message("enemy_ability", {"value": "1"})
         session.send_input_message("effectiveness", {"value": "1"})
-        ui.update_numeric("def_spd_stage-number_value", value=0)
         session.send_input_message("has_reflect_lightscreen", {"value": False})
         session.send_input_message("has_def_spd_badge", {"value": False})
         session.send_input_message("has_thick_fat", {"value": False})
@@ -1481,14 +1614,17 @@ def server(input: Inputs, output: Outputs, session: Session):
 
     def calc_offense_stat_modifiers(stat: int, has_offense_badge: bool, offense_stage: int, has_huge_pure_power=False,
                                     has_choice_band=False, is_clamperl_with_dep_sea_tooth=False,
-                                    is_pikachu_with_light_ball=False, thick_fat_applied=False,
-                                    has_hustle_plus_minus_guts=False, ):
+                                    is_pikachu_with_light_ball=False,
+                                    is_marowak_cubone_with_thick_club=False,
+                                    thick_fat_applied=False,
+                                    has_hustle_plus_minus_guts=False):
         result = stat
         if has_huge_pure_power: result = floor(2 * result)
         if has_offense_badge: result = floor(1.1 * result)
         if has_choice_band: result = floor(1.5 * result)
         if is_clamperl_with_dep_sea_tooth: result = floor(2 * result)
         if is_pikachu_with_light_ball: result = floor(2 * result)
+        if is_marowak_cubone_with_thick_club: result = floor(2 * result)
         if thick_fat_applied: result = floor(0.5 * result)
         if has_hustle_plus_minus_guts: result = floor(1.5 * result)
 
@@ -1662,14 +1798,6 @@ def server(input: Inputs, output: Outputs, session: Session):
                                        max_value=999)
     spe_iv_input = number_input_server(id="spe_iv", label="SPE:", init=12, min_value=4,
                                        max_value=999)
-
-    level_from_info_input = number_input_server(id="level_from_info", label="Level From:",
-                                                min_value=1,
-                                                max_value=100,
-                                                init=5)
-    level_to_info_input = number_input_server(id="level_to_info", label="Level To:",
-                                              min_value=1, max_value=100,
-                                              init=8)
     enemy_level_info_input = number_input_server(id="enemy_level_info", label="Level:",
                                                  init=8, min_value=1,
                                                  max_value=100)
@@ -1684,6 +1812,13 @@ def server(input: Inputs, output: Outputs, session: Session):
                                          init=20, min_value=1, max_value=999)
     def_stage_info_input = number_input_server(id="def_stage_info", label="DEF Stage:",
                                                init=0, min_value=-6, max_value=6)
+
+    xp_requirement_input_info = xp_requirement_input_server(id="xp_requirement_1",
+                                                            from_level=5, to_level=8)
+    xp_requirement_input_info = xp_requirement_input_server(id="xp_requirement_2",
+                                                            from_level=8, to_level=10)
+    xp_requirement_input_info = xp_requirement_input_server(id="xp_requirement_3",
+                                                            from_level=5, to_level=8)
 
 
 app = App(app_ui, server,

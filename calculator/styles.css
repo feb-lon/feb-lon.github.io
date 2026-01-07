@@ -26,6 +26,12 @@
   align-items: top;
 }
 
+.right_bound_row {
+  display: flex;
+  justify-content: end;
+  gap: 1rem;
+}
+
 .accordion {
   margin-top: 0.5rem;
 }
@@ -105,8 +111,7 @@
   justify-content: space-between;
   gap: 2rem;
   align-items: top;
-  text-align: center;
-  gap: 7%;
+  gap: 3%;
 }
 
 .top_layer_column {
@@ -231,13 +236,17 @@ input[name="graph_style"] +span {
   align-content: space-between;
 }
 
-.shiny-options-group:has(.radio), .shiny-options-group:has(.radio-inline) {
+.shiny-input-radiogroup>.shiny-options-group {
   display: flex;
   justify-content: center;
   align-content: center;
   margin: 0;
   padding: 0;
   gap: 0;
+}
+
+.shiny-input-radiogroup.shiny-input-container-inline {
+  text-align: center;
 }
 
 .shiny-options-group:has(.radio) {
@@ -353,6 +362,20 @@ input[name="effectiveness"][value="0.25"]:hover +span{
 }
 
 /* tooltip */
+
+.tag_and_tooltip {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+}
+
+.tooltip.show {
+  opacity: 1;
+}
+
+.centered_img_row>div {
+  justify-content: center;
+}
 
 .tooltip_card {
   border-color: black;
