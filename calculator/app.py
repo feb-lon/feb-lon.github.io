@@ -1,6 +1,7 @@
 from math import floor, ceil
 
 import matplotlib.pyplot as plt
+import numpy as np
 from shiny.express.ui import card_header
 from shiny.types import SilentException
 
@@ -178,6 +179,13 @@ def atk_spa_calculator_page():
                         {"only_dmg_received": "Only DMG Received", "all_dmg_values": "All DMG Values"},
                         inline=False,
                         selected="only_dmg_received",
+                    ),
+                    ui.input_radio_buttons(
+                        "simulate_generation",
+                        "Using DMG calc of Gen:",
+                        {3: "3", 4: "4", 5: "5", 6: "6+"},
+                        inline=True,
+                        selected=3,
                     ),
                     class_="io_row",
                 ),
@@ -411,8 +419,9 @@ def typing_tooltip():
     return ui.card(
         ui.card_header(
             "Effectiveness \"1x-\" is for cases where the move used has opposite effectiveness against "
-            "the two defending types, and damage gets lost during rounding.In this generation, this is "
-            "the case with: "
+            "the two defending types, and damage gets lost during rounding. "
+            "This can happen in generations 1 - 4. "
+            "With Pokemon up to generation 3, this is relevant for the following move / defensive typing combinations:"
         ),
         ui.card_body(
             ui.layout_columns(
@@ -1003,6 +1012,12 @@ def server(input: Inputs, output: Outputs, session: Session):
     def calculate_offense():
         # the formula used to determine ATK / SPA of the opponent in the ATK / SPA calculator
 
+        # while gen 3 is the focus, you can also estimate the ATK / SPA of pokemon in other generations
+        # there is less research / detailed possibility of accurate input into other gens
+        if not input.simulate_generation():
+            gen_used = 3
+        gen_used = int(input.simulate_generation())
+
         if not enemy_level_input():
             raise SilentException()
         enemy_level = int(enemy_level_input())
@@ -1020,43 +1035,10 @@ def server(input: Inputs, output: Outputs, session: Session):
         stab_modifier = 1.5 if is_stab else 1
 
         is_crit = input.is_crit()
-        crit_modifier = 2 if is_crit else 1
-
-        eff1 = 0.5
-        eff2 = 2
-
-        if input.effectiveness() != "1-":
-            # get effectiveness for "normal" (= how you would intuitively expect effectiveness to work) situations
-            effectiveness = float(input.effectiveness())
-            eff2 = 2 if effectiveness == 4 else 1
-            if effectiveness == 0.25: eff2 = 0.5
-            eff1 = 2 if effectiveness > 1 else 1
-            if effectiveness < 1: eff1 = 0.5
-
-        # only used for minimum damage (increases minimum dmg at that point in the calc from 0 to 1 if physical)
-        is_physical = input.is_physical()
-
-        weather_modifier = float(input.weather_modifier())
-
-        has_thick_fat = input.has_thick_fat()
-        thick_fat_modifier = 1 if not has_thick_fat else 0.5
-
-        has_sport = input.mud_or_water_sport_active()
-        sport_modifier = 1 if not has_sport else 0.5
-
-        has_def_spd_badge = input.has_def_spd_badge()
-
-        is_burned = input.is_burned()
-        burned_modifier = 0.5 if is_burned else 1
-
-        ff_active = input.ff_active()
-        ff_modifier = 1.5 if ff_active else 1
-
-        has_double_damage_or_charge = input.has_dd_charge()
-        double_damage_or_charge_modifier = 2 if has_double_damage_or_charge else 1
-
-        has_reflect_lightscreen = input.has_reflect_lightscreen()
-        reflect_lightscreen_modifier = 1 if (is_crit or not has_reflect_lightscreen) else 0.5
+        if gen_used == 6:
+            crit_modifier = 1.5 if is_crit else 1
+        else:
+            crit_modifier = 2 if is_crit else 1
 
         if not (atk_spa_stage_input() or atk_spa_stage_input() == 0):
             raise SilentException()
@@ -1066,61 +1048,169 @@ def server(input: Inputs, output: Outputs, session: Session):
         if not (def_spd_stage_input() or def_spd_stage_input() == 0):
             raise SilentException()
         def_spd_stage = int(def_spd_stage_input())
+        if not input.has_def_spd_badge():
+            has_def_spd_badge = False
+        else:
+            has_def_spd_badge = input.has_def_spd_badge()
         applied_def_spd_stage = 0 if (is_crit and def_spd_stage > 0) else def_spd_stage
         effective_def_spd = calc_defensive_stat_modifiers(own_defense, has_def_spd_badge,
                                                           applied_def_spd_stage)
 
-        enemy_ability_atk_spa_modifier = 1
-        has_power_modifying_ability = False
-        ability_input = input.enemy_ability()
-        if ability_input != "1.5x power":
-            enemy_ability_atk_spa_modifier = float(ability_input)
+        if gen_used == 3 or gen_used == 4:
+            eff1 = 0.5
+            eff2 = 2
+            if input.effectiveness() != "1-":
+                # get effectiveness for "normal" (= how you would intuitively expect effectiveness to work) situations
+                effectiveness = float(input.effectiveness())
+                eff2 = 2 if effectiveness == 4 else 1
+                if effectiveness == 0.25: eff2 = 0.5
+                eff1 = 2 if effectiveness > 1 else 1
+                if effectiveness < 1: eff1 = 0.5
+
+            if gen_used == 3:
+                enemy_ability_atk_spa_modifier = 1
+                has_power_modifying_ability = False
+                ability_input = input.enemy_ability()
+                if ability_input != "1.5x power":
+                    enemy_ability_atk_spa_modifier = float(ability_input)
+                else:
+                    has_power_modifying_ability = True
+
+                has_reflect_lightscreen = input.has_reflect_lightscreen()
+                reflect_lightscreen_modifier = 1 if (is_crit or not has_reflect_lightscreen) else 0.5
+
+                weather_modifier = float(input.weather_modifier())
+
+                has_thick_fat = input.has_thick_fat()
+                thick_fat_modifier = 1 if not has_thick_fat else 0.5
+
+                has_sport = input.mud_or_water_sport_active()
+                sport_modifier = 1 if not has_sport else 0.5
+
+                is_burned = input.is_burned()
+                burned_modifier = 0.5 if is_burned else 1
+
+                ff_active = input.ff_active()
+                ff_modifier = 1.5 if ff_active else 1
+
+                # only used for minimum damage (increases minimum dmg at that point in the calc from 0 to 1 if physical)
+                is_physical = input.is_physical()
+
+                has_double_damage_or_charge = input.has_dd_charge()
+                double_damage_or_charge_modifier = 2 if has_double_damage_or_charge else 1
+
+                move_effective_power = calc_move_power_modifiers(move_power, False, has_sport,
+                                                                 has_power_modifying_ability)
+
+                # get rough lower / upper limits of possible ATK / SPA values to reduce calculations needed
+                min_offense_guess, max_offense_guess = calc_offense_backwards(
+                    damage_received, is_physical,
+                    [eff2, eff1, stab_modifier, double_damage_or_charge_modifier, crit_modifier],
+                    [ff_modifier, weather_modifier,
+                     reflect_lightscreen_modifier, burned_modifier],
+                    effective_def_spd, calc_base_power(enemy_level, move_effective_power), applied_atk_spa_stage,
+                    thick_fat_modifier, enemy_ability_atk_spa_modifier
+                )
+                base_power = calc_base_power(enemy_level, move_effective_power)
+
+                min_offense = -1
+                max_offense = -1
+
+                dmg = []
+                values = []
+                # go through the previously determined upper and lower limits
+                for x in range(min_offense_guess, max_offense_guess + 1):
+                    dmg.append(0)
+                    values.append([])
+                    # calc the whole dmg formula except random factor for this specific ATK / SPA value
+                    full_damage = floor(floor(base_power
+                                              * calc_stat_stages(floor(floor(floor(x * enemy_ability_atk_spa_modifier)
+                                                                             * thick_fat_modifier) * sport_modifier),
+                                                                 applied_atk_spa_stage) / effective_def_spd) / 50)
+                    full_damage = calc_ibm_damage(int(full_damage), burned_modifier,
+                                                  reflect_lightscreen_modifier, weather_modifier, ff_modifier,
+                                                  is_physical)
+                    full_damage = calc_obm_damage_no_randomness(full_damage, crit_modifier,
+                                                                double_damage_or_charge_modifier, stab_modifier, eff1,
+                                                                eff2)
+
+                    for y in range(16):
+                        # apply the random factor of the dmg calculation, and use it if it matches the dmg we received
+                        value = max(1, floor(full_damage * (y + 85) / 100))
+                        values[x - min_offense_guess].append(value)
+                        if floor(value == damage_received):
+                            dmg[x - min_offense_guess] += 1
+                            max_offense = x
+                            if min_offense == -1:
+                                min_offense = x
+            else:
+                # get rough lower / upper limits of possible ATK / SPA values to reduce calculations needed
+                min_offense_guess, max_offense_guess = calc_offense_backwards_gen_4(
+                    damage_received, eff2, eff1, stab_modifier, crit_modifier,
+                    effective_def_spd, calc_base_power(enemy_level, move_power), applied_atk_spa_stage)
+                base_power = calc_base_power(enemy_level, move_power)
+
+                min_offense = -1
+                max_offense = -1
+
+                dmg = []
+                values = []
+                # go through the previously determined upper and lower limits
+                for x in range(min_offense_guess, max_offense_guess + 1):
+                    dmg.append(0)
+                    values.append([])
+                    # calc the whole dmg formula except random factor, effectiveness and stab
+                    pre_rnd_dmg = floor((floor(floor(base_power * calc_stat_stages(x, applied_atk_spa_stage)
+                                                     / effective_def_spd) / 50) + 2) * crit_modifier)
+
+                    for y in range(16):
+                        # apply the random factor of the dmg calculation, and use it if it matches the dmg we received
+                        value = max(1, floor(pre_rnd_dmg * (y + 85) / 100))
+                        value = max(1, floor(
+                            floor(floor(floor(pre_rnd_dmg * (y + 85) / 100) * stab_modifier) * eff1) * eff2))
+                        values[x - min_offense_guess].append(value)
+                        if floor(value == damage_received):
+                            dmg[x - min_offense_guess] += 1
+                            max_offense = x
+                            if min_offense == -1:
+                                min_offense = x
+
         else:
-            has_power_modifying_ability = True
+            if input.effectiveness() == "1-":
+                effectiveness = 1
+            else:
+                effectiveness = float(input.effectiveness())
+            min_offense_guess, max_offense_guess = (
+                calc_offense_backwards_gen_5(damage_received, effectiveness, stab_modifier, crit_modifier,
+                                             effective_def_spd, calc_base_power(enemy_level, move_power),
+                                             applied_atk_spa_stage))
 
-        move_effective_power = calc_move_power_modifiers(move_power, False, has_sport,
-                                                         has_power_modifying_ability)
+            min_offense = -1
+            max_offense = -1
 
-        # get rough lower / upper limits of possible ATK / SPA values to reduce calculations needed
-        min_offense_guess, max_offense_guess = calc_offense_backwards(
-            damage_received, is_physical,
-            [eff2, eff1, stab_modifier, double_damage_or_charge_modifier, crit_modifier],
-            [ff_modifier, weather_modifier,
-             reflect_lightscreen_modifier, burned_modifier],
-            effective_def_spd, calc_base_power(enemy_level, move_effective_power), applied_atk_spa_stage,
-            thick_fat_modifier, enemy_ability_atk_spa_modifier
-        )
+            base_power = calc_base_power(enemy_level, move_power)
 
-        min_offense = -1
-        max_offense = -1
+            dmg = []
+            values = []
 
-        base_power = calc_base_power(enemy_level, move_effective_power)
-
-        dmg = []
-        values = []
-        # go through the previously determined upper and lower limits
-        for x in range(min_offense_guess, max_offense_guess + 1):
-            dmg.append(0)
-            values.append([])
-            # calc the whole dmg formula except random factor for this specific ATK / SPA value
-            full_damage = floor(floor(base_power
-                                      * calc_stat_stages(floor(floor(floor(x * enemy_ability_atk_spa_modifier)
-                                                                     * thick_fat_modifier) * sport_modifier),
-                                                         applied_atk_spa_stage) / effective_def_spd) / 50)
-            full_damage = calc_ibm_damage(int(full_damage), burned_modifier,
-                                          reflect_lightscreen_modifier, weather_modifier, ff_modifier, is_physical)
-            full_damage = calc_obm_damage_no_randomness(full_damage, crit_modifier,
-                                                        double_damage_or_charge_modifier, stab_modifier, eff1, eff2)
-
-            for y in range(16):
-                # apply the random factor of the dmg calculation, and use it if it matches the dmg we received
-                value = max(1, floor(full_damage * (y + 85) / 100))
-                values[x - min_offense_guess].append(value)
-                if floor(value == damage_received):
-                    dmg[x - min_offense_guess] += 1
-                    max_offense = x
-                    if min_offense == -1:
-                        min_offense = x
+            for x in range(min_offense_guess, max_offense_guess + 1):
+                dmg.append(0)
+                values.append([])
+                # calc the dmg formula except random factor for this specific ATK / SPA value until rnd value
+                pre_rnd_dmg = floor(floor(floor(base_power * calc_stat_stages(x, applied_atk_spa_stage)
+                                                / effective_def_spd) / 50 + 2) * crit_modifier)
+                for y in range(16):
+                    # apply the random factor of the dmg calculation, and use it if it matches the dmg we received
+                    value = max(1, floor(gen_5_round(
+                        floor(pre_rnd_dmg * (y + 85) / 100)
+                        * stab_modifier)
+                                         * effectiveness))
+                    values[x - min_offense_guess].append(value)
+                    if floor(value == damage_received):
+                        dmg[x - min_offense_guess] += 1
+                        max_offense = x
+                        if min_offense == -1:
+                            min_offense = x
 
         graph_style = input.graph_style()
 
@@ -1305,6 +1395,51 @@ def server(input: Inputs, output: Outputs, session: Session):
 
         return offense_guess_min, offense_guess_max
 
+    def calc_offense_backwards_gen_4(damage_received: int, eff1: float, eff2: float, stab_modifier: float,
+                                     crit_modifier: float, effective_def_spd: int, base_power: int, atk_spa_stage: int):
+        offense_guess_min = damage_received
+        offense_guess_max = damage_received
+
+        offense_guess_min = floor(floor(floor(offense_guess_min / eff2) / eff1) / stab_modifier)
+        offense_guess_max = ceil(ceil(ceil(offense_guess_max / eff2) / eff1) / stab_modifier)
+
+        offense_guess_min = ceil(offense_guess_min / crit_modifier) - 2
+        offense_guess_max = ceil(ceil(offense_guess_max / 0.85) / crit_modifier) - 2
+
+        offense_guess_min = offense_guess_min * 50 * effective_def_spd
+        offense_guess_max = (offense_guess_max * 50 + 49) * effective_def_spd + effective_def_spd - 1
+
+        offense_guess_min = calc_stat_stages_backwards(floor(offense_guess_min / base_power), atk_spa_stage)[0]
+        offense_guess_max = calc_stat_stages_backwards(ceil(offense_guess_max / base_power), atk_spa_stage)[1]
+
+        return offense_guess_min, offense_guess_max
+
+    def calc_offense_backwards_gen_5(damage_received: int, effectiveness: float, stab_modifier: float,
+                                     crit_modifier: float, effective_def_spd: int, base_power: int, atk_spa_stage: int):
+        offense_guess_min = damage_received
+        offense_guess_max = damage_received
+
+        # keep both as in the future they might be different at this point
+        offense_guess_min = floor(offense_guess_min / effectiveness - 4)
+        offense_guess_max = ceil(offense_guess_max / effectiveness + 4)
+
+        offense_guess_min = floor(offense_guess_min / stab_modifier)
+        offense_guess_max = floor(offense_guess_max / stab_modifier)
+
+        # offense guess min gets divided by 1
+        offense_guess_max = ceil(offense_guess_max / 0.85)
+
+        offense_guess_min = floor(offense_guess_min / crit_modifier) - 2
+        offense_guess_max = floor(offense_guess_max / crit_modifier + 1) - 2
+
+        offense_guess_min = offense_guess_min * 50 * effective_def_spd
+        offense_guess_max = (offense_guess_max * 50 + 49) * effective_def_spd + effective_def_spd - 1
+
+        offense_guess_min = calc_stat_stages_backwards(floor(offense_guess_min / base_power), atk_spa_stage)[0]
+        offense_guess_max = calc_stat_stages_backwards(ceil(offense_guess_max / base_power), atk_spa_stage)[1]
+
+        return offense_guess_min - 1, offense_guess_max + 1
+
     def calc_ibm_damage(base_damage: int, burned_modifier=1.0, barrier_lightscreen_modifier=1.0,
                         current_weather_modifier=1.0, flash_fire_modifier=1.0, is_physical=False):
         result = floor(floor(floor(floor(base_damage * flash_fire_modifier)
@@ -1464,7 +1599,7 @@ def server(input: Inputs, output: Outputs, session: Session):
 
     def calc_base_power(level: int, move_power: int):
         # in case you don't want offense / defense included in the calculation
-        return floor(2 * level / 5 + 2) * move_power
+        return int(floor(2 * level / 5 + 2) * move_power)
 
     def get_weather_modifier(current_weather, move_type):
         if (current_weather == "Sunny" and move_type == "Fire") or (
@@ -1492,6 +1627,11 @@ def server(input: Inputs, output: Outputs, session: Session):
 
     def calc_hp(level: int, base: int, iv: int, ev: int):
         return int(floor(floor(2 * base + iv + floor(ev / 4)) * level / 100) + 10 + level)
+
+    def gen_5_round(number_to_round: float) -> int:
+        result = int(floor(number_to_round))
+        if number_to_round % 1 > .5: result = result + 1
+        return result
 
     """
     ---------------------- Module Server ----------------------
