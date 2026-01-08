@@ -1345,6 +1345,8 @@ def server(input: Inputs, output: Outputs, session: Session):
                         if min_offense == -1:
                             min_offense = x
 
+        if max_offense < 1:
+            raise SilentException
         graph_style = input.graph_style()
 
         if graph_style == "only_dmg_received":
