@@ -998,6 +998,7 @@ def server(input: Inputs, output: Outputs, session: Session):
     ---------------------- Info Page ----------------------
     """
 
+     # currently calculated info: XP yield, EV yield, weight -> low kick power
     @render.table(index=True)
     def calculate_xp_ev_info():
         # returns XP and EVs for a mon in a specific situation
@@ -1034,6 +1035,9 @@ def server(input: Inputs, output: Outputs, session: Session):
         table.columns = [''] * len(table.columns)
         return table
 
+     # calculates the confusion damage a player might receive.
+     # aside from base inputs (atk+stage, def+stage, level) inputs are highly reliant on generaion, so these parts of
+     # the formula should only be used in generation 3
     @render.plot
     def confusion_damage_info():
 
@@ -1064,6 +1068,7 @@ def server(input: Inputs, output: Outputs, session: Session):
         if ability == "2": has_huge_pure_power = True
 
         effective_atk = calc_offense_stat_modifiers(stat=atk, has_offense_badge=atk_badge, offense_stage=atk_stage,
+                                                    has_type_bonus_item=has_silk_scarf,
                                                     has_huge_pure_power=has_huge_pure_power,
                                                     has_choice_band=has_choice_band,
                                                     is_marowak_cubone_with_thick_club=has_thick_club,
@@ -1073,9 +1078,8 @@ def server(input: Inputs, output: Outputs, session: Session):
                                                       is_ditto_with_metal_powder=has_metal_powder,
                                                       marvel_scale_active=marvel_scale_active,
                                                       move_is_explosion_selfdestruct=is_explosion_selfdestruct)
-        effective_power = calc_move_power_modifiers(power=40, type_bonus_item=has_silk_scarf)
 
-        base_dmg = calc_dmg_base(level, effective_power, effective_atk, effective_def)
+        base_dmg = calc_dmg_base(level, 40, effective_atk, effective_def)
         ibm_dmg = calc_ibm_damage(base_dmg, burned_modifier=burned_modifier)
 
         dmg_values = []
@@ -1109,15 +1113,15 @@ def server(input: Inputs, output: Outputs, session: Session):
     @reactive.effect
     @reactive.event(input.reset_all)
     def reset_all():
-        reset_visible_inputs()
-        reset_dropdowns()
+        reset_main_inputs()
+        reset_accordions()
 
     @reactive.effect
     @reactive.event(input.reset_dropdowns, input.reset_all)
-    def reset_dropdowns_only():
-        reset_dropdowns()
+    def reset_accordions_only():
+        reset_accordions()
 
-    def reset_visible_inputs():
+    def reset_main_inputs():
         ui.update_numeric("enemy_level-number_value", value=8)
         ui.update_numeric("move_power-number_value", value=95)
         ui.update_numeric("own_defense-number_value", value=20)
@@ -1128,7 +1132,7 @@ def server(input: Inputs, output: Outputs, session: Session):
         ui.update_numeric("atk_spa_stage-number_value", value=0)
         ui.update_numeric("def_spd_stage-number_value", value=0)
 
-    def reset_dropdowns():
+    def reset_accordions():
         session.send_input_message("is_burned", {"value": False})
         session.send_input_message("ff_active", {"value": False})
         session.send_input_message("has_dd_charge", {"value": False})
@@ -1141,12 +1145,12 @@ def server(input: Inputs, output: Outputs, session: Session):
         session.send_input_message("weather_modifier", {"value": "1"})
         session.send_input_message("mud_or_water_sport_active", {"value": False})
 
+
+     # the formula used to determine ATK / SPA of the opponent in the ATK / SPA calculator
+     # while gen 3 is the focus, you can also estimate the ATK / SPA of pokemon in other generations
+     # there is less research / detailed possibility of accurate input into other gens
     @render.plot
     def calculate_offense():
-        # the formula used to determine ATK / SPA of the opponent in the ATK / SPA calculator
-
-        # while gen 3 is the focus, you can also estimate the ATK / SPA of pokemon in other generations
-        # there is less research / detailed possibility of accurate input into other gens
         if not input.simulate_generation():
             gen_used = 3
         gen_used = int(input.simulate_generation())
@@ -1232,11 +1236,11 @@ def server(input: Inputs, output: Outputs, session: Session):
                 has_double_damage_or_charge = input.has_dd_charge()
                 double_damage_or_charge_modifier = 2 if has_double_damage_or_charge else 1
 
-                move_effective_power = calc_move_power_modifiers(move_power, False, has_sport,
+                move_effective_power = calc_move_power_modifiers(move_power, has_sport,
                                                                  has_power_modifying_ability)
 
                 # get rough lower / upper limits of possible ATK / SPA values to reduce calculations needed
-                min_offense_guess, max_offense_guess = calc_offense_backwards(
+                min_offense_guess, max_offense_guess = calc_offense_backwards_gen_3(
                     damage_received, is_physical,
                     [eff2, eff1, stab_modifier, double_damage_or_charge_modifier, crit_modifier],
                     [ff_modifier, weather_modifier,
@@ -1314,7 +1318,7 @@ def server(input: Inputs, output: Outputs, session: Session):
             else:
                 effectiveness = float(input.effectiveness())
             min_offense_guess, max_offense_guess = (
-                calc_offense_backwards_gen_5(damage_received, effectiveness, stab_modifier, crit_modifier,
+                calc_offense_backwards_gen_5_onward(damage_received, effectiveness, stab_modifier, crit_modifier,
                                              effective_def_spd, calc_base_power(enemy_level, move_power),
                                              applied_atk_spa_stage))
 
@@ -1434,6 +1438,7 @@ def server(input: Inputs, output: Outputs, session: Session):
         else:
             raise SilentException()
 
+     # for the "you have changed values in this accordion" indicator
     @render.text
     def own_modifiers_counter():
         screen_modifier = int(input.has_reflect_lightscreen())
@@ -1446,6 +1451,7 @@ def server(input: Inputs, output: Outputs, session: Session):
         else:
             return ""
 
+     # for the "you have changed values in this accordion" indicator
     @render.text
     def enemy_modifiers_counter():
         burned_modifier = int(input.is_burned())
@@ -1461,6 +1467,7 @@ def server(input: Inputs, output: Outputs, session: Session):
         else:
             return ""
 
+     # for the "you have changed values in this accordion" indicator
     @render.text
     def field_effects_counter():
         weather_modifier = input.weather_modifier()
@@ -1476,33 +1483,13 @@ def server(input: Inputs, output: Outputs, session: Session):
     ---------------------- Support Methods ----------------------
     """
 
-    def is_type_physical(type_number: int):
-        return type_number in [0, 6, 7, 8, 9, 11, 12, 13, 16]
-
-    def get_move_attributes(enemy_move, current_weather):
-        move_power = int(moves["Power"][enemy_move])
-        move_type = moves["Type"][enemy_move]
-        if enemy_move == "Weather Ball":
-            if current_weather != "Clear":
-                move_power = 100
-                if current_weather == "Sunny": move_type = "Fire"
-                if current_weather == "Sandstorm": move_type = "Rock"
-                if current_weather == "Hail": move_type = "Ice"
-                if current_weather == "Rain": move_type = "Water"
-            else:
-                move_power = 50
-        elif enemy_move == "Solarbeam":
-            if current_weather is not ("Clear" or "Sunny"): move_power = floor(move_power / 2)
-
-        is_physical = is_type_physical(move_type) == "Physical"
-        return move_type, move_power, is_physical
-
-    def calc_offense_backwards(dmg_dealt: int, is_physical: bool, obm: list, ibm: list, defense: int,
+     # gives upper and lower bounds for the ATK / SPA values we are looking for
+     # see https://bulbapedia.bulbagarden.net/wiki/Damage#Generation_III for a good overview
+    def calc_offense_backwards_gen_3(dmg_dealt: int, is_physical: bool, obm: list, ibm: list, defense: int,
                                base_power: int, offense_stage: int, thick_fat_modifier: float,
                                enemy_ability_modifier: float):
         # ibm = "inside bracket modifier", the modifiers before the +2 in the formula
         # obm = "outside bracket modifier", the modifiers after the +2 in the formula
-        # see https://bulbapedia.bulbagarden.net/wiki/Damage#Generation_III
         offense_guess_min = dmg_dealt
         offense_guess_max = ceil(dmg_dealt / 0.85) + 1
         for factor in obm:
@@ -1530,6 +1517,8 @@ def server(input: Inputs, output: Outputs, session: Session):
 
         return offense_guess_min, offense_guess_max
 
+     # gives upper and lower bounds for the ATK / SPA values we are looking for
+     # see https://bulbapedia.bulbagarden.net/wiki/Damage#Generation_IV for a good overview
     def calc_offense_backwards_gen_4(damage_received: int, eff1: float, eff2: float, stab_modifier: float,
                                      crit_modifier: float, effective_def_spd: int, base_power: int, atk_spa_stage: int):
         offense_guess_min = damage_received
@@ -1549,7 +1538,9 @@ def server(input: Inputs, output: Outputs, session: Session):
 
         return offense_guess_min, offense_guess_max
 
-    def calc_offense_backwards_gen_5(damage_received: int, effectiveness: float, stab_modifier: float,
+     # gives upper and lower bounds for the ATK / SPA values we are looking for
+     # see https://bulbapedia.bulbagarden.net/wiki/Damage#Generation_V_onward for a good overview
+    def calc_offense_backwards_gen_5_onward(damage_received: int, effectiveness: float, stab_modifier: float,
                                      crit_modifier: float, effective_def_spd: int, base_power: int, atk_spa_stage: int):
         offense_guess_min = damage_received
         offense_guess_max = damage_received
@@ -1575,6 +1566,7 @@ def server(input: Inputs, output: Outputs, session: Session):
 
         return offense_guess_min - 1, offense_guess_max + 1
 
+     # calculates the part in the damage formula before the +2 and after /50
     def calc_ibm_damage(base_damage: int, burned_modifier=1.0, barrier_lightscreen_modifier=1.0,
                         current_weather_modifier=1.0, flash_fire_modifier=1.0, is_physical=False):
         result = floor(floor(floor(floor(base_damage * flash_fire_modifier)
@@ -1583,29 +1575,34 @@ def server(input: Inputs, output: Outputs, session: Session):
         result = max(result, 1 if is_physical else 0)  # minimum dmg of 1 only for physical moves at this point
         return result + 2
 
+     # calculates the part in the damage formula before the random factor and after +2
     def calc_obm_damage_no_randomness(base_damage: int, crit_modifier=1, double_damage_charge_modifier=1,
                                       stab_modifier=1.0, effectiveness_type_1=1.0, effectiveness_type_2=1.0):
         result = apply(crit_modifier, double_damage_charge_modifier, stab_modifier, effectiveness_type_1,
                        effectiveness_type_2, dmg_val=base_damage)
         return result
 
-    def calc_stat_stages_backwards(stat: int, stages: int):
-        original_stat = stat / (2 + (stages if stages > 0 else 0)) * (2 - (stages if stages < 0 else 0))
+     # calculates the possible min and max values for the original stat of stat_with_stages
+    def calc_stat_stages_backwards(stat_with_stages: int, stages: int):
+        stat_without_stages = stat_with_stages / (2 + (stages if stages > 0 else 0)) * (2 - (stages if stages < 0 else 0))
         if stages < 0:
-            result = ceil(original_stat)
+            original_stat_min = ceil(stat_without_stages)
             # -stages increases the result due to stages < 0
-            return result, result - ceil(stages / 2)
+            return original_stat_min, original_stat_min - ceil(stages / 2)
         else:
-            result = floor(original_stat)
-            return result, result
+            original_stat_min = floor(stat_without_stages)
+            return original_stat_min, original_stat_min
 
-    #  https://github.com/pret/pokefirered/blob/338ec9d956fcd39f4bbb361b444ded3eec8e9425/src/pokemon.c#L2437
-    def calc_defensive_stat_modifiers(stat: int, has_defensive_badge: bool, defensive_stage: int,
+     # all possible defensive stat modifiers before and including stages aside enigma berry
+     #  https://github.com/pret/pokefirered/blob/338ec9d956fcd39f4bbb361b444ded3eec8e9425/src/pokemon.c#L2437
+    def calc_defensive_stat_modifiers(stat: int, has_defensive_badge=False,
+                                      is_latios_latias_with_soul_dew=False,
                                       is_clamperl_with_dep_sea_scale=False, is_ditto_with_metal_powder=False,
                                       marvel_scale_active=False, move_is_explosion_selfdestruct=False,
-                                      ):
+                                      defensive_stage=0):
         result = stat
         if has_defensive_badge: result = floor(1.1 * result)
+        if is_latios_latias_with_soul_dew: result = floor(1.5 * result)
         if is_clamperl_with_dep_sea_scale: result = floor(2 * result)
         if is_ditto_with_metal_powder: result = floor(2 * result)
         if marvel_scale_active: result = floor(1.5 * result)
@@ -1614,15 +1611,21 @@ def server(input: Inputs, output: Outputs, session: Session):
         result = calc_stat_stages(result, defensive_stage)
         return result
 
-    def calc_offense_stat_modifiers(stat: int, has_offense_badge: bool, offense_stage: int, has_huge_pure_power=False,
+     # all possible offensive stat modifiers before and including stages aside enigma berry
+     # https://github.com/pret/pokefirered/blob/338ec9d956fcd39f4bbb361b444ded3eec8e9425/src/pokemon.c#L2437
+    def calc_offense_stat_modifiers(stat: int, has_type_bonus_item=False,
+                                    has_offense_badge=False,
+                                    is_latios_latias_with_soul_dew=False, has_huge_pure_power=False,
                                     has_choice_band=False, is_clamperl_with_dep_sea_tooth=False,
                                     is_pikachu_with_light_ball=False,
                                     is_marowak_cubone_with_thick_club=False,
                                     thick_fat_applied=False,
-                                    has_hustle_plus_minus_guts=False):
+                                    has_hustle_plus_minus_guts=False, offense_stage=0):
         result = stat
+        if has_type_bonus_item: result = floor(1.1 * result)
         if has_huge_pure_power: result = floor(2 * result)
         if has_offense_badge: result = floor(1.1 * result)
+        if is_latios_latias_with_soul_dew: result = floor(1.5 * result)
         if has_choice_band: result = floor(1.5 * result)
         if is_clamperl_with_dep_sea_tooth: result = floor(2 * result)
         if is_pikachu_with_light_ball: result = floor(2 * result)
@@ -1633,10 +1636,12 @@ def server(input: Inputs, output: Outputs, session: Session):
         result = calc_stat_stages(result, offense_stage)
         return result
 
-    def calc_move_power_modifiers(power: int, type_bonus_item: bool, has_sport=False,
+     # all possible power modifiers before the general dmg formula
+     # https://github.com/pret/pokefirered/blob/338ec9d956fcd39f4bbb361b444ded3eec8e9425/src/pokemon.c#L2437
+    def calc_move_power_modifiers(power: int, has_sport=False,
                                   overgrow_blaze_torrent_swarm_active=False):
         result = power
-        if type_bonus_item: result = floor(1.1 * result)
+        if has_sport: result = floor(.5 * result)
         if overgrow_blaze_torrent_swarm_active: result = floor(1.5 * result)
 
         return result
@@ -1648,24 +1653,9 @@ def server(input: Inputs, output: Outputs, session: Session):
         result = max(1, result)
         return int(result)
 
-    def get_pokemon_types(pokemon):
-        return pokemons["Type 1"][pokemon], pokemons["Type 2"][pokemon]
-
-    def calc_effectiveness(move_type, mon_type_1, mon_type_2):
-        if mon_type_1 == "":
-            return 1, 1
-        elif mon_type_2 == "":
-            return types[mon_type_1][move_type], 1
-        else:
-            type_1_effectiveness = types[mon_type_1][move_type]
-            type_2_effectiveness = types[mon_type_2][move_type]
-            type_1_prio = type_priority.index(mon_type_1)
-            type_2_prio = type_priority.index(mon_type_2)
-            if type_1_prio < type_2_prio:
-                return type_1_effectiveness, type_2_effectiveness
-            else:
-                return type_2_effectiveness, type_1_effectiveness
-
+     # biv is my abbreviation for 2 * Base stat + Individual Value (also written: 2 * Base + IVs)
+     # i use it as it is easier to get both as a package than directly calc the base stat
+     # (and it does not make a difference for the resulting stat anyway)
     def biv_range_hp(level: int, current_stat: int, evs: int):
         return biv_range(level, current_stat - 5 - level, evs, 1)
 
@@ -1690,13 +1680,7 @@ def server(input: Inputs, output: Outputs, session: Session):
 
         return biv_minimum, biv_maximum
 
-    def biv_min_hp(level: int, current_stat: int, evs: int, ):
-        return int(biv_min(level, current_stat - 5 - level, evs, 1))
-
     def biv_min(level: int, current_stat: int, evs: int, nature: float):
-        # biv is my abbreviation for 2 * Base stat + Individual Value (also written: 2 * Base + IVs)
-        # i use it as it is easier to get both as a package than directly calc the base stat
-        # (and it does not make a difference for the resulting stat anyway)
         biv = min(541, max(22,
                            int(floor(floor(floor(current_stat / nature) - 4
                                            - (1 if nature == 1 or (
@@ -1706,9 +1690,6 @@ def server(input: Inputs, output: Outputs, session: Session):
                                - floor(evs / 4))))
         result = calc_stat(level, 0, biv, 0, nature)
         return biv
-
-    def biv_max_hp(level: int, current_stat: int, evs: int):
-        return int(biv_max(level, current_stat - 5 - level, evs, 1))
 
     def biv_max(level: int, current_stat: int, evs: int, nature: float):
         biv = max(22, min(541, int(ceil(ceil((
@@ -1739,33 +1720,28 @@ def server(input: Inputs, output: Outputs, session: Session):
         # in case you don't want offense / defense included in the calculation
         return int(floor(2 * level / 5 + 2) * move_power)
 
-    def get_weather_modifier(current_weather, move_type):
-        if (current_weather == "Sunny" and move_type == "Fire") or (
-                current_weather == "Rain" and move_type == "Water"):
-            return 1.5
-        elif (current_weather == "Sunny" and move_type == "Water") or (
-                current_weather == "Rain" and move_type == "Fire"):
-            return 0.5
-        return 1
-
     def calc_stat_stages(stat: int, stages: int):
         return floor(stat * (2 + (stages if stages > 0 else 0)) / (2 - (stages if stages < 0 else 0)))
 
+     # calculate the given pokemon yields, valid formula for generations 2-4
+     # https://bulbapedia.bulbagarden.net/wiki/Experience#Gain_formula
     def calc_xp_yield(pokemon, level: int, opponent_is_trainer: bool, lucky_egg_held=False,
                       is_original_trainer=True):
-        # the generation 3 XP formula from https://bulbapedia.bulbagarden.net/wiki/Experience
         xp_pokemon = floor(pokemons["XP"][pokemon] * level / 7)
         xp = floor(floor(floor(xp_pokemon * (1.5 if lucky_egg_held else 1)) * (1.5 if opponent_is_trainer else 1))
                    * (1.5 if not is_original_trainer else 1))
         return xp
 
-    # Formula: https://bulbapedia.bulbagarden.net/wiki/Stat#Generation_III_onward
+     # calculation of stats beside HP
+     # Formula: https://bulbapedia.bulbagarden.net/wiki/Stat#Generation_III_onward
     def calc_stat(level: int, base: int, iv: int, ev: int, nature: float):
         return int(floor((floor(floor(2 * base + iv + floor(ev / 4)) * level / 100) + 5) * nature))
 
+     # hp has a slightly different calculation compared to other stats
     def calc_hp(level: int, base: int, iv: int, ev: int):
         return int(floor(floor(2 * base + iv + floor(ev / 4)) * level / 100) + 10 + level)
 
+     # starting in generation 5, this rounding formula is used for some calculations
     def gen_5_round(number_to_round: float) -> int:
         result = int(floor(number_to_round))
         if number_to_round % 1 > .5: result = result + 1
@@ -1774,6 +1750,7 @@ def server(input: Inputs, output: Outputs, session: Session):
     """
     ---------------------- Module Server ----------------------
     """
+     # the server of @module.ui
 
     enemy_level_input = number_input_server("enemy_level")
     enemy_move_power_input = number_input_server(id="move_power", label="Move Power:",

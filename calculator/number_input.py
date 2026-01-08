@@ -34,7 +34,7 @@ def number_input_server(input: Inputs, output: Outputs, session: Session, id_pas
     @reactive.effect
     @reactive.event(input.increment)
     def increment_number_value():
-        value = input.number_value() or init-1
+        value = input.number_value() or init
         ui.update_numeric(
             "number_value",
             value=min(value + step, max_value),
@@ -44,7 +44,7 @@ def number_input_server(input: Inputs, output: Outputs, session: Session, id_pas
     @reactive.effect
     @reactive.event(input.decrement)
     def decrement_number_value():
-        value = input.number_value() or init+1
+        value = input.number_value() or init
         ui.update_numeric(
             "number_value",
             value=max(value - step, min_value),
