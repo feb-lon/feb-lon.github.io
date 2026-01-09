@@ -16,12 +16,9 @@ def iv_calculation_page():
         "IV Calculator",
         element_and_tooltip(
             ui.h2("IV Calculator"),
-            ui.card(
-                "As there is currently no method to track EVs, i would "
-                "not recommend using this when having no idea what to do about EVs",
-                class_="tooltip_card",
-            ),
-            True,
+            "As there is currently no method to track EVs, i would "
+            "not recommend using this when having no idea what to do about EVs",
+            1,
         ),
         ui.div(
             ui.div(
@@ -90,11 +87,8 @@ def pokemon_info_page():
                     ui.card_header(
                         element_and_tooltip(
                             ui.h3("Pokemon Information"),
-                            ui.card(
-                                "XP information valid for Generations 2 - 4",
-                                style_="tooltip_card",
-                            ),
-                            True,
+                            "XP information valid for Generations 2 - 4",
+                            1,
                         ),
                     ),
                     ui.div(
@@ -119,10 +113,7 @@ def pokemon_info_page():
                 ui.card(
                     element_and_tooltip(
                         ui.card_header("XP Information 1"),
-                        ui.card(
-                            "Valid for all Generations.",
-                            class_="tooltip_card",
-                        ),
+                        "Valid for all Generations.",
                     ),
                     xp_requirement_input(id="xp_requirement_1", from_level=5, to_level=8),
                     class_="io_column",
@@ -143,16 +134,15 @@ def pokemon_info_page():
                 ui.card_header(
                     element_and_tooltip(
                         ui.h3("Confusion Information"),
-                        ui.card(
+                        (
                             ui.span("When using only inputs above the graph, output usable for every Generation."),
                             ui.span(),
                             ui.span("HOWEVER in Generations 1 - 2, there is no random factor for Confusion. "),
                             ui.span("This means the result is always the highest DMG value (furthest to the right)"),
                             ui.span(),
                             ui.span("Inputs below the graph should only be used in Generation 3"),
-                            class_="tooltip_card"
                         ),
-                        True,
+                        1,
                     ),
                 ),
                 ui.div(
@@ -244,29 +234,15 @@ def atk_spa_calculator_page():
                     ui.card_header(
                         "Graph Style"
                     ),
-                    ui.input_radio_buttons(
-                        "graph_style",
-                        "",
-                        {"only_dmg_received": "Only DMG Received", "all_dmg_values": "All DMG Values"},
-                        inline=False,
-                        selected="only_dmg_received",
-                    ),
-                    ui.input_radio_buttons(
-                        "simulate_generation",
-                        element_and_tooltip(
-                            "Using DMG calc of Gen:",
-                            ui.card(
-                                ui.span("Inputs under the graph currently only work for Generation 3."),
-                                ui.span("\nEffectiveness 1x- is only relevant in Generations 1 - 4"),
-                                class_="tooltip_card",
-                            ),
-                            True,
+                    ui.card_body(
+                        ui.input_radio_buttons(
+                            "graph_style",
+                            "",
+                            {"only_dmg_received": "Only DMG Received", "all_dmg_values": "All DMG Values"},
+                            inline=False,
+                            selected="only_dmg_received",
                         ),
-                        {3: "3", 4: "4", 5: "5", 6: "6+"},
-                        inline=True,
-                        selected=3,
                     ),
-                    class_="io_row",
                 ),
                 ui.div(
                     ui.card(
@@ -321,10 +297,15 @@ def atk_spa_calculator_page():
                                         class_="io_column close_distance",
                                     ),
                                     ui.div(
+                                        ui.panel_conditional(
+                                            "input.simulate_generation == 4",
+                                            ui.input_switch("has_sniper", "Sniper"),
+                                        ),
                                         ui.input_switch("is_crit", "CRIT"),
                                         ui.input_switch("is_stab", "STAB"),
-                                        class_="spread_column big_buttons close_distance",
+                                        class_="ui_column big_buttons small_gap",
                                     ),
+                                    ui.output_ui("crit_button"),
                                     ui.div(
                                         {"style": "margin-top: -1rem; margin-bottom: -1rem;"},
                                         ui.input_radio_buttons(
@@ -364,108 +345,162 @@ def atk_spa_calculator_page():
                 ui.div(
                     {"style": "gap: 1rem;margin-right: 5%"},
                     ui.card(
-                        ui.card_header("Reset Input Buttons"),
-                        ui.input_action_button("reset_all", "Reset All Inputs"),
-                        ui.input_action_button("reset_dropdowns", "Reset Inputs Below Graph"),
-                        class_="spread_column",
+                        ui.card_header(
+                            "Reset Input Buttons"
+                        ),
+                        ui.card_body(
+                            ui.input_action_button("reset_all", "Reset All Inputs"),
+                            ui.input_action_button("reset_dropdowns", "Reset Detailed Inputs"),
+                            class_="spread_column",
+                        ),
                     ),
                 ),
                 class_="io_row",
             ),
-            ui.page_fluid(
+            ui.card(
+                {"style": "border-color: black; border-width: 0.05rem;"},
                 ui.output_plot("calculate_offense"),
             ),
-            ui.page_fluid(
-                ui.accordion(
-                    {"style": "width: 35%"},
-                    ui.accordion_panel(
-                        ui.div(
-                            ui.h5("Enemy Pokemon Modifiers:"),
-                            ui.output_text_verbatim("enemy_modifiers_counter"),
-                            id="enemy_modifiers_title",
-                            class_="accordion_title",
+            ui.div(
+                {"style": "min-height: 5rem; align-items: start; padding-top: 1rem;"},
+                ui.card(
+                    ui.card_body(
+                        ui.input_switch(
+                            "use_detailed_inputs",
+                            "Use Detailed Inputs"
                         ),
-                        ui.div(
-                            ui.input_switch("is_burned", "Enemy Burned"),
+                        ui.input_radio_buttons(
+                            "simulate_generation",
                             element_and_tooltip(
-                                ui.input_switch("ff_active", "Flashfire Bonus"),
-                                ui.card(
+                                "Generation:",
+                                (
+                                    ui.span("Effectiveness 1x- is only relevant in Generations 1 - 4"),
+                                    ui.span("Detailed inputs only available for Generation 3")
+                                ),
+                                1,
+                            ),
+                            {3: "3", 4: "4", 5: "5", 6: "6+"},
+                            inline=True,
+                            selected=3,
+                        ),
+                        class_="io_column",
+                    ),
+                ),
+                ui.panel_conditional(
+                    "input.simulate_generation == 3 & input.use_detailed_inputs",
+                    {"style": "width: 85%; padding-top: 0;"},
+                    ui.accordion(
+                        {"style": "width: 45%"},
+                        ui.accordion_panel(
+                            ui.div(
+                                ui.h5("Enemy Pokemon Modifiers:"),
+                                ui.output_text_verbatim("enemy_modifiers_counter"),
+                                id="enemy_modifiers_title",
+                                class_="accordion_title",
+                            ),
+                            ui.div(
+                                ui.input_switch("is_burned", "Enemy Burned"),
+                                element_and_tooltip(
+                                    ui.input_switch("ff_active", "Flashfire Bonus"),
                                     "Getting hit by a fire move gives this bonus for the whole fight.",
-                                    class_="tooltip_card"
                                 ),
+                                element_and_tooltip(
+                                    ui.input_switch("has_dd_charge", "Double Damage / Charge Bonus"),
+                                    double_damage_tooltip(),
+                                ),
+                                class_="io_row"
                             ),
-                            element_and_tooltip(
-                                ui.input_switch("has_dd_charge", "Double Damage / Charge Bonus"),
-                                double_damage_tooltip(),
-                            ),
-                            class_="io_row"
-                        ),
-                        ui.div(
-                            element_and_tooltip(
-                                ui.input_switch("is_physical", "Move is Physical"),
-                                ui.card(
+                            ui.div(
+                                element_and_tooltip(
+                                    ui.input_switch("is_physical", "Move is Physical"),
                                     "Only used for determining minimum DMG (physical DMG has higher minimum DMG)",
-                                    class_="tooltip_card"
                                 ),
+                                ui.input_radio_buttons("enemy_ability",
+                                                       element_and_tooltip(
+                                                           ("Enemy Ability: ", spacer(1, 0)),
+                                                           ability_tooltip(),
+                                                       ),
+                                                       {"1": "generic", "1.5x power": "1.5x Move Power",
+                                                        "1.5": "1.5x ATK/SPA", "2": "2x ATK"},
+                                                       selected="1",
+                                                       inline=True,
+                                                       ),
+                                class_="spread_row align_bottom"
                             ),
-                            ui.input_radio_buttons("enemy_ability",
-                                                   element_and_tooltip(
-                                                       ("Enemy Ability: ", spacer(1, 0)),
-                                                       ability_tooltip(),
-                                                   ),
-                                                   {"1": "generic", "1.5x power": "1.5x Move Power",
-                                                    "1.5": "1.5x ATK/SPA", "2": "2x ATK"},
-                                                   selected="1",
-                                                   inline=True,
-                                                   ),
-                            class_="io_row align_bottom"
+                            value="enemy_modifiers_counter",
                         ),
-                        value="enemy_modifiers_counter",
+                        open=False,
                     ),
-                    open=False,
-                ),
-                ui.accordion(
-                    {"style": "width: 30%"},
-                    ui.accordion_panel(
-                        ui.div(
-                            ui.h5("Own Pokemon Modifiers:"),
-                            ui.output_text_verbatim("own_modifiers_counter"),
-                            id="own_modifiers_title",
-                            class_="accordion_title",
-                        ),
-                        ui.input_switch("has_def_spd_badge", "DEF/SPD Badge"),
-                        ui.input_switch("has_thick_fat", "Thick Fat"),
-                        ui.input_switch("has_reflect_lightscreen", "Reflect / Lightscreen"),
-                        value="own_modifiers_counter",
-                        class_="io_row",
-                    ),
-                    open=False,
-                ),
-                ui.accordion(
-                    {"style": "width: 25%"},
-                    ui.accordion_panel(
-                        ui.div(
-                            ui.h5("Field Effects:"),
-                            ui.output_text_verbatim("field_effects_counter"),
-                            id="field_effects_title",
-                            class_="accordion_title",
-                        ),
-                        ui.div(
-                            ui.input_switch("mud_or_water_sport_active", "Mud/Water Sport"),
-                            ui.input_radio_buttons(
-                                "weather_modifier",
-                                "Weather Modifier:",
-                                {"0.5": "0.5x", "1": "1x", "1.5": "1.5x"},
-                                inline=True,
-                                selected="1",
+                    ui.accordion(
+                        {"style": "width: 35%"},
+                        ui.accordion_panel(
+                            ui.div(
+                                ui.h5("Own Pokemon + Weather Modifiers:"),
+                                ui.output_text_verbatim("own_modifiers_counter"),
+                                id="own_modifiers_title",
+                                class_="accordion_title",
                             ),
-                            class_="io_row align_bottom",
+                            ui.div(
+                                ui.input_switch("has_def_spd_badge", "DEF/SPD Badge"),
+                                ui.input_switch("has_thick_fat", "Thick Fat"),
+                                ui.input_switch("has_reflect_lightscreen", "Reflect / Lightscreen"),
+                                class_="io_row",
+                            ),
+                            ui.div(
+                                ui.input_switch("mud_or_water_sport_active", "Mud/Water Sport"),
+                                ui.input_radio_buttons(
+                                    "weather_modifier",
+                                    "Weather Modifier:",
+                                    {"0.5": "0.5x", "1": "1x", "1.5": "1.5x"},
+                                    inline=True,
+                                    selected="1",
+                                ),
+                                class_="spread_row align_bottom",
+                            ),
+                            value="own_modifiers_counter",
+                            class_="io_column",
                         ),
-                        value="field_effects_counter",
+                        open=False,
                     ),
-                    open=False,
+                    class_="spread_row top",
                 ),
-                class_="spread_row top",
+                ui.panel_conditional(
+                    "input.simulate_generation == 4 & input.use_detailed_inputs",
+                    {"style": "width: 85%"},
+                    ui.div(
+                        "Early Stage Modifier",
+                        number_input("early_modifier_gen_4", min_value=0, max_value=50, init=1, step=0.25),
+                        class_="io_column",
+                    ),
+                    ui.div(
+                        "Mid Stage Modifier",
+                        number_input("mid_modifier_gen_4", min_value=1, max_value=3, init=1, step=0.5),
+                        class_="io_column",
+                    ),
+                    ui.div(
+                        "Late Stage Modifier",
+                        number_input("late_modifier_gen_4", min_value=0, max_value=2, init=1, step=0.25),
+                        class_="io_column",
+                    ),
+                    class_="spread_row top",
+                ),
+                ui.panel_conditional(
+                    "(input.simulate_generation == 5 || input.simulate_generation == 6) "
+                    "& input.use_detailed_inputs",
+                    {"style": "width: 85%"},
+                    ui.div(
+                        "Mid Stage Modifier",
+                        number_input("mid_modifier_gen_5_onward", min_value=1, max_value=3, init=1, step=0.5),
+                        class_="io_column",
+                    ),
+                    ui.div(
+                        "Late Stage Modifier",
+                        number_input("late_modifier_gen_5_onward", min_value=0, max_value=2, init=1, step=0.25),
+                        class_="io_column",
+                    ),
+                    class_="spread_row top",
+                ),
+                class_="io_row top",
             ),
             class_="top_layer_column",
         )
@@ -473,24 +508,21 @@ def atk_spa_calculator_page():
 
 
 def ability_tooltip():
-    return ui.card(
-        ui.card_body(
-            ui.layout_columns(
-                ui.page_fluid("1.5x Move Power"),
-                ui.page_fluid("Swarm, Overgrow, Blaze or Torrent"),
-                ui.page_fluid("1.5x ATK/SPA"),
-                ui.page_fluid("Hustle, Guts, Plus/Minus"),
-                ui.page_fluid("2x ATK"),
-                ui.page_fluid("Huge Power, Pure Power"),
-                col_widths=(5, 7),
-            )
+    return (
+        ui.layout_columns(
+            ui.page_fluid("1.5x Move Power"),
+            ui.page_fluid("Swarm, Overgrow, Blaze or Torrent"),
+            ui.page_fluid("1.5x ATK/SPA"),
+            ui.page_fluid("Hustle, Guts, Plus/Minus"),
+            ui.page_fluid("2x ATK"),
+            ui.page_fluid("Huge Power, Pure Power"),
+            col_widths=(5, 7),
         ),
-        class_="tooltip_card",
     )
 
 
 def double_damage_tooltip():
-    return ui.card(
+    return (
         ui.card_header("Double Damage Situations:"),
         ui.card_body(
             ui.layout_columns(
@@ -510,8 +542,7 @@ def double_damage_tooltip():
                 ui.page_fluid("vs enemy switching pokemon"),
                 col_widths=(6, 6),
             )
-        ),
-        class_="tooltip_card",
+        )
     )
 
 
@@ -713,16 +744,16 @@ def spacer(width: float, height: float):
     return ui.tags.div({"style": f"width:{width}rem;height:{height}rem;"})
 
 
-def element_and_tooltip(tag, tooltip_content, use_spacer=False):
-    space = "" if not use_spacer else spacer(1, 0)
-
+def element_and_tooltip(tag, tooltip_content, space=0):
     return ui.div(
         tag,
-        space,
+        spacer(space, 0),
         ui.tooltip(
             question_circle_fill,
-            tooltip_content,
-            class_="tooltip_card",
+            ui.card(
+                tooltip_content,
+                class_="tooltip_card",
+            ),
         ),
         class_="tag_and_tooltip",
     )
@@ -1151,8 +1182,6 @@ def server(input: Inputs, output: Outputs, session: Session):
     # there is less research / detailed possibility of accurate input into other gens
     @render.plot
     def calculate_offense():
-        if not input.simulate_generation():
-            gen_used = 3
         gen_used = int(input.simulate_generation())
 
         if not enemy_level_input():
@@ -1172,10 +1201,14 @@ def server(input: Inputs, output: Outputs, session: Session):
         stab_modifier = 1.5 if is_stab else 1
 
         is_crit = input.is_crit()
+        crit_multiplier = 2
+
         if gen_used == 6:
-            crit_modifier = 1.5 if is_crit else 1
-        else:
-            crit_modifier = 2 if is_crit else 1
+            crit_multiplier = 1.5
+        if gen_used == 4:
+            crit_multiplier = 3 if input.has_sniper() else 2
+
+        crit_modifier = crit_multiplier if is_crit else 1
 
         if not (atk_spa_stage_input() or atk_spa_stage_input() == 0):
             raise SilentException()
@@ -1190,8 +1223,8 @@ def server(input: Inputs, output: Outputs, session: Session):
         else:
             has_def_spd_badge = input.has_def_spd_badge()
         applied_def_spd_stage = 0 if (is_crit and def_spd_stage > 0) else def_spd_stage
-        effective_def_spd = calc_defensive_stat_modifiers(own_defense, has_def_spd_badge,
-                                                          applied_def_spd_stage)
+        effective_def_spd = calc_defensive_stat_modifiers(own_defense, has_defensive_badge=has_def_spd_badge,
+                                                          defensive_stage=applied_def_spd_stage)
 
         if gen_used == 3 or gen_used == 4:
             eff1 = 0.5
@@ -1261,8 +1294,8 @@ def server(input: Inputs, output: Outputs, session: Session):
                     values.append([])
                     # calc the whole dmg formula except random factor for this specific ATK / SPA value
                     full_damage = floor(floor(base_power
-                                              * calc_stat_stages(floor(floor(floor(x * enemy_ability_atk_spa_modifier)
-                                                                             * thick_fat_modifier) * sport_modifier),
+                                              * calc_stat_stages(floor(floor(x * enemy_ability_atk_spa_modifier)
+                                                                       * thick_fat_modifier),
                                                                  applied_atk_spa_stage) / effective_def_spd) / 50)
                     full_damage = calc_ibm_damage(int(full_damage), burned_modifier,
                                                   reflect_lightscreen_modifier, weather_modifier, ff_modifier,
@@ -1444,7 +1477,10 @@ def server(input: Inputs, output: Outputs, session: Session):
         screen_modifier = int(input.has_reflect_lightscreen())
         badge_modifier = int(input.has_def_spd_badge())
         thick_fat_modifier = int(input.has_thick_fat())
-        modifiers_changed = screen_modifier + badge_modifier + thick_fat_modifier
+        weather_modifier = int(input.weather_modifier() != "1")
+        sport_modifier = int(input.mud_or_water_sport_active())
+        modifiers_changed = (screen_modifier + badge_modifier + thick_fat_modifier +
+                             weather_modifier + sport_modifier)
 
         if modifiers_changed > 0:
             return modifiers_changed
@@ -1461,18 +1497,6 @@ def server(input: Inputs, output: Outputs, session: Session):
         enemy_ability_modifier = int(input.enemy_ability() != "1")
         modifiers_changed = (burned_modifier + ff_modifier + dd_charge_modifier
                              + is_physical_modifier + enemy_ability_modifier)
-
-        if modifiers_changed > 0:
-            return modifiers_changed
-        else:
-            return ""
-
-    # for the "you have changed values in this accordion" indicator
-    @render.text
-    def field_effects_counter():
-        weather_modifier = input.weather_modifier()
-        sport_modifier = input.mud_or_water_sport_active()
-        modifiers_changed = int(weather_modifier != "1") + int(sport_modifier)
 
         if modifiers_changed > 0:
             return modifiers_changed
@@ -1587,7 +1611,7 @@ def server(input: Inputs, output: Outputs, session: Session):
     # calculates the possible min and max values for the original stat of stat_with_stages
     def calc_stat_stages_backwards(stat_with_stages: int, stages: int) -> Tuple[int, int]:
         stat_without_stages = stat_with_stages / (2 + (stages if stages > 0 else 0)) * (
-                    2 - (stages if stages < 0 else 0))
+                2 - (stages if stages < 0 else 0))
         if stages < 0:
             original_stat_min = ceil(stat_without_stages)
             # -stages increases the result due to stages < 0
@@ -1798,11 +1822,25 @@ def server(input: Inputs, output: Outputs, session: Session):
                                                init=0, min_value=-6, max_value=6)
 
     xp_requirement_input_info_1 = xp_requirement_input_server(id="xp_requirement_1",
-                                                            from_level=5, to_level=8)
+                                                              from_level=5, to_level=8)
     xp_requirement_input_info_2 = xp_requirement_input_server(id="xp_requirement_2",
-                                                            from_level=8, to_level=10)
+                                                              from_level=8, to_level=10)
     xp_requirement_input_info_3 = xp_requirement_input_server(id="xp_requirement_3",
-                                                            from_level=5, to_level=8)
+                                                              from_level=5, to_level=8)
+
+    early_modifier_gen_4_input = number_input_server("early_modifier_gen_4", min_value=0,
+                                                     max_value=50, init=1, step=0.25),
+    mid_modifier_gen_4_input = number_input_server("mid_modifier_gen_4", min_value=1,
+                                                   max_value=3, init=1, step=0.50),
+    late_modifier_gen_4_input = number_input_server("late_modifier_gen_4", min_value=1,
+                                                    max_value=3, init=1, step=0.50),
+
+    early_modifier_gen_5_onward_input = number_input_server("early_modifier_gen_5_onward", min_value=0,
+                                                            max_value=50, init=1, step=0.25),
+    mid_modifier_gen_5_onward_input = number_input_server("mid_modifier_gen_5_onward", min_value=1,
+                                                          max_value=3, init=1, step=0.50),
+    late_modifier_gen_5_onward_input = number_input_server("late_modifier_gen_5_onward", min_value=1,
+                                                           max_value=3, init=1, step=0.50),
 
 
 app = App(app_ui, server,

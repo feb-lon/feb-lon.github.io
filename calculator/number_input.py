@@ -2,8 +2,8 @@ from shiny import Inputs, Outputs, Session, module, reactive, ui
 
 
 @module.ui
-def number_input(label: str, init: int, min_value: int = 1, max_value: int = 100,
-                 step: int = 1, layout="") -> ui.TagChild:
+def number_input(init: float, label = "", min_value: float = 1, max_value: float = 100,
+                 step: float = 1, layout="") -> ui.TagChild:
     has_layout = layout != ""
 
     return ui.card(
@@ -22,8 +22,8 @@ def number_input(label: str, init: int, min_value: int = 1, max_value: int = 100
 #  label as input parameter to enable user just copy paste input parameter
 @module.server
 def number_input_server(input: Inputs, output: Outputs, session: Session, id_passed=None, label: str = "",
-                        init: int = 5, min_value: int = 1, max_value: int = 100, step: int = 1):
-    val = reactive.value(int(init))
+                        init: float = 5, min_value: float = 1, max_value: float = 100, step: float = 1):
+    val = reactive.value(float(init))
 
     @reactive.effect
     def _sync():

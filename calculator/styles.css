@@ -32,10 +32,6 @@
   gap: 1rem;
 }
 
-.accordion {
-  margin-top: 0.5rem;
-}
-
 .accordion_title, .accordion-title {
   display: flex;
   justify-content: space-between;
@@ -184,6 +180,14 @@ input[type="radio"]:checked +span {
   margin: 1rem;
 }
 
+#has_sniper +label {
+  padding-inline: .3rem;
+  padding-top: .1rem;
+  margin-bottom: -1rem;
+  font-size: .7rem;
+  align-self: end;
+}
+
 .form-check-input:checked +label {
   background:#009456;
 }
@@ -230,7 +234,6 @@ input[name="graph_style"] +span {
   padding: 0;
   padding-left: .5rem !important;
   padding-right: .5rem;
-  margin: auto;
   margin-top: .1rem;
   margin-bottom: .5rem;
   align-content: space-between;
@@ -349,7 +352,7 @@ input[name="effectiveness"][value="0.25"]:hover +span{
 
 .form-switch {
   display: flex;
-  justify-content: end;
+  justify-content: center;
 }
 
 .form-control {
