@@ -277,6 +277,7 @@ def atk_spa_calculator_page():
                                     class_="io_row",
                                 ),
                                 ui.div(
+                                    {"style": "margin-top: -1rem; margin-bottom: -1rem;"},
                                     ui.div(
                                         number_input(id="atk_spa_stage", label="",
                                                      init=0, min_value=-6, max_value=6, layout="stages"),
@@ -300,13 +301,21 @@ def atk_spa_calculator_page():
                                             "input.simulate_generation == 4",
                                             ui.input_switch("has_sniper", "Sniper"),
                                         ),
+                                        ui.panel_conditional(
+                                            "input.simulate_generation == 5 || input.simulate_generation == 6",
+                                            {"style": "visibility: hidden;"},
+                                            ui.input_switch("padding_element", ""),
+                                        ),
                                         ui.input_switch("is_crit", "CRIT"),
                                         ui.input_switch("is_stab", "STAB"),
+                                        ui.panel_conditional(
+                                            "input.simulate_generation == 4 || input.simulate_generation == 5 "
+                                            "|| input.simulate_generation == 6",
+                                            ui.input_switch("has_adaptability", "Adaptability"),
+                                        ),
                                         class_="ui_column big_buttons small_gap",
                                     ),
-                                    ui.output_ui("crit_button"),
                                     ui.div(
-                                        {"style": "margin-top: -1rem; margin-bottom: -1rem;"},
                                         ui.input_radio_buttons(
                                             "effectiveness",
                                             "",
@@ -1243,6 +1252,9 @@ def server(input: Inputs, output: Outputs, session: Session):
         is_stab = input.is_stab()
         stab_modifier = 1.5 if is_stab else 1
 
+        if gen_used != 3:
+            if input.has_adaptability() and is_stab: stab_modifier = 2
+
         is_crit = input.is_crit()
         crit_multiplier = 2
 
@@ -1313,7 +1325,7 @@ def server(input: Inputs, output: Outputs, session: Session):
                     double_damage_or_charge_modifier = 2 if has_double_damage_or_charge else 1
 
                     move_effective_power = calc_move_power_modifiers(move_power, has_sport,
-                                                                    has_power_modifying_ability)
+                                                                     has_power_modifying_ability)
                 else:
                     is_physical = False
                     double_damage_or_charge_modifier = 1
@@ -1452,7 +1464,7 @@ def server(input: Inputs, output: Outputs, session: Session):
                         if min_offense == -1:
                             min_offense = x
 
-        if sum(dmg)==0 and max_offense_guess > 5:
+        if sum(dmg) == 0 and max_offense_guess > 5:
             raise SafeException("The given DMG value can't be reached with these Parameters. "
                                 "\n\nAll Gens: If all parameters are correct, consider the mon to have a different ability or an item"
                                 "\n\nGen 4+: Due to not being as granular as the game the rounding might not be the same, "

@@ -188,12 +188,23 @@ input[type="radio"]:checked +span {
   align-self: end;
 }
 
+#has_adaptability +label {
+  border-start-end-radius: 0;
+  border-start-start-radius: 0;
+  padding-inline: .4rem;
+  padding-bottom: .1rem;
+  margin-top: -1rem;
+  font-size: .7rem;
+  align-self: start;
+}
+
 .form-check-input:checked +label {
   background:#009456;
 }
 
 label[for="is_stab"], label[for="is_crit"] {
   width: 5rem;
+  z-index: 2
 }
 
 input[type="radio"] +span, .form-check-input +label {
