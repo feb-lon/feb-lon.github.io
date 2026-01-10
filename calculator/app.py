@@ -2,7 +2,7 @@ from math import floor, ceil
 from typing import Tuple
 
 import matplotlib.pyplot as plt
-from shiny.types import SilentException
+from shiny.types import SilentException, SafeException
 
 from shared import *
 from number_input import *
@@ -16,9 +16,9 @@ def iv_calculation_page():
         "IV Calculator",
         element_and_tooltip(
             ui.h2("IV Calculator"),
+            1,
             "As there is currently no method to track EVs, i would "
             "not recommend using this when having no idea what to do about EVs",
-            1,
         ),
         ui.div(
             ui.div(
@@ -87,8 +87,8 @@ def pokemon_info_page():
                     ui.card_header(
                         element_and_tooltip(
                             ui.h3("Pokemon Information"),
-                            "XP information valid for Generations 2 - 4",
                             1,
+                            "XP information valid for Generations 2 - 4",
                         ),
                     ),
                     ui.div(
@@ -113,6 +113,7 @@ def pokemon_info_page():
                 ui.card(
                     element_and_tooltip(
                         ui.card_header("XP Information 1"),
+                        0,
                         "Valid for all Generations.",
                     ),
                     xp_requirement_input(id="xp_requirement_1", from_level=5, to_level=8),
@@ -134,15 +135,13 @@ def pokemon_info_page():
                 ui.card_header(
                     element_and_tooltip(
                         ui.h3("Confusion Information"),
-                        (
-                            ui.span("When using only inputs above the graph, output usable for every Generation."),
-                            ui.span(),
-                            ui.span("HOWEVER in Generations 1 - 2, there is no random factor for Confusion. "),
-                            ui.span("This means the result is always the highest DMG value (furthest to the right)"),
-                            ui.span(),
-                            ui.span("Inputs below the graph should only be used in Generation 3"),
-                        ),
                         1,
+                        ui.span("When using only inputs above the graph, output usable for every Generation."),
+                        ui.span(),
+                        ui.span("HOWEVER in Generations 1 - 2, there is no random factor for Confusion. "),
+                        ui.span("This means the result is always the highest DMG value (furthest to the right)"),
+                        ui.span(),
+                        ui.span("Inputs below the graph should only be used in Generation 3"),
                     ),
                 ),
                 ui.div(
@@ -373,11 +372,8 @@ def atk_spa_calculator_page():
                             "simulate_generation",
                             element_and_tooltip(
                                 "Generation:",
-                                (
-                                    ui.span("Effectiveness 1x- is only relevant in Generations 1 - 4"),
-                                    ui.span("Detailed inputs only available for Generation 3")
-                                ),
                                 1,
+                                ui.span("Effectiveness 1x- is only relevant in Generations 1 - 4")
                             ),
                             {3: "3", 4: "4", 5: "5", 6: "6+"},
                             inline=True,
@@ -402,10 +398,12 @@ def atk_spa_calculator_page():
                                 ui.input_switch("is_burned", "Enemy Burned"),
                                 element_and_tooltip(
                                     ui.input_switch("ff_active", "Flashfire Bonus"),
+                                    0,
                                     "Getting hit by a fire move gives this bonus for the whole fight.",
                                 ),
                                 element_and_tooltip(
                                     ui.input_switch("has_dd_charge", "Double Damage / Charge Bonus"),
+                                    0,
                                     double_damage_tooltip(),
                                 ),
                                 class_="io_row"
@@ -413,11 +411,13 @@ def atk_spa_calculator_page():
                             ui.div(
                                 element_and_tooltip(
                                     ui.input_switch("is_physical", "Move is Physical"),
+                                    0,
                                     "Only used for determining minimum DMG (physical DMG has higher minimum DMG)",
                                 ),
                                 ui.input_radio_buttons("enemy_ability",
                                                        element_and_tooltip(
                                                            ("Enemy Ability: ", spacer(1, 0)),
+                                                           0,
                                                            ability_tooltip(),
                                                        ),
                                                        {"1": "generic", "1.5x power": "1.5x Move Power",
@@ -467,20 +467,42 @@ def atk_spa_calculator_page():
                 ui.panel_conditional(
                     "input.simulate_generation == 4 & input.use_detailed_inputs",
                     {"style": "width: 85%"},
-                    ui.div(
-                        "Early Stage Modifier",
-                        number_input("early_modifier_gen_4", min_value=0, max_value=50, init=1, step=0.25),
-                        class_="io_column",
+                    ui.card(
+                        element_and_tooltip(
+                            "Early Stage Modifier",
+                            1,
+                            ui.span("Burn: 0.5"),
+                            ui.span("Reflect/Lightscreen: 0.5"),
+                            ui.span("moreTargets(Double Battle): 0.75"),
+                            ui.span("Weather: 0.5, 1, 1.5"),
+                            ui.span("Flash Fire: 1.5"),
+                        ),
+                        number_input(id="early_modifier_gen_4", init=1, min_value=0.25, max_value=50, step=0.25),
+                        class_="io_row",
                     ),
-                    ui.div(
-                        "Mid Stage Modifier",
-                        number_input("mid_modifier_gen_4", min_value=1, max_value=3, init=1, step=0.5),
-                        class_="io_column",
+                    ui.card(
+                        element_and_tooltip(
+                            "Mid Stage Modifier",
+                            1,
+                            ui.span("Life Orb: 1.3"),
+                            ui.span("Metronome(item): 1.0-2.0"),
+                            ui.span("Me First: 1.5"),
+                        ),
+                        number_input(id="mid_modifier_gen_4", init=1, min_value=0.5, max_value=3, step=0.5),
+                        class_="io_row",
                     ),
-                    ui.div(
-                        "Late Stage Modifier",
-                        number_input("late_modifier_gen_4", min_value=0, max_value=2, init=1, step=0.25),
-                        class_="io_column",
+                    ui.card(
+                        element_and_tooltip(
+                            "Late Stage Modifier",
+                            1,
+                            ui.span("Solid Rock: 0.75"),
+                            ui.span("Filter: 0.75"),
+                            ui.span("Expert Belt: 1.2"),
+                            ui.span("Tinted Lens: 2"),
+                            ui.span("Type-Weakening-Berries: 0.5")
+                        ),
+                        number_input(id="late_modifier_gen_4", init=1, min_value=0.25, max_value=3, step=0.25),
+                        class_="io_row",
                     ),
                     class_="spread_row top",
                 ),
@@ -488,15 +510,31 @@ def atk_spa_calculator_page():
                     "(input.simulate_generation == 5 || input.simulate_generation == 6) "
                     "& input.use_detailed_inputs",
                     {"style": "width: 85%"},
-                    ui.div(
-                        "Mid Stage Modifier",
-                        number_input("mid_modifier_gen_5_onward", min_value=1, max_value=3, init=1, step=0.5),
-                        class_="io_column",
+                    ui.card(
+                        element_and_tooltip(
+                            "Mid Stage Modifier",
+                            1,
+                            ui.span("moreTargets(Double Battle): 0.75"),
+                            ui.span("moreTargets(Battle Royals): 0.5"),
+                            ui.span("Parental Bond 2nd Strike: 0.5 (Gen 6), 0.25 (other Gens)"),
+                            ui.span("Weather: 0.5, 1, 1.5"),
+                            ui.span("Glaive Rush: 2"),
+                        ),
+                        number_input("mid_modifier_gen_5_onward", min_value=0.25, max_value=10, init=1, step=0.5),
+                        class_="io_row",
                     ),
-                    ui.div(
-                        "Late Stage Modifier",
-                        number_input("late_modifier_gen_5_onward", min_value=0, max_value=2, init=1, step=0.25),
-                        class_="io_column",
+                    ui.card(
+                        element_and_tooltip(
+                            "Late Stage Modifier",
+                            1,
+                            ui.span("Burn: 0.5"),
+                            ui.span("other: see below"),
+                            ui.span("Z-Move vs protected target: 0.25"),
+                            ui.span("Tera Shield: 0.2-0.75"),
+                            other_factors(),
+                        ),
+                        number_input("late_modifier_gen_5_onward", min_value=0.25, max_value=20, init=1, step=0.25),
+                        class_="io_row",
                     ),
                     class_="spread_row top",
                 ),
@@ -736,6 +774,10 @@ def steel_type():
     return ui.tags.img(src="steel_type.png", width=type_image_size, class_="tooltip_img")
 
 
+def other_factors():
+    return ui.tags.img(src="gen_5_onward_other_factors.png", width="1000px")
+
+
 def empty_text():
     return ui.tags.div({"style": "height:1.5rem;"})
 
@@ -744,14 +786,14 @@ def spacer(width: float, height: float):
     return ui.tags.div({"style": f"width:{width}rem;height:{height}rem;"})
 
 
-def element_and_tooltip(tag, tooltip_content, space=0):
+def element_and_tooltip(tag, space=0, *args):
     return ui.div(
         tag,
         spacer(space, 0),
         ui.tooltip(
             question_circle_fill,
             ui.card(
-                tooltip_content,
+                args,
                 class_="tooltip_card",
             ),
         ),
@@ -1183,6 +1225,7 @@ def server(input: Inputs, output: Outputs, session: Session):
     @render.plot
     def calculate_offense():
         gen_used = int(input.simulate_generation())
+        is_detailed = input.use_detailed_inputs()
 
         if not enemy_level_input():
             raise SilentException()
@@ -1238,39 +1281,49 @@ def server(input: Inputs, output: Outputs, session: Session):
                 if effectiveness < 1: eff1 = 0.5
 
             if gen_used == 3:
-                enemy_ability_atk_spa_modifier = 1
-                has_power_modifying_ability = False
-                ability_input = input.enemy_ability()
-                if ability_input != "1.5x power":
-                    enemy_ability_atk_spa_modifier = float(ability_input)
+                if is_detailed:
+                    enemy_ability_atk_spa_modifier = 1
+                    has_power_modifying_ability = False
+                    ability_input = input.enemy_ability()
+                    if ability_input != "1.5x power":
+                        enemy_ability_atk_spa_modifier = float(ability_input)
+                    else:
+                        has_power_modifying_ability = True
+
+                    has_reflect_lightscreen = input.has_reflect_lightscreen()
+                    reflect_lightscreen_modifier = 1 if (is_crit or not has_reflect_lightscreen) else 0.5
+
+                    weather_modifier = float(input.weather_modifier())
+
+                    has_thick_fat = input.has_thick_fat()
+                    thick_fat_modifier = 1 if not has_thick_fat else 0.5
+
+                    has_sport = input.mud_or_water_sport_active()
+
+                    is_burned = input.is_burned()
+                    burned_modifier = 0.5 if is_burned else 1
+
+                    ff_active = input.ff_active()
+                    ff_modifier = 1.5 if ff_active else 1
+
+                    # only used for minimum damage (increases minimum dmg at that point in the calc from 0 to 1 if physical)
+                    is_physical = input.is_physical()
+
+                    has_double_damage_or_charge = input.has_dd_charge()
+                    double_damage_or_charge_modifier = 2 if has_double_damage_or_charge else 1
+
+                    move_effective_power = calc_move_power_modifiers(move_power, has_sport,
+                                                                    has_power_modifying_ability)
                 else:
-                    has_power_modifying_ability = True
-
-                has_reflect_lightscreen = input.has_reflect_lightscreen()
-                reflect_lightscreen_modifier = 1 if (is_crit or not has_reflect_lightscreen) else 0.5
-
-                weather_modifier = float(input.weather_modifier())
-
-                has_thick_fat = input.has_thick_fat()
-                thick_fat_modifier = 1 if not has_thick_fat else 0.5
-
-                has_sport = input.mud_or_water_sport_active()
-                sport_modifier = 1 if not has_sport else 0.5
-
-                is_burned = input.is_burned()
-                burned_modifier = 0.5 if is_burned else 1
-
-                ff_active = input.ff_active()
-                ff_modifier = 1.5 if ff_active else 1
-
-                # only used for minimum damage (increases minimum dmg at that point in the calc from 0 to 1 if physical)
-                is_physical = input.is_physical()
-
-                has_double_damage_or_charge = input.has_dd_charge()
-                double_damage_or_charge_modifier = 2 if has_double_damage_or_charge else 1
-
-                move_effective_power = calc_move_power_modifiers(move_power, has_sport,
-                                                                 has_power_modifying_ability)
+                    is_physical = False
+                    double_damage_or_charge_modifier = 1
+                    ff_modifier = 1
+                    weather_modifier = 1
+                    reflect_lightscreen_modifier = 1
+                    burned_modifier = 1
+                    move_effective_power = move_power
+                    thick_fat_modifier = 1
+                    enemy_ability_atk_spa_modifier = 1
 
                 # get rough lower / upper limits of possible ATK / SPA values to reduce calculations needed
                 min_offense_guess, max_offense_guess = calc_offense_backwards_gen_3(
@@ -1314,15 +1367,24 @@ def server(input: Inputs, output: Outputs, session: Session):
                             if min_offense == -1:
                                 min_offense = x
             else:
+                early_mod = 1
+                mid_mod = 1
+                late_mod = 1
+
+                if is_detailed:
+                    early_mod = early_modifier_gen_4_input()
+                    mid_mod = mid_modifier_gen_4_input()
+                    late_mod = late_modifier_gen_4_input()
+
                 # get rough lower / upper limits of possible ATK / SPA values to reduce calculations needed
                 min_offense_guess, max_offense_guess = calc_offense_backwards_gen_4(
                     damage_received, eff2, eff1, stab_modifier, crit_modifier,
-                    effective_def_spd, calc_base_power(enemy_level, move_power), applied_atk_spa_stage)
-                base_power = calc_base_power(enemy_level, move_power)
+                    effective_def_spd, calc_base_power(enemy_level, move_power), applied_atk_spa_stage,
+                    early_mod, mid_mod, late_mod)
 
+                base_power = calc_base_power(enemy_level, move_power)
                 min_offense = -1
                 max_offense = -1
-
                 dmg = []
                 values = []
                 # go through the previously determined upper and lower limits
@@ -1330,14 +1392,14 @@ def server(input: Inputs, output: Outputs, session: Session):
                     dmg.append(0)
                     values.append([])
                     # calc the whole dmg formula except random factor, effectiveness and stab
-                    pre_rnd_dmg = floor((floor(floor(base_power * calc_stat_stages(x, applied_atk_spa_stage)
-                                                     / effective_def_spd) / 50) + 2) * crit_modifier)
+                    pre_rnd_dmg = floor(floor(floor(floor(floor(base_power * calc_stat_stages(x, applied_atk_spa_stage)
+                                                                / effective_def_spd) / 50) * early_mod + 2)
+                                              * crit_modifier) * mid_mod)
 
                     for y in range(16):
                         # apply the random factor of the dmg calculation, and use it if it matches the dmg we received
-                        value = max(1, floor(pre_rnd_dmg * (y + 85) / 100))
-                        value = max(1, floor(
-                            floor(floor(floor(pre_rnd_dmg * (y + 85) / 100) * stab_modifier) * eff1) * eff2))
+                        value = max(1, floor(floor(floor(
+                            floor(floor(pre_rnd_dmg * (y + 85) / 100) * stab_modifier) * eff1) * eff2) * late_mod))
                         values[x - min_offense_guess].append(value)
                         if floor(value == damage_received):
                             dmg[x - min_offense_guess] += 1
@@ -1350,10 +1412,20 @@ def server(input: Inputs, output: Outputs, session: Session):
                 effectiveness = 1
             else:
                 effectiveness = float(input.effectiveness())
-            min_offense_guess, max_offense_guess = (
-                calc_offense_backwards_gen_5_onward(damage_received, effectiveness, stab_modifier, crit_modifier,
-                                                    effective_def_spd, calc_base_power(enemy_level, move_power),
-                                                    applied_atk_spa_stage))
+
+            mid_mod = 1
+            late_mod = 1
+            if is_detailed:
+                mid_mod = mid_modifier_gen_5_onward_input()
+                late_mod = late_modifier_gen_5_onward_input()
+
+            min_offense_guess, max_offense_guess = calc_offense_backwards_gen_5_onward(damage_received, effectiveness,
+                                                                                       stab_modifier, crit_modifier,
+                                                                                       effective_def_spd,
+                                                                                       calc_base_power(enemy_level,
+                                                                                                       move_power),
+                                                                                       applied_atk_spa_stage, mid_mod,
+                                                                                       late_mod)
 
             min_offense = -1
             max_offense = -1
@@ -1367,14 +1439,12 @@ def server(input: Inputs, output: Outputs, session: Session):
                 dmg.append(0)
                 values.append([])
                 # calc the dmg formula except random factor for this specific ATK / SPA value until rnd value
-                pre_rnd_dmg = floor(floor(floor(base_power * calc_stat_stages(x, applied_atk_spa_stage)
-                                                / effective_def_spd) / 50 + 2) * crit_modifier)
+                pre_rnd_dmg = floor(gen_5_round(floor(floor(base_power * calc_stat_stages(x, applied_atk_spa_stage)
+                                                            / effective_def_spd) / 50 + 2) * mid_mod) * crit_modifier)
                 for y in range(16):
                     # apply the random factor of the dmg calculation, and use it if it matches the dmg we received
-                    value = max(1, floor(gen_5_round(
-                        floor(pre_rnd_dmg * (y + 85) / 100)
-                        * stab_modifier)
-                                         * effectiveness))
+                    value = max(1, gen_5_round(floor(gen_5_round(floor(pre_rnd_dmg * (y + 85) / 100) * stab_modifier)
+                                                     * effectiveness) * late_mod))
                     values[x - min_offense_guess].append(value)
                     if floor(value == damage_received):
                         dmg[x - min_offense_guess] += 1
@@ -1382,6 +1452,12 @@ def server(input: Inputs, output: Outputs, session: Session):
                         if min_offense == -1:
                             min_offense = x
 
+        if sum(dmg)==0 and max_offense_guess > 5:
+            raise SafeException("The given DMG value can't be reached with these Parameters. "
+                                "\n\nAll Gens: If all parameters are correct, consider the mon to have a different ability or an item"
+                                "\n\nGen 4+: Due to not being as granular as the game the rounding might not be the same, "
+                                "\nespecially if several factors are submitted through a single input (like Sniper + Magnitude vs Dig in gen5+ late stage modifier). "
+                                "\n\nIn these cases, trying +-1 DMG (or +-2DMG) and inspecting their \"All DMG Values\" styled graph might be helpful.")
         if max_offense < 1:
             raise SilentException
         graph_style = input.graph_style()
@@ -1438,6 +1514,7 @@ def server(input: Inputs, output: Outputs, session: Session):
 
             num_rows = len(df)
             col_names = list(df.columns)
+            target_boxes = []
 
             # write dmg numbers on the bars
             for patch_index, rect in enumerate(plot.patches):
@@ -1457,7 +1534,12 @@ def server(input: Inputs, output: Outputs, session: Session):
                         color='black', fontsize=13,
                         fontweight=('bold' if is_searched_value else 'normal'),
                     )
-                    if is_searched_value: rect.set_linewidth(2)
+                    if is_searched_value:
+                        rect.set_linewidth(2)
+                        target_boxes.append(rect)
+
+            for box in target_boxes:
+                box.set_zorder(2)
             plot.get_legend().remove()
             # to avoid the graph getting to crowded with labels
             if max_offense - min_offense < 20:
@@ -1545,18 +1627,19 @@ def server(input: Inputs, output: Outputs, session: Session):
     # see https://bulbapedia.bulbagarden.net/wiki/Damage#Generation_IV for a good overview
     def calc_offense_backwards_gen_4(damage_received: int, eff1: float, eff2: float, stab_modifier: float,
                                      crit_modifier: float, effective_def_spd: int, base_power: int,
-                                     atk_spa_stage: int) -> Tuple[int, int]:
+                                     atk_spa_stage: int, early_mod: float, mid_mod: float, late_mod: float) \
+            -> Tuple[int, int]:
         offense_guess_min = damage_received
         offense_guess_max = damage_received
 
-        offense_guess_min = floor(floor(floor(offense_guess_min / eff2) / eff1) / stab_modifier)
-        offense_guess_max = ceil(ceil(ceil(offense_guess_max / eff2) / eff1) / stab_modifier)
+        offense_guess_min = floor(floor(floor(floor(offense_guess_min / late_mod) / eff2) / eff1) / stab_modifier)
+        offense_guess_max = ceil(ceil(ceil(ceil(offense_guess_max / late_mod) / eff2) / eff1) / stab_modifier)
 
-        offense_guess_min = ceil(offense_guess_min / crit_modifier) - 2
-        offense_guess_max = ceil(ceil(offense_guess_max / 0.85) / crit_modifier) - 2
+        offense_guess_min = ceil(floor(offense_guess_min / mid_mod) / crit_modifier) - 2
+        offense_guess_max = ceil(ceil(ceil(offense_guess_max / mid_mod) / 0.85) / crit_modifier) - 2
 
-        offense_guess_min = offense_guess_min * 50 * effective_def_spd
-        offense_guess_max = (offense_guess_max * 50 + 49) * effective_def_spd + effective_def_spd - 1
+        offense_guess_min = floor(offense_guess_min / early_mod) * 50 * effective_def_spd
+        offense_guess_max = (ceil(offense_guess_max / early_mod) * 50 + 49) * effective_def_spd + effective_def_spd - 1
 
         offense_guess_min = calc_stat_stages_backwards(floor(offense_guess_min / base_power), atk_spa_stage)[0]
         offense_guess_max = calc_stat_stages_backwards(ceil(offense_guess_max / base_power), atk_spa_stage)[1]
@@ -1567,9 +1650,9 @@ def server(input: Inputs, output: Outputs, session: Session):
     # see https://bulbapedia.bulbagarden.net/wiki/Damage#Generation_V_onward for a good overview
     def calc_offense_backwards_gen_5_onward(damage_received: int, effectiveness: float, stab_modifier: float,
                                             crit_modifier: float, effective_def_spd: int, base_power: int,
-                                            atk_spa_stage: int) -> Tuple[int, int]:
-        offense_guess_min = damage_received
-        offense_guess_max = damage_received
+                                            atk_spa_stage: int, mid_mod: float, late_mod: float) -> Tuple[int, int]:
+        offense_guess_min = floor(damage_received / late_mod)
+        offense_guess_max = floor(damage_received / late_mod + 1)
 
         # keep both as in the future they might be different at this point
         offense_guess_min = floor(offense_guess_min / effectiveness - 4)
@@ -1581,8 +1664,8 @@ def server(input: Inputs, output: Outputs, session: Session):
         # offense guess min gets divided by 1
         offense_guess_max = ceil(offense_guess_max / 0.85)
 
-        offense_guess_min = floor(offense_guess_min / crit_modifier) - 2
-        offense_guess_max = floor(offense_guess_max / crit_modifier + 1) - 2
+        offense_guess_min = floor(floor(offense_guess_min / crit_modifier) / mid_mod) - 2
+        offense_guess_max = floor(floor(offense_guess_max / crit_modifier + 1) / mid_mod + 1) - 2
 
         offense_guess_min = offense_guess_min * 50 * effective_def_spd
         offense_guess_max = (offense_guess_max * 50 + 49) * effective_def_spd + effective_def_spd - 1
@@ -1828,19 +1911,17 @@ def server(input: Inputs, output: Outputs, session: Session):
     xp_requirement_input_info_3 = xp_requirement_input_server(id="xp_requirement_3",
                                                               from_level=5, to_level=8)
 
-    early_modifier_gen_4_input = number_input_server("early_modifier_gen_4", min_value=0,
-                                                     max_value=50, init=1, step=0.25),
-    mid_modifier_gen_4_input = number_input_server("mid_modifier_gen_4", min_value=1,
-                                                   max_value=3, init=1, step=0.50),
-    late_modifier_gen_4_input = number_input_server("late_modifier_gen_4", min_value=1,
-                                                    max_value=3, init=1, step=0.50),
+    early_modifier_gen_4_input = number_input_server(id="early_modifier_gen_4", min_value=0.25,
+                                                     max_value=50, init=1, step=0.25)
+    mid_modifier_gen_4_input = number_input_server(id="mid_modifier_gen_4", min_value=1,
+                                                   max_value=3, init=1, step=0.50)
+    late_modifier_gen_4_input = number_input_server(id="late_modifier_gen_4", min_value=0.5,
+                                                    max_value=3, init=1, step=0.25)
 
-    early_modifier_gen_5_onward_input = number_input_server("early_modifier_gen_5_onward", min_value=0,
-                                                            max_value=50, init=1, step=0.25),
-    mid_modifier_gen_5_onward_input = number_input_server("mid_modifier_gen_5_onward", min_value=1,
-                                                          max_value=3, init=1, step=0.50),
-    late_modifier_gen_5_onward_input = number_input_server("late_modifier_gen_5_onward", min_value=1,
-                                                           max_value=3, init=1, step=0.50),
+    mid_modifier_gen_5_onward_input = number_input_server(id="mid_modifier_gen_5_onward", min_value=0.25,
+                                                          max_value=10, init=1, step=0.50)
+    late_modifier_gen_5_onward_input = number_input_server(id="late_modifier_gen_5_onward", min_value=0.25,
+                                                           max_value=20, init=1, step=0.25)
 
 
 app = App(app_ui, server,
