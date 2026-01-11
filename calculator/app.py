@@ -22,40 +22,36 @@ def iv_calculation_page():
         ),
         ui.div(
             ui.div(
-                {"style": "width: 30%"},
+                {"style": "width: 20%"},
                 ui.card(
-                    ui.div(
-                        "Select Pokemon:",
-                        ui.input_selectize("pokemon_iv", "",
-                                           sorted(pokemons.index), selected="Lickitung"),
-                        ui.output_code("pokemon_bst_iv"),
-                        class_="io_row",
-                    ),
-                    ui.div(
+                    ui.card_body(
                         {"style": "text-align: center"},
-                        ui.input_radio_buttons("nature_plus_iv", "Nature + :",
-                                               ["=", "+ ATK", "+ DEF", "+ SPA", "+ SPD", "+ SPE"]),
-                        ui.input_radio_buttons("nature_minus_iv", "Nature - :",
-                                               ["=", "- ATK", "- DEF", "- SPA", "- SPD", "- SPE"]),
-                        class_="spread_row",
+                        "Select Pokemon:",
+                        ui.div(
+                            ui.input_selectize("pokemon_iv", "",
+                                               sorted(pokemons.index), selected="Lickitung"),
+                            ui.output_code("pokemon_bst_iv"),
+                            class_="io_row",
+                        ),
+                        ui.div(
+                            ui.input_radio_buttons("nature_plus_iv", "Nature + :",
+                                                   ["=", "+ ATK", "+ DEF", "+ SPA", "+ SPD", "+ SPE"]),
+                            ui.input_radio_buttons("nature_minus_iv", "Nature - :",
+                                                   ["=", "- ATK", "- DEF", "- SPA", "- SPD", "- SPE"]),
+                            class_="spread_row",
+                        ),
+                        class_="io_column small_gap",
                     ),
-                ),
-                ui.card(
-                    ui.input_action_button("save_stats_iv", "Save Stats"),
-                    ui.input_action_button("prefill_next_level_iv", "Prefill Next Level"),
-                    ui.input_action_button("prefill_current_level_iv", "Prefill Current Level"),
-                    ui.input_action_button("delete_row_iv", "Delete Selected Row"),
-                    ui.input_action_button("reset_all_iv", "Clear All"),
-                    class_="io_column",
                 ),
             ),
             ui.div(
-                {"style": "width: 60%"},
+                {"style": "width: 70%"},
                 ui.card(
                     ui.output_table("result_iv"),
                 ),
                 ui.card(
                     ui.div(
+                        ui.input_action_button("prefill_current_level_iv", "Guess stats for this Level ->"),
                         number_input(id="level_iv", label="Level:", init=5, min_value=1, max_value=100),
                         number_input(id="hp_iv", label="HP:", init=22, min_value=11, max_value=999),
                         number_input(id="atk_iv", label="ATK:", init=12, min_value=4, max_value=999),
@@ -64,12 +60,21 @@ def iv_calculation_page():
                         number_input(id="spd_iv", label="SPD:", init=12, min_value=4, max_value=999),
                         number_input(id="spe_iv", label="SPE:", init=12, min_value=4, max_value=999),
                         # ui.input_selectize("mons_defeated_iv", "Mons Defeated at this Level:", sorted(pokemons.index), multiple=True, class_="io_row"),
+                        ui.input_action_button("save_stats_iv", "Save Stats"),
                         class_="io_row",
                     ),
                 ),
-                ui.div(
-                    ui.layout_columns(ui.h5("Stat History (editable)")),
-                    ui.output_data_frame("history_iv")
+                ui.card(
+                    ui.card_body(
+                        ui.div(
+                            ui.layout_columns(ui.h5("Stat History (editable)")),
+                            ui.input_action_button("delete_row_iv", "Delete Selected Row"),
+                            ui.input_action_button("reset_all_iv", "Clear All"),
+                            class_="io_row"
+                        ),
+                        ui.output_data_frame("history_iv"),
+                        class_="io_column",
+                    ),
                 ),
             ),
             class_="top_layer_row",
@@ -106,6 +111,31 @@ def pokemon_info_page():
                     ),
                     ui.output_table("calculate_xp_ev_info"),
                     class_="io_column"
+                ),
+                ui.card(
+                    ui.card_header(
+                        element_and_tooltip(
+                            ui.h3("Nature Information"),
+                            1,
+                            "Generations 3+",
+                        ),
+                    ),
+                    ui.card_body(
+                        ui.layout_columns(
+                            {"style": "align-items: center; justify-items: start;"},
+                            ui.span("My Nature:"),
+                            ui.span("With this Nature:"),
+                            ui.input_radio_buttons("nature_from_info", "", ["+", "=", "-"], selected="-", inline=True),
+                            ui.input_radio_buttons("nature_to_info", "", ["+", "=", "-"], selected="+", inline=True),
+                            ui.span("My Stat:"),
+                            ui.span("It would have this stat:"),
+                            number_input(id="stat_from_info", init=9, min_value=1, max_value=999),
+                            ui.output_code("nature_info"),
+                            col_widths=6,
+                            class_="io_column"
+                        ),
+                        class_="spread_row",
+                    ),
                 ),
             ),
             ui.div(
@@ -1118,6 +1148,46 @@ def server(input: Inputs, output: Outputs, session: Session):
         table.columns = [''] * len(table.columns)
         return table
 
+    @render.text
+    def nature_info():
+        nature_from = input.nature_from_info()
+        nature_to = input.nature_to_info()
+        stat_from = stat_from_info_input()
+
+        # return input if nature_from = nature_to
+        if nature_from == nature_to:
+            return stat_from
+
+        stat_result_min = stat_from
+        stat_result_max = stat_from
+        stat_result = stat_from
+
+        # convert input to neutral
+        if nature_from == "-":
+            stat_result_min = ceil(stat_from / 0.9)
+            stat_result_max = ceil(stat_from / 0.9) + (1 if stat_from % 9 == 0 else 0)
+            if nature_to == "+":
+                stat_result_min = floor(stat_result_min * 1.1)
+                stat_result_max = floor(stat_result_max * 1.1)
+            if stat_result_min != stat_result_max:
+                return str(stat_result_min) + " or " + str(stat_result_max)
+            else:
+                stat_result = stat_result_min
+        else:
+            if nature_from == "+":
+                # floor(int * 1.1) is never int * 11 + 10
+                if stat_from % 11 == 10:
+                    return "<- Not Possible"
+                stat_result = ceil(stat_from / 1.1)
+
+            # convert stat from neutral to + / -
+            if nature_to == "-":
+                stat_result = floor(stat_result_min * 0.9)
+            elif nature_to == "+":
+                stat_result = floor(stat_result_min * 1.1)
+
+        return str(stat_result)
+
     # calculates the confusion damage a player might receive.
     # aside from base inputs (atk+stage, def+stage, level) inputs are highly reliant on generaion, so these parts of
     # the formula should only be used in generation 3
@@ -1915,6 +1985,7 @@ def server(input: Inputs, output: Outputs, session: Session):
                                          init=20, min_value=1, max_value=999)
     def_stage_info_input = number_input_server(id="def_stage_info", label="DEF Stage:",
                                                init=0, min_value=-6, max_value=6)
+    stat_from_info_input = number_input_server(id="stat_from_info", init=9, min_value=1, max_value=999)
 
     xp_requirement_input_info_1 = xp_requirement_input_server(id="xp_requirement_1",
                                                               from_level=5, to_level=8)

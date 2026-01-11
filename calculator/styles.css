@@ -18,6 +18,7 @@
 
 .io_row {
   display: flex;
+  flex-direction: row;
   justify-content: space-between;
   align-items: center;
 }
@@ -55,6 +56,10 @@
   gap: .2rem;
 }
 
+.io_column.top {
+  align-self: start;
+}
+
 .io_column_small {
   padding-top: 0.2rem;
   gap: .1rem;
@@ -85,6 +90,7 @@
 
 .spread_row, .whole_row {
   display: flex;
+  flex-direction: row;
   padding: .5rem;
 }
 
