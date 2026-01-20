@@ -21,7 +21,7 @@ def number_input(init: float, label = "", min_value: float = 1, max_value: float
 
 #  label as input parameter to enable user just copy paste input parameter
 @module.server
-def number_input_server(input: Inputs, output: Outputs, session: Session, id_passed=None, label: str = "",
+def number_input_server(input: Inputs, output: Outputs, session: Session,
                         init: float = 5, min_value: float = 1, max_value: float = 100, step: float = 1):
     val = reactive.value(float(init))
 
@@ -30,6 +30,9 @@ def number_input_server(input: Inputs, output: Outputs, session: Session, id_pas
         value = input.number_value()
         if value is not None:
             val.set(value)
+
+    def set_val(value: float):
+        ui.update_numeric("number_value", value=min(max(value, min_value), max_value), session=session)
 
     @reactive.effect
     @reactive.event(input.increment)
@@ -51,4 +54,4 @@ def number_input_server(input: Inputs, output: Outputs, session: Session, id_pas
             session=session,
         )
 
-    return val
+    return val, set_val

@@ -12,17 +12,27 @@ to help Ironmon players.
 
 ## ATK / SPA Calculator
 
-The biggest problem hereby (and also the biggest motivation for creating this page) is estimating the ATK / SPA of an 
-opponent. 
+This page is the main focus of this website.
+It focuses on one of the biggest challenges in Ironmon:
+Estimating the ATK / SPA of an opponent. 
+
+This calculator was created and tested for use in generation 3, 
+but changing the damage formula to later generations is possible. 
+These however have less input options and were tested less.
+
 
 ## XP / EV Information
 
-Gives information about the Yields from defeating a Pokemon, and can tell the XP difference between two levels.
+Contains Information about:
+- The Yields from defeating a Pokemon, as well its weight and power for Low Kick
+- How a stat would look like with a different nature
+- XP difference between two levels
+- How much confusion damage is to be expected
 
 ## IV Calculator
 
 When catching a new Pokemon, it can be quite useful to know how many IVs a Pokemon has. 
-Adding EVs is planned.
+This calculator currently ignores the topic of EVs completely, which depending on the use-case can be very impactful.
 
 ## Technical Information
 

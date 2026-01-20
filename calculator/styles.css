@@ -1,3 +1,7 @@
+/*
+changing default layout
+*/
+
 .bslib-page-navbar {
   background: whitesmoke;
 }
@@ -16,6 +20,60 @@
   gap: 0.2rem;
 }
 
+.accordion_title, .accordion-title {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+  gap: 2rem;
+  padding-right: .5rem;
+}
+
+.accordion-button {
+  padding-right: 2rem;
+  padding-left: 2rem;
+}
+
+/* override default */
+.shiny-input-container:not(.shiny-input-container-inline) {
+  width: auto;
+}
+
+/* width: auto is sometimes too small */
+div:has(.selectize-control) {
+  min-width: 150px;
+}
+
+.action-button {
+  padding-inline: .8em;
+  padding-top: .4em;
+  padding-bottom: .4em;
+  font-size: .9rem;
+}
+
+pre {
+  border-radius: 12px;
+  border-color: black;
+  background: orange;
+  color: black;
+  margin-top: 0rem;
+  margin-bottom: 0rem;
+  padding: .3rem;
+  padding-left: .5rem;
+  padding-right: .5rem;
+}
+
+/* for the accordion content indicator */
+.noplaceholder {
+  color: white;
+  background:#009456 !important;
+  border-radius: 25px !important;
+}
+
+/*
+custom classes
+*/
+
 .io_row {
   display: flex;
   flex-direction: row;
@@ -31,20 +89,6 @@
   display: flex;
   justify-content: end;
   gap: 1rem;
-}
-
-.accordion_title, .accordion-title {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  width: 100%;
-  gap: 2rem;
-  padding-right: .5rem;
-}
-
-.accordion-button {
-  padding-right: 2rem;
-  padding-left: 2rem;
 }
 
 .io_column, io_column_small {
@@ -84,6 +128,7 @@
   align-content: center;
 }
 
+/* for divs that have switches in them */
 .big_buttons>div>div>label {
   font-size: 1.3rem;
 }
@@ -126,43 +171,26 @@
   gap: 7%;
 }
 
-/* override default */
-.shiny-input-container:not(.shiny-input-container-inline) {
-  width: auto;
+.close_distance {
+  padding: 0;
+  margin: 0;
 }
 
-/* width: auto is sometimes too small */
-div:has(.selectize-control) {
-  min-width: 150px;
+.big_gap {
+  gap: 6rem;
 }
 
-.action-button {
-  padding-inline: .8em;
-  padding-top: .4em;
-  padding-bottom: .4em;
-  font-size: .9rem;
+.small_gap {
+  gap: 1rem;
 }
 
-pre {
-  border-radius: 12px;
-  border-color: black;
-  background: orange;
-  color: black;
-  margin-top: 0rem;
-  margin-bottom: 0rem;
-  padding: .3rem;
-  padding-left: .5rem;
-  padding-right: .5rem;
+.align_bottom {
+  align-items: end;
 }
 
-/* for the accordion content indicator */
-.noplaceholder {
-  color: white;
-  background:#009456 !important;
-  border-radius: 25px !important;
-}
-
-/* inputs */
+/*
+inputs
+*/
 
 input[type="radio"], input[type="checkbox"]{
   display: none;
@@ -182,35 +210,8 @@ input[type="radio"]:checked +span {
   background: #007bc2;
 }
 
-#graph_style>div>.radio {
-  margin: 1rem;
-}
-
-#has_sniper +label {
-  padding-inline: .3rem;
-  padding-top: .1rem;
-  margin-bottom: -1rem;
-  font-size: .7rem;
-  align-self: end;
-}
-
-#has_adaptability +label {
-  border-start-end-radius: 0;
-  border-start-start-radius: 0;
-  padding-inline: .4rem;
-  padding-bottom: .1rem;
-  margin-top: -1rem;
-  font-size: .7rem;
-  align-self: start;
-}
-
 .form-check-input:checked +label {
   background:#009456;
-}
-
-label[for="is_stab"], label[for="is_crit"] {
-  width: 5rem;
-  z-index: 2
 }
 
 input[type="radio"] +span, .form-check-input +label {
@@ -232,14 +233,6 @@ input[type="radio"] +span, .form-check-input +label {
 .radio>label>span, .radio-inline>label>span {
   display: block;
   border-radius: 0;
-}
-
-input[name="effectiveness"] +span, input[name="nature_plus_iv"] +span, input[name="nature_minus_iv"] +span {
- width: 4rem;
-}
-
-input[name="graph_style"] +span {
- width: 10rem;
 }
 
 .radio-inline, .radio  {
@@ -307,61 +300,6 @@ input[type="checkbox"]:hover +label {
   background: #BFEEDA;
 }
 
-input[name="effectiveness"][value="4"]:checked +span{
-  background: #009456 !important;
-  color: white;
-  border-color: black;
-}
-
-input[name="effectiveness"][value="4"]:hover +span{
-  background: #80CAAB !important;
-  color: black;
-}
-
-input[name="effectiveness"][value="2"]:checked +span, input[name="weather_modifier"][value="1.5"]:checked +span{
-  background: #4E9E3A !important;
-  color: white;
-  border-color: black;
-}
-
-input[name="effectiveness"][value="2"]:hover +span, input[name="weather_modifier"][value="1.5"]:hover +span{
-  background: #A7CF9D !important;
-  color: black;
-}
-
-input[name="effectiveness"][value="1-"]:checked +span{
-  background: #B38F00 !important;
-  color: white;
-  border-color: black;
-}
-
-input[name="effectiveness"][value="1-"]:hover +span{
-  background: #D9C780 !important;
-  color: black;
-}
-
-input[name="effectiveness"][value="0.5"]:checked +span, input[name="weather_modifier"][value="0.5"]:checked +span{
-  background: #C65A1E !important;
-  color: white;
-  border-color: black;
-}
-
-input[name="effectiveness"][value="0.5"]:hover +span, input[name="weather_modifier"][value="0.5"]:hover +span{
-  background: #E3AD8F !important;
-  color: black;
-}
-
-input[name="effectiveness"][value="0.25"]:checked +span{
-  background: #B3262E !important;
-  color: white;
-  border-color: black;
-}
-
-input[name="effectiveness"][value="0.25"]:hover +span{
-  background: #D99397 !important;
-  color: black;
-}
-
 .shiny-options-group {
   justify-content: space-between;
   margin-top: 0rem !important;
@@ -381,7 +319,9 @@ input[name="effectiveness"][value="0.25"]:hover +span{
   justify-content: space-between;
 }
 
-/* tooltip */
+/*
+tooltip
+*/
 
 .tag_and_tooltip {
   display: flex;
@@ -433,7 +373,9 @@ input[name="effectiveness"][value="0.25"]:hover +span{
   padding: .1rem;
 }
 
-/* dropdowns */
+/*
+dropdowns
+*/
 
 .bslib-card, .card-body {
   overflow: visible !important;
@@ -443,19 +385,92 @@ input[name="effectiveness"][value="0.25"]:hover +span{
   max-height: 500px;
 }
 
-.close_distance {
-  padding: 0;
-  margin: 0;
+/*
+targeted by ids
+*/
+
+input[name="atk_spa_calculator-effectiveness"] +span, input[name="iv_calculation-nature_plus"] +span, input[name="iv_calculation-nature_minus"] +span {
+ width: 4rem;
 }
 
-.big_gap {
-  gap: 6rem;
+input[name="atk_spa_calculator-graph_style"] +span {
+ width: 10rem;
 }
 
-.small_gap {
-  gap: 1rem;
+input[name="atk_spa_calculator-effectiveness"][value="4"]:checked +span{
+  background: #009456 !important;
+  color: white;
+  border-color: black;
 }
 
-.align_bottom {
-  align-items: end;
+input[name="atk_spa_calculator-effectiveness"][value="4"]:hover +span{
+  background: #80CAAB !important;
+  color: black;
+}
+
+input[name="atk_spa_calculator-effectiveness"][value="2"]:checked +span, input[name="atk_spa_calculator-weather_modifier"][value="1.5"]:checked +span{
+  background: #4E9E3A !important;
+  color: white;
+  border-color: black;
+}
+
+input[name="atk_spa_calculator-effectiveness"][value="2"]:hover +span, input[name="atk_spa_calculator-weather_modifier"][value="1.5"]:hover +span{
+  background: #A7CF9D !important;
+  color: black;
+}
+
+input[name="atk_spa_calculator-effectiveness"][value="1-"]:checked +span{
+  background: #B38F00 !important;
+  color: white;
+  border-color: black;
+}
+
+input[name="atk_spa_calculator-effectiveness"][value="1-"]:hover +span{
+  background: #D9C780 !important;
+  color: black;
+}
+
+input[name="atk_spa_calculator-effectiveness"][value="0.5"]:checked +span, input[name="atk_spa_calculator-weather_modifier"][value="0.5"]:checked +span{
+  background: #C65A1E !important;
+  color: white;
+  border-color: black;
+}
+
+input[name="atk_spa_calculator-effectiveness"][value="0.5"]:hover +span, input[name="atk_spa_calculator-weather_modifier"][value="0.5"]:hover +span{
+  background: #E3AD8F !important;
+  color: black;
+}
+
+input[name="atk_spa_calculator-effectiveness"][value="0.25"]:checked +span{
+  background: #B3262E !important;
+  color: white;
+  border-color: black;
+}
+
+input[name="atk_spa_calculator-effectiveness"][value="0.25"]:hover +span{
+  background: #D99397 !important;
+  color: black;
+}
+
+#atk_spa_calculator-has_sniper +label {
+  padding-inline: .3rem;
+  padding-top: .1rem;
+  margin-bottom: -1rem;
+  font-size: .7rem;
+  align-self: end;
+}
+
+#atk_spa_calculator-has_adaptability +label {
+  border-start-end-radius: 0;
+  border-start-start-radius: 0;
+  padding-inline: .4rem;
+  padding-bottom: .1rem;
+  margin-top: -1rem;
+  font-size: .7rem;
+  align-self: start;
+}
+
+label[for="atk_spa_calculator-is_stab"], label[for="atk_spa_calculator-is_crit"] {
+  width: 5rem;
+  z-index: 2
 }
