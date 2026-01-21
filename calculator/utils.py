@@ -190,7 +190,7 @@ def apply(*args, dmg_val: int) -> int:
 # biv is my abbreviation for 2 * Base stat + Individual Value (also written: 2 * Base + IVs)
 # i use it as it is easier to get both as a package than directly calc the base stat
 # (and it does not make a difference for the resulting stat anyway)
-def biv_range_hp(level: int, current_stat: int, evs: int):
+def biv_range_hp(level: int, current_stat: int, evs: int) -> Tuple[int, int]:
     return biv_range(level, current_stat - 5 - level, evs, 1)
 
 
@@ -218,26 +218,28 @@ def biv_range(level: int, current_stat: int, evs: int, nature: float) -> Tuple[i
 
 # the minimum possible 2*Base+IV sum for given level, stat, EVs, nature
 def biv_min(level: int, current_stat: int, evs: int, nature: float) -> int:
-    biv = min(541, max(22,
-                       int(floor(floor(floor(current_stat / nature) - 4
-                                       - (1 if nature == 1 or (
-                               nature == 1.1 and current_stat % 11 == 0) else 0))
-                                 * 100 / level) + (0 if not (nature == 0.9 and current_stat % 10 == 0)
-                                                   else 100 % level)
-                           - floor(evs / 4))))
-    result = calc_stat(level, 0, biv, 0, nature)
+    biv = min(541, max(22, floor((current_stat +
+                                   (0 if nature == 1
+                                    else ceil(current_stat / 9) if nature == 0.9
+                                    else -floor(current_stat / 11))
+                                  - 5)
+                                  * 100 / level)
+                                 - floor(evs / 4)
+                       ))
     return biv
 
 
 # the maximum possible 2*Base+IV sum for given level, stat, EVs, nature
 def biv_max(level: int, current_stat: int, evs: int, nature: float) -> int:
-    biv = max(22, min(541, int(ceil(ceil((
-                                                 (current_stat + (1 if (
-                                                         nature == 1.1 and current_stat % 11 == 0) else 0)) / nature
-                                                 - (5 if nature == 1 else 4)) * 100 + 99) / level) - floor(
-        evs / 4))))
-
-    result = calc_stat(level, 0, biv, 0, nature)
+    biv = max(22, min(541, floor((current_stat
+                                  + (0 if not (nature == 0.9 and current_stat % 10 == 0) else 1)
+                                  + (0 if nature == 1
+                                     else ceil(current_stat / 9) if nature == 0.9
+                                     else - floor(current_stat / 11))
+                                  - 5)
+                                 * 100 + 99 / level)
+                                - floor(evs / 4)
+                      ))
     return biv
 
 
