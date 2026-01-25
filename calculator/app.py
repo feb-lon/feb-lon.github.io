@@ -3,9 +3,11 @@ from pokemon_info_page import *
 from atk_spa_calculation_page import *
 from shiny import *
 
-
 app_ui = (
     ui.page_navbar(
+        ui.nav_control(
+            ui.a("Project Code on Github", href="https://github.com/feb-lon/feb-lon.github.io", target="_blank"),
+        ),
         ui.nav_spacer(),
         atk_spa_calculator_page(id="atk_spa_calculator"),
         pokemon_info_page(id="pokemon_info"),
@@ -25,6 +27,7 @@ def server(input: Inputs, output: Outputs, session: Session):
     atk_spa_calculation_page_server(id="atk_spa_calculator")
     iv_calculation_page_server(id="iv_calculation")
     pokemon_info_page_server(id="pokemon_info")
+
 
 app = App(app_ui, server,
           static_assets=Path(app_dir / "images"))
