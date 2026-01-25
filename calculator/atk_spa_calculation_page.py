@@ -634,6 +634,8 @@ def atk_spa_calculation_page_server(input: Inputs, output: Outputs, session: Ses
                 if effectiveness < 1: eff1 = 0.5
 
             if gen_used == 3:
+                # only used for minimum damage (increases minimum dmg at that point in the calc from 0 to 1 if physical)
+                is_physical = input.dmg_type() == "physical"
                 if is_detailed:
                     enemy_ability_atk_spa_modifier = 1
                     has_power_modifying_ability = False
@@ -659,16 +661,12 @@ def atk_spa_calculation_page_server(input: Inputs, output: Outputs, session: Ses
                     ff_active = input.ff_active()
                     ff_modifier = 1.5 if ff_active else 1
 
-                    # only used for minimum damage (increases minimum dmg at that point in the calc from 0 to 1 if physical)
-                    is_physical = input.dmg_type() == "physical"
-
                     has_double_damage_or_charge = input.has_dd_charge()
                     double_damage_or_charge_modifier = 2 if has_double_damage_or_charge else 1
 
                     move_effective_power = calc_move_power_modifiers(move_power, has_sport,
                                                                      has_power_modifying_ability)
                 else:
-                    is_physical = False
                     double_damage_or_charge_modifier = 1
                     ff_modifier = 1
                     weather_modifier = 1
