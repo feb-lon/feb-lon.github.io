@@ -39,13 +39,16 @@ def pokemon_info_page():
                     ui.output_table("general_information"),
                     class_="io_column"
                 ),
+            ),
+            ui.div(
+                {"style": "width: 30%"},
                 ui.card(
-                    ui.card_header(
-                        element_and_tooltip(
+                    element_and_tooltip(
+                        ui.card_header(
                             ui.h3("Nature Information"),
-                            1,
-                            "Generations 3+",
                         ),
+                        1,
+                        "Generations 3+",
                     ),
                     ui.card_body(
                         ui.layout_columns(
@@ -61,29 +64,18 @@ def pokemon_info_page():
                             col_widths=6,
                             class_="io_column"
                         ),
-                        class_="spread_row",
+                        class_="io_column",
                     ),
                 ),
-            ),
-            ui.div(
-                {"style": "width: 30%"},
                 ui.card(
                     element_and_tooltip(
-                        ui.card_header("XP Information 1"),
+                        ui.card_header(ui.h3("XP Information")),
                         0,
                         "Valid for all Generations.",
                     ),
                     xp_requirement_input(id="xp_requirement_1", from_level=5, to_level=8),
-                    class_="io_column",
-                ),
-                ui.card(
-                    ui.card_header("XP Information 2"),
+                    ui.card_header(" "),
                     xp_requirement_input(id="xp_requirement_2", from_level=8, to_level=10),
-                    class_="io_column",
-                ),
-                ui.card(
-                    ui.card_header("XP Information 3"),
-                    xp_requirement_input(id="xp_requirement_3", from_level=5, to_level=8, curve="Slow"),
                     class_="io_column",
                 ),
             ),
@@ -184,7 +176,7 @@ def pokemon_info_page_server(input: Inputs, output: Outputs, session: Session):
     # for general information
     enemy_level_input, _ = number_input_server(id="enemy_level", init=8, min_value=1, max_value=100)
 
-    #for xp information
+    # for xp information
     xp_requirement_input_server(id="xp_requirement_1", from_level=5, to_level=8)
     xp_requirement_input_server(id="xp_requirement_2", from_level=8, to_level=10)
     xp_requirement_input_server(id="xp_requirement_3", from_level=5, to_level=8)
@@ -214,23 +206,30 @@ def pokemon_info_page_server(input: Inputs, output: Outputs, session: Session):
 
         weight = pokemons["Weight"][pokemon]
         if weight < 100:
-            power = 20
+            low_kick_power = 20
         elif weight < 250:
-            power = 40
+            low_kick_power = 40
         elif weight < 500:
-            power = 60
+            low_kick_power = 60
         elif weight < 1000:
-            power = 80
+            low_kick_power = 80
         elif weight < 2000:
-            power = 100
+            low_kick_power = 100
         else:
-            power = 120
+            low_kick_power = 120
+
+        base_friendship = int(pokemons["Base Friendship"][pokemon])
+        return_power = max(floor(base_friendship / 2.5), 1)
+        frustration_power = max(floor((255 - base_friendship) / 2.5), 1)
 
         table = pokemons.loc[[pokemon], ["HP", "ATK", "DEF", "SPA", "SPD", "SPE"]]
         table = table.loc[:, (table != 0).any(axis=0)]
         table.insert(0, "XP", xp)
-        table["Low Kick Power"] = power
-        table["Weight"] = str(weight / 10) + "kg"
+        # table["Weight"] = str(weight / 10) + "kg"
+        table[f"Low Kick vs. {pokemon}:"] = f"{low_kick_power} Power"
+        # table["Base Friendship"] = base_friendship
+        table[f"Return by {pokemon}:"] = f"{return_power} Power"
+        table[f"Frustration by{pokemon}:"] = f"{frustration_power} Power"
         table = table.transpose()
         table.columns = [''] * len(table.columns)
         return table
@@ -310,16 +309,16 @@ def pokemon_info_page_server(input: Inputs, output: Outputs, session: Session):
         if ability == "2": has_huge_pure_power = True
 
         effective_atk = calc_offense_stat_modifiers(stat=atk, has_offense_badge=atk_badge, offense_stage=atk_stage,
-                                                has_type_bonus_item=has_silk_scarf,
-                                                has_huge_pure_power=has_huge_pure_power,
-                                                has_choice_band=has_choice_band,
-                                                is_marowak_cubone_with_thick_club=has_thick_club,
-                                                has_hustle_plus_minus_guts=has_hustle_guts)
+                                                    has_type_bonus_item=has_silk_scarf,
+                                                    has_huge_pure_power=has_huge_pure_power,
+                                                    has_choice_band=has_choice_band,
+                                                    is_marowak_cubone_with_thick_club=has_thick_club,
+                                                    has_hustle_plus_minus_guts=has_hustle_guts)
         effective_def = calc_defensive_stat_modifiers(stat=deff, has_defensive_badge=def_badge,
-                                                  defensive_stage=def_stage,
-                                                  is_ditto_with_metal_powder=has_metal_powder,
-                                                  marvel_scale_active=marvel_scale_active,
-                                                  move_is_explosion_selfdestruct=is_explosion_selfdestruct)
+                                                      defensive_stage=def_stage,
+                                                      is_ditto_with_metal_powder=has_metal_powder,
+                                                      marvel_scale_active=marvel_scale_active,
+                                                      move_is_explosion_selfdestruct=is_explosion_selfdestruct)
 
         base_dmg = calc_dmg_base(level, 40, effective_atk, effective_def)
         ibm_dmg = calc_ibm_damage(base_dmg, burned_modifier=burned_modifier)
