@@ -229,7 +229,7 @@ def pokemon_info_page_server(input: Inputs, output: Outputs, session: Session):
         table[f"Low Kick vs. {pokemon}:"] = f"{low_kick_power} Power"
         # table["Base Friendship"] = base_friendship
         table[f"Return by {pokemon}:"] = f"{return_power} Power"
-        table[f"Frustration by{pokemon}:"] = f"{frustration_power} Power"
+        table[f"Frustration by {pokemon}:"] = f"{frustration_power} Power"
         table = table.transpose()
         table.columns = [''] * len(table.columns)
         return table
