@@ -389,7 +389,9 @@ dropdowns
 targeted by ids
 */
 
-input[name="atk_spa_calculator-effectiveness"] +span, input[name="iv_calculation-nature_plus"] +span, input[name="iv_calculation-nature_minus"] +span {
+input[name="atk_spa_calculator-effectiveness"] +span,
+input[name="iv_calculation-nature_plus"] +span,
+input[name="iv_calculation-nature_minus"] +span {
  width: 4rem;
 }
 
@@ -408,18 +410,29 @@ input[name="atk_spa_calculator-effectiveness"][value="4"]:hover +span{
   color: black;
 }
 
-input[name="atk_spa_calculator-effectiveness"][value="2"]:checked +span, input[name="atk_spa_calculator-weather_modifier"][value="1.5"]:checked +span{
+input[name="atk_spa_calculator-effectiveness"][value="2"]:checked +span,
+input[name="atk_spa_calculator-weather_modifier"][value="1.5"]:checked +span,
+#atk_spa_calculator-def_spd_stage-number_value,
+#atk_spa_calculator-atk_spa_stage-number_value {
   background: #4E9E3A !important;
   color: white;
   border-color: black;
 }
 
-input[name="atk_spa_calculator-effectiveness"][value="2"]:hover +span, input[name="atk_spa_calculator-weather_modifier"][value="1.5"]:hover +span{
+#atk_spa_calculator-def_spd_stage-number_value[value="0"],
+#atk_spa_calculator-atk_spa_stage-number_value[value="0"] {
+  background: #fff !important;
+  color: black;
+  border-color: black;
+}
+
+input[name="atk_spa_calculator-effectiveness"][value="2"]:hover +span,
+input[name="atk_spa_calculator-weather_modifier"][value="1.5"]:hover +span {
   background: #A7CF9D !important;
   color: black;
 }
 
-input[name="atk_spa_calculator-effectiveness"][value="1-"]:checked +span{
+input[name="atk_spa_calculator-effectiveness"][value="1-"]:checked +span {
   background: #B38F00 !important;
   color: white;
   border-color: black;
@@ -430,24 +443,28 @@ input[name="atk_spa_calculator-effectiveness"][value="1-"]:hover +span{
   color: black;
 }
 
-input[name="atk_spa_calculator-effectiveness"][value="0.5"]:checked +span, input[name="atk_spa_calculator-weather_modifier"][value="0.5"]:checked +span{
+input[name="atk_spa_calculator-effectiveness"][value="0.5"]:checked +span,
+input[name="atk_spa_calculator-weather_modifier"][value="0.5"]:checked +span,
+#atk_spa_calculator-def_spd_stage-number_value[value*="-"],
+#atk_spa_calculator-atk_spa_stage-number_value[value*="-"]  {
   background: #C65A1E !important;
   color: white;
   border-color: black;
 }
 
-input[name="atk_spa_calculator-effectiveness"][value="0.5"]:hover +span, input[name="atk_spa_calculator-weather_modifier"][value="0.5"]:hover +span{
+input[name="atk_spa_calculator-effectiveness"][value="0.5"]:hover +span,
+input[name="atk_spa_calculator-weather_modifier"][value="0.5"]:hover +span {
   background: #E3AD8F !important;
   color: black;
 }
 
-input[name="atk_spa_calculator-effectiveness"][value="0.25"]:checked +span{
+input[name="atk_spa_calculator-effectiveness"][value="0.25"]:checked +span {
   background: #B3262E !important;
   color: white;
   border-color: black;
 }
 
-input[name="atk_spa_calculator-effectiveness"][value="0.25"]:hover +span{
+input[name="atk_spa_calculator-effectiveness"][value="0.25"]:hover +span {
   background: #D99397 !important;
   color: black;
 }

@@ -74,24 +74,8 @@ def atk_spa_calculator_page():
                                 ),
                                 ui.div(
                                     {"style": "margin-top: -1rem; margin-bottom: -1rem;"},
-                                    ui.div(
-                                        number_input(id="atk_spa_stage", label="",
-                                                     init=0, min_value=-6, max_value=6, layout="stages"),
-                                        ui.div(
-                                            {"style": "width:3.7rem;font-size: .8rem;"},
-                                            "ATK/SPA Stage",
-                                        ),
-                                        class_="io_column close_distance",
-                                    ),
-                                    ui.div(
-                                        number_input(id="def_spd_stage", label="",
-                                                     init=0, min_value=-6, max_value=6, layout="stages"),
-                                        ui.div(
-                                            {"style": "width:3.7rem;font-size: .8rem;"},
-                                            "DEF/SPD Stage",
-                                        ),
-                                        class_="io_column close_distance",
-                                    ),
+                                    ui.output_ui("atk_spa_stage_ui"),
+                                    ui.output_ui("def_spd_stage_ui"),
                                     ui.div(
                                         ui.panel_conditional(
                                             "input.simulate_generation == 4",
@@ -534,6 +518,33 @@ def atk_spa_calculation_page_server(input: Inputs, output: Outputs, session: Ses
         = number_input_server(id="mid_modifier_gen_5_onward", min_value=0.25, max_value=10, init=1, step=0.50)
     get_late_modifier_gen_5_onward, set_late_modifier_gen_5_onward \
         = number_input_server(id="late_modifier_gen_5_onward", min_value=0.25, max_value=20, init=1, step=0.25)
+
+    @render.ui
+    def def_spd_stage_ui():
+        stage = get_def_spd_stage()
+        return ui.div(
+            number_input(id="def_spd_stage", label="",
+                         init=stage, min_value=-6, max_value=6, layout="stages"),
+            ui.div(
+                {"style": "width:3.7rem;font-size: .8rem;"},
+                "DEF/SPD Stage",
+            ),
+            id="def_spd_stage_env",
+            class_="io_column close_distance",
+        )
+
+    @render.ui
+    def atk_spa_stage_ui():
+        stage = get_atk_spa_stage()
+        return ui.div(
+            number_input(id="atk_spa_stage", label="",
+                         init=stage, min_value=-6, max_value=6, layout="stages"),
+            ui.div(
+                {"style": "width:3.7rem;font-size: .8rem;"},
+                "ATK/SPA Stage",
+            ),
+            class_="io_column close_distance",
+        ),
 
     @reactive.effect
     @reactive.event(input.reset_all)
