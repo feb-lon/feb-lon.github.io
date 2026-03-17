@@ -245,12 +245,8 @@ def pokemon_info_page_server(input: Inputs, output: Outputs, session: Session):
         if nature_from == nature_to:
             return stat_from
 
-        stat_result_min = stat_from
-        stat_result_max = stat_from
-        stat_result = stat_from
-
-        # convert input to neutral
         if nature_from == "-":
+            # -nature can be ambiguous when the stat is exactly a multiple of 9
             stat_result_min = ceil(stat_from / 0.9)
             stat_result_max = ceil(stat_from / 0.9) + (1 if stat_from % 9 == 0 else 0)
             if nature_to == "+":
@@ -261,17 +257,19 @@ def pokemon_info_page_server(input: Inputs, output: Outputs, session: Session):
             else:
                 stat_result = stat_result_min
         else:
+            stat_result = stat_from
+            # other cases are pretty straight forward, we first convert to neutral from +nature if necessary
             if nature_from == "+":
                 # floor(int * 1.1) is never int * 11 + 10
                 if stat_from % 11 == 10:
                     return "<- Not Possible"
                 stat_result = ceil(stat_from / 1.1)
 
-            # convert stat from neutral to + / -
+            # and then to the desired +/-nature convert stat from neutral to + / -
             if nature_to == "-":
-                stat_result = floor(stat_result_min * 0.9)
+                stat_result = floor(stat_result * 0.9)
             elif nature_to == "+":
-                stat_result = floor(stat_result_min * 1.1)
+                stat_result = floor(stat_result * 1.1)
 
         return str(stat_result)
 
