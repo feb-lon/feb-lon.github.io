@@ -138,7 +138,7 @@ def atk_spa_calculator_page():
                         ),
                         ui.card_body(
                             ui.input_action_button("reset_all", "Reset All Inputs"),
-                            ui.input_action_button("reset_dropdowns", "Reset Detailed Inputs"),
+                            ui.input_action_button("reset_detailed_only", "Reset Detailed Inputs"),
                             class_="spread_column",
                         ),
                     ),
@@ -174,15 +174,9 @@ def atk_spa_calculator_page():
                 ui.panel_conditional(
                     "input.simulate_generation == 3 & input.use_detailed_inputs",
                     {"style": "width: 85%; padding-top: 0;"},
-                    ui.accordion(
-                        {"style": "width: 45%"},
-                        ui.accordion_panel(
-                            ui.div(
-                                ui.h5("Enemy Pokemon Modifiers:"),
-                                ui.output_text_verbatim("enemy_modifiers_counter"),
-                                id="enemy_modifiers_title",
-                                class_="accordion_title",
-                            ),
+                    ui.card(
+                        {"style": "width: 45%; padding-top: 0; border-color: #C65A1E; border-width: .15rem;"},
+                        ui.card_body(
                             ui.div(
                                 ui.input_switch("is_burned", "Enemy Burned"),
                                 element_and_tooltip(
@@ -198,6 +192,7 @@ def atk_spa_calculator_page():
                                 class_="io_row"
                             ),
                             ui.div(
+                                ui.input_switch("move_is_explosion_selfdestruct", "Explosion / Selfdestruct"),
                                 ui.input_radio_buttons("enemy_ability",
                                                        element_and_tooltip(
                                                            ("Enemy Ability: ", spacer(1, 0)),
@@ -209,28 +204,23 @@ def atk_spa_calculator_page():
                                                        selected="1",
                                                        inline=True,
                                                        ),
-                                class_="spread_row align_bottom"
+                                class_="io_row align_bottom"
                             ),
                             value="enemy_modifiers_counter",
+                            class_="io_column",
                         ),
-                        open=False,
                     ),
-                    ui.accordion(
-                        {"style": "width: 35%"},
-                        ui.accordion_panel(
-                            ui.div(
-                                ui.h5("Own Pokemon + Weather Modifiers:"),
-                                ui.output_text_verbatim("own_modifiers_counter"),
-                                id="own_modifiers_title",
-                                class_="accordion_title",
-                            ),
+                    ui.card(
+                        {"style": "width: 35%; padding-top: 0; border-color: #4E9E3A; border-width: .15rem;"},
+                        ui.card_body(
                             ui.div(
                                 ui.input_switch("has_def_spd_badge", "DEF/SPD Badge"),
                                 ui.input_switch("has_thick_fat", "Thick Fat"),
-                                ui.input_switch("has_reflect_lightscreen", "Reflect / Lightscreen"),
+                                ui.input_switch("has_marvel_scale", "Marvel Scale"),
                                 class_="io_row",
                             ),
                             ui.div(
+                                ui.input_switch("has_reflect_lightscreen", "Reflect / Lightscreen"),
                                 ui.input_switch("mud_or_water_sport_active", "Mud/Water Sport"),
                                 ui.input_radio_buttons(
                                     "weather_modifier",
@@ -239,12 +229,11 @@ def atk_spa_calculator_page():
                                     inline=True,
                                     selected="1",
                                 ),
-                                class_="spread_row align_bottom",
+                                class_="io_row align_bottom",
                             ),
                             value="own_modifiers_counter",
                             class_="io_column",
                         ),
-                        open=False,
                     ),
                     class_="spread_row top",
                 ),
@@ -550,12 +539,12 @@ def atk_spa_calculation_page_server(input: Inputs, output: Outputs, session: Ses
     @reactive.event(input.reset_all)
     def reset_all():
         reset_main_inputs()
-        reset_accordions()
+        reset_detailed_input()
 
     @reactive.effect
-    @reactive.event(input.reset_dropdowns, input.reset_all)
-    def reset_accordions_only():
-        reset_accordions()
+    @reactive.event(input.reset_detailed_only, input.reset_all)
+    def reset_detailed_only():
+        reset_detailed_input()
 
     def reset_main_inputs():
         set_enemy_level(8)
@@ -568,15 +557,17 @@ def atk_spa_calculation_page_server(input: Inputs, output: Outputs, session: Ses
         set_atk_spa_stage(0)
         set_def_spd_stage(0)
 
-    def reset_accordions():
+    def reset_detailed_input():
         session.send_input_message("is_burned", {"value": False})
         session.send_input_message("ff_active", {"value": False})
         session.send_input_message("has_dd_charge", {"value": False})
+        session.send_input_message("move_is_explosion_selfdestruct", {"value": False})
         session.send_input_message("enemy_ability", {"value": "1"})
-        session.send_input_message("effectiveness", {"value": "1"})
+
         session.send_input_message("has_reflect_lightscreen", {"value": False})
         session.send_input_message("has_def_spd_badge", {"value": False})
         session.send_input_message("has_thick_fat", {"value": False})
+        session.send_input_message("has_marvel_scale", {"value": False})
         session.send_input_message("weather_modifier", {"value": "1"})
         session.send_input_message("mud_or_water_sport_active", {"value": False})
 
@@ -625,13 +616,30 @@ def atk_spa_calculation_page_server(input: Inputs, output: Outputs, session: Ses
         if not (get_def_spd_stage() or get_def_spd_stage() == 0):
             raise SilentException()
         def_spd_stage = int(get_def_spd_stage())
+
+        has_def_spd_badge = False
         if not input.has_def_spd_badge():
-            has_def_spd_badge = False
-        else:
+            pass
+        elif is_detailed:
             has_def_spd_badge = input.has_def_spd_badge()
+
+        has_marvel_scale = False
+        if not input.has_marvel_scale():
+            pass
+        elif is_detailed:
+            has_marvel_scale = input.has_marvel_scale()
+
+        move_is_explosion_selfdestruct = False
+        if not input.move_is_explosion_selfdestruct():
+            pass
+        elif is_detailed:
+            move_is_explosion_selfdestruct = input.move_is_explosion_selfdestruct()
+
         applied_def_spd_stage = 0 if (is_crit and def_spd_stage > 0) else def_spd_stage
         effective_def_spd = calc_defensive_stat_modifiers(own_defense, has_defensive_badge=has_def_spd_badge,
-                                                          defensive_stage=applied_def_spd_stage)
+                                                          defensive_stage=applied_def_spd_stage,
+                                                          marvel_scale_active = has_marvel_scale,
+                                                          move_is_explosion_selfdestruct = move_is_explosion_selfdestruct)
 
         if gen_used == 3 or gen_used == 4:
             eff1 = 0.5

@@ -399,13 +399,15 @@ input[name="atk_spa_calculator-graph_style"] +span {
  width: 10rem;
 }
 
-input[name="atk_spa_calculator-effectiveness"][value="4"]:checked +span{
+input[name="atk_spa_calculator-effectiveness"][value="4"]:checked +span,
+input[name="atk_spa_calculator-enemy_ability"][value="2"]:checked +span {
   background: #009456 !important;
   color: white;
   border-color: black;
 }
 
-input[name="atk_spa_calculator-effectiveness"][value="4"]:hover +span{
+input[name="atk_spa_calculator-effectiveness"][value="4"]:hover +span,
+input[name="atk_spa_calculator-enemy_ability"][value="2"]:hover +span {
   background: #80CAAB !important;
   color: black;
 }
@@ -413,7 +415,9 @@ input[name="atk_spa_calculator-effectiveness"][value="4"]:hover +span{
 input[name="atk_spa_calculator-effectiveness"][value="2"]:checked +span,
 input[name="atk_spa_calculator-weather_modifier"][value="1.5"]:checked +span,
 #atk_spa_calculator-def_spd_stage-number_value,
-#atk_spa_calculator-atk_spa_stage-number_value {
+#atk_spa_calculator-atk_spa_stage-number_value,
+input[name="atk_spa_calculator-enemy_ability"][value="1.5x power"]:checked +span,
+input[name="atk_spa_calculator-enemy_ability"][value="1.5"]:checked +span {
   background: #4E9E3A !important;
   color: white;
   border-color: black;
@@ -427,7 +431,9 @@ input[name="atk_spa_calculator-weather_modifier"][value="1.5"]:checked +span,
 }
 
 input[name="atk_spa_calculator-effectiveness"][value="2"]:hover +span,
-input[name="atk_spa_calculator-weather_modifier"][value="1.5"]:hover +span {
+input[name="atk_spa_calculator-weather_modifier"][value="1.5"]:hover +span,
+input[name="atk_spa_calculator-enemy_ability"][value="1.5x power"]:hover +span,
+input[name="atk_spa_calculator-enemy_ability"][value="1.5"]:hover +span  {
   background: #A7CF9D !important;
   color: black;
 }
