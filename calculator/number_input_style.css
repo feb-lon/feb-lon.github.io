@@ -99,10 +99,16 @@ text_bottom>div {
   text-align: center;
 }
 
+input[type=number]::-webkit-outer-spin-button,
+input[type=number]::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+}
+
 .number_input_controls input[type="number"] {
+  -moz-appearance: textfield;
   width: 2.5rem;
   text-align: center;
-  -moz-appearance: textfield;
   padding: .2rem;
   margin-top: -.3rem;
   margin-bottom:-.3rem;
