@@ -16,303 +16,13 @@ def atk_spa_calculator_page():
         ui.h2("ATK / SPA Calculator"),
         ui.div(
             ui.page_fluid(
-                ui.card(
-                    {"style": "margin-left: 5%;"},
-                    ui.card_body(
-                        ui.input_radio_buttons(
-                            "dmg_type",
-                            element_and_tooltip(
-                                "Minimum Damage:",
-                                1,
-                                "Only used for determining minimum DMG (physical DMG has higher minimum DMG)",
-                            ),
-                            {"physical": "Physical", "special": "Special"},
-                            selected="special",
-                            inline=True,
-                        ),
-                        ui.input_radio_buttons(
-                            "graph_style",
-                            "Graph Style:",
-                            {"only_dmg_received": "Only DMG Received", "all_dmg_values": "All DMG Values"},
-                            inline=False,
-                            selected="only_dmg_received",
-                        ),
-                    ),
-                ),
-                ui.div(
-                    ui.card(
-                        {"style": "border-color: black; border-width: 0.1rem; background-color: #FFF;"},
-                        ui.card_body(
-                            ui.div(
-                                {"style": "display: flex;"},
-                                ui.div(
-                                    ui.div(
-                                        number_input(id="enemy_level", label="",
-                                                     init=8, layout="big"),
-                                        "Enemy LVL",
-                                        class_="io_column close_distance",
-                                    ),
-                                    ui.div(
-                                        number_input(id="move_power", label="",
-                                                     init=95, step=5, min_value=5, max_value=999, layout="big"),
-                                        "Power",
-                                        class_="io_column close_distance",
-                                    ),
-                                    ui.div(
-                                        number_input(id="own_defense", label="",
-                                                     init=20, min_value=1, max_value=999, layout="big"),
-                                        "DEF/SPD",
-                                        class_="io_column close_distance",
-                                    ),
-                                    ui.div(
-                                        number_input(id="damage_received", label="",
-                                                     init=10, min_value=1, max_value=999, layout="big"),
-                                        "DMG",
-                                        class_="io_column close_distance",
-                                    ),
-                                    class_="io_row",
-                                ),
-                                ui.div(
-                                    {"style": "margin-top: -1rem; margin-bottom: -1rem;"},
-                                    ui.output_ui("atk_spa_stage_ui"),
-                                    ui.output_ui("def_spd_stage_ui"),
-                                    ui.div(
-                                        ui.panel_conditional(
-                                            "input.simulate_generation == 4",
-                                            ui.input_switch("has_sniper", "Sniper"),
-                                        ),
-                                        ui.panel_conditional(
-                                            "input.simulate_generation == 5 || input.simulate_generation == 6",
-                                            {"style": "visibility: hidden;"},
-                                            ui.input_switch("padding_element", ""),
-                                        ),
-                                        ui.input_switch("is_crit", "CRIT"),
-                                        ui.input_switch("is_stab", "STAB"),
-                                        ui.panel_conditional(
-                                            "input.simulate_generation == 4 || input.simulate_generation == 5 "
-                                            "|| input.simulate_generation == 6",
-                                            ui.input_switch("has_adaptability", "Adaptability"),
-                                        ),
-                                        class_="ui_column big_buttons small_gap",
-                                    ),
-                                    ui.div(
-                                        ui.input_radio_buttons(
-                                            "effectiveness",
-                                            "",
-                                            {"4": "4x", "2": "2x", "1": "1x", "1-": "1x-", "0.5": "0.5x",
-                                             "0.25": "0.25x"},
-                                            selected="1",
-                                        ),
-                                    ),
-                                    ui.span(
-                                        {
-                                            "style":
-                                                "line-break: anywhere;"
-                                                "width: 0;"
-                                                "font-size: 1.6rem;"
-                                                "margin-left: 0rem;"
-                                                "padding: 0rem;"
-                                                "margin-top: 0rem;"
-                                                "margin-bottom: 0rem;"
-                                                "border-color: transparent;"
-                                        },
-                                        "EFF",
-                                        ui.tooltip(
-                                            question_circle_fill,
-                                            typing_tooltip(),
-                                            id="effectiveness_tooltip_advanced",
-                                        ),
-                                    ),
-                                    class_="spread_row small_gap",
-                                ),
-                                class_="spread_row big_gap",
-                            ),
-                        ),
-                    ),
-                ),
-                ui.div(
-                    {"style": "gap: 1rem;margin-right: 5%"},
-                    ui.card(
-                        ui.card_header(
-                            "Reset Input Buttons"
-                        ),
-                        ui.card_body(
-                            ui.input_action_button("reset_all", "Reset All Inputs"),
-                            ui.input_action_button("reset_detailed_only", "Reset Detailed Inputs"),
-                            class_="spread_column",
-                        ),
-                    ),
-                ),
-                class_="io_row",
+                graph_settings(),
+                main_inputs(),
+                reset_buttons(),
+                class_="spread_row",
             ),
-            ui.card(
-                {"style": "border-color: black; border-width: 0.05rem;"},
-                ui.output_plot("calculate_offense"),
-            ),
-            ui.div(
-                {"style": "min-height: 5rem; align-items: start; padding-top: 1rem;"},
-                ui.card(
-                    ui.card_body(
-                        ui.input_switch(
-                            "use_detailed_inputs",
-                            "Use Detailed Inputs"
-                        ),
-                        ui.input_radio_buttons(
-                            "simulate_generation",
-                            element_and_tooltip(
-                                "Generation:",
-                                1,
-                                ui.span("Effectiveness 1x- is only relevant in Generations 1 - 4")
-                            ),
-                            {3: "3", 4: "4", 5: "5", 6: "6+"},
-                            inline=True,
-                            selected=3,
-                        ),
-                        class_="io_column",
-                    ),
-                ),
-                ui.panel_conditional(
-                    "input.simulate_generation == 3 & input.use_detailed_inputs",
-                    {"style": "width: 85%; padding-top: 0;"},
-                    ui.card(
-                        {"style": "width: 45%; padding-top: 0; border-color: #C65A1E; border-width: .15rem;"},
-                        ui.card_body(
-                            ui.div(
-                                ui.input_switch("is_burned", "Enemy Burned"),
-                                element_and_tooltip(
-                                    ui.input_switch("ff_active", "Flashfire Bonus"),
-                                    0,
-                                    "Getting hit by a fire move gives this bonus for the whole fight.",
-                                ),
-                                element_and_tooltip(
-                                    ui.input_switch("has_dd_charge", "Double Damage / Charge Bonus"),
-                                    0,
-                                    double_damage_tooltip(),
-                                ),
-                                class_="io_row"
-                            ),
-                            ui.div(
-                                ui.input_switch("move_is_explosion_selfdestruct", "Explosion / Selfdestruct"),
-                                ui.input_radio_buttons("enemy_ability",
-                                                       element_and_tooltip(
-                                                           ("Enemy Ability: ", spacer(1, 0)),
-                                                           0,
-                                                           ability_tooltip(),
-                                                       ),
-                                                       {"1": "generic", "1.5x power": "1.5x Move Power",
-                                                        "1.5": "1.5x ATK/SPA", "2": "2x ATK"},
-                                                       selected="1",
-                                                       inline=True,
-                                                       ),
-                                class_="io_row align_bottom"
-                            ),
-                            value="enemy_modifiers_counter",
-                            class_="io_column",
-                        ),
-                    ),
-                    ui.card(
-                        {"style": "width: 35%; padding-top: 0; border-color: #4E9E3A; border-width: .15rem;"},
-                        ui.card_body(
-                            ui.div(
-                                ui.input_switch("has_def_spd_badge", "DEF/SPD Badge"),
-                                ui.input_switch("has_thick_fat", "Thick Fat"),
-                                ui.input_switch("has_marvel_scale", "Marvel Scale"),
-                                class_="io_row",
-                            ),
-                            ui.div(
-                                ui.input_switch("has_reflect_lightscreen", "Reflect / Lightscreen"),
-                                ui.input_switch("mud_or_water_sport_active", "Mud/Water Sport"),
-                                ui.input_radio_buttons(
-                                    "weather_modifier",
-                                    "Weather Modifier:",
-                                    {"0.5": "0.5x", "1": "1x", "1.5": "1.5x"},
-                                    inline=True,
-                                    selected="1",
-                                ),
-                                class_="io_row align_bottom",
-                            ),
-                            value="own_modifiers_counter",
-                            class_="io_column",
-                        ),
-                    ),
-                    class_="spread_row top",
-                ),
-                ui.panel_conditional(
-                    "input.simulate_generation == 4 & input.use_detailed_inputs",
-                    {"style": "width: 85%"},
-                    ui.card(
-                        element_and_tooltip(
-                            "Early Stage Modifier",
-                            1,
-                            ui.span("Burn: 0.5"),
-                            ui.span("Reflect/Lightscreen: 0.5"),
-                            ui.span("moreTargets(Double Battle): 0.75"),
-                            ui.span("Weather: 0.5, 1, 1.5"),
-                            ui.span("Flash Fire: 1.5"),
-                        ),
-                        number_input(id="early_modifier_gen_4", init=1, min_value=0.25, max_value=50, step=0.25),
-                        class_="io_row",
-                    ),
-                    ui.card(
-                        element_and_tooltip(
-                            "Mid Stage Modifier",
-                            1,
-                            ui.span("Life Orb: 1.3"),
-                            ui.span("Metronome(item): 1.0-2.0"),
-                            ui.span("Me First: 1.5"),
-                        ),
-                        number_input(id="mid_modifier_gen_4", init=1, min_value=0.5, max_value=3, step=0.5),
-                        class_="io_row",
-                    ),
-                    ui.card(
-                        element_and_tooltip(
-                            "Late Stage Modifier",
-                            1,
-                            ui.span("Solid Rock: 0.75"),
-                            ui.span("Filter: 0.75"),
-                            ui.span("Expert Belt: 1.2"),
-                            ui.span("Tinted Lens: 2"),
-                            ui.span("Type-Weakening-Berries: 0.5")
-                        ),
-                        number_input(id="late_modifier_gen_4", init=1, min_value=0.25, max_value=3, step=0.25),
-                        class_="io_row",
-                    ),
-                    class_="spread_row top",
-                ),
-                ui.panel_conditional(
-                    "(input.simulate_generation == 5 || input.simulate_generation == 6) "
-                    "& input.use_detailed_inputs",
-                    {"style": "width: 85%"},
-                    ui.card(
-                        element_and_tooltip(
-                            "Mid Stage Modifier",
-                            1,
-                            ui.span("moreTargets(Double Battle): 0.75"),
-                            ui.span("moreTargets(Battle Royals): 0.5"),
-                            ui.span("Parental Bond 2nd Strike: 0.5 (Gen 6), 0.25 (other Gens)"),
-                            ui.span("Weather: 0.5, 1, 1.5"),
-                            ui.span("Glaive Rush: 2"),
-                        ),
-                        number_input("mid_modifier_gen_5_onward", min_value=0.25, max_value=10, init=1, step=0.5),
-                        class_="io_row",
-                    ),
-                    ui.card(
-                        element_and_tooltip(
-                            "Late Stage Modifier",
-                            1,
-                            ui.span("Burn: 0.5"),
-                            ui.span("other: see below"),
-                            ui.span("Z-Move vs protected target: 0.25"),
-                            ui.span("Tera Shield: 0.2-0.75"),
-                            other_factors(),
-                        ),
-                        number_input("late_modifier_gen_5_onward", min_value=0.25, max_value=20, init=1, step=0.25),
-                        class_="io_row",
-                    ),
-                    class_="spread_row top",
-                ),
-                class_="io_row top",
-            ),
+            offense_plot(),
+            optional_inputs(),
             class_="top_layer_column",
         )
     )
@@ -355,6 +65,326 @@ def double_damage_tooltip():
             )
         )
     )
+
+
+def graph_settings():
+    return ui.card(
+        ui.card_body(
+            ui.input_radio_buttons(
+                "dmg_type",
+                element_and_tooltip(
+                    "Minimum Damage:",
+                    1,
+                    "Only used for determining minimum DMG (physical DMG has higher minimum DMG)",
+                ),
+                {"physical": "Physical", "special": "Special"},
+                selected="special",
+                inline=True,
+            ),
+            ui.input_radio_buttons(
+                "graph_style",
+                "Graph Style:",
+                {"only_dmg_received": "Only DMG Received", "all_dmg_values": "All DMG Values"},
+                inline=False,
+                selected="only_dmg_received",
+            ),
+        ),
+    ),
+
+
+def main_inputs():
+    return ui.div(
+        ui.card(
+            {"style": "border-color: black; border-width: 0.1rem; background-color: #FFF;"},
+            ui.card_body(
+                ui.div(
+                    {"style": "display: flex;"},
+                    ui.div(
+                        ui.div(
+                            number_input(id="enemy_level", label="",
+                                         init=8, layout="big"),
+                            "Enemy LVL",
+                            class_="io_column close_distance",
+                        ),
+                        ui.div(
+                            number_input(id="move_power", label="",
+                                         init=95, step=5, min_value=5, max_value=999, layout="big"),
+                            "Power",
+                            class_="io_column close_distance",
+                        ),
+                        ui.div(
+                            number_input(id="own_defense", label="",
+                                         init=20, min_value=1, max_value=999, layout="big"),
+                            "DEF/SPD",
+                            class_="io_column close_distance",
+                        ),
+                        ui.div(
+                            number_input(id="damage_received", label="",
+                                         init=10, min_value=1, max_value=999, layout="big"),
+                            "DMG",
+                            class_="io_column close_distance",
+                        ),
+                        class_="io_row",
+                    ),
+                    ui.div(
+                        {"style": "margin-top: -1rem; margin-bottom: -1rem;"},
+                        ui.output_ui("atk_spa_stage_ui"),
+                        ui.output_ui("def_spd_stage_ui"),
+                        ui.div(
+                            ui.panel_conditional(
+                                "input.simulate_generation == 4",
+                                ui.input_switch("has_sniper", "Sniper"),
+                            ),
+                            ui.panel_conditional(
+                                "input.simulate_generation == 5 || input.simulate_generation == 6",
+                                {"style": "visibility: hidden;"},
+                                ui.input_switch("padding_element", ""),
+                            ),
+                            ui.input_switch("is_crit", "CRIT"),
+                            ui.input_switch("is_stab", "STAB"),
+                            ui.panel_conditional(
+                                "input.simulate_generation == 4 || input.simulate_generation == 5 "
+                                "|| input.simulate_generation == 6",
+                                ui.input_switch("has_adaptability", "Adaptability"),
+                            ),
+                            class_="ui_column big_buttons small_gap",
+                        ),
+                        ui.div(
+                            ui.input_radio_buttons(
+                                "effectiveness",
+                                "",
+                                {"4": "4x", "2": "2x", "1": "1x", "1-": "1x-", "0.5": "0.5x",
+                                 "0.25": "0.25x"},
+                                selected="1",
+                            ),
+                        ),
+                        ui.span(
+                            {
+                                "style":
+                                    "line-break: anywhere;"
+                                    "width: 0;"
+                                    "font-size: 1.6rem;"
+                                    "margin-left: 0rem;"
+                                    "padding: 0rem;"
+                                    "margin-top: 0rem;"
+                                    "margin-bottom: 0rem;"
+                                    "border-color: transparent;"
+                            },
+                            "EFF",
+                            ui.tooltip(
+                                question_circle_fill,
+                                typing_tooltip(),
+                                id="effectiveness_tooltip_advanced",
+                            ),
+                        ),
+                        class_="spread_row small_gap",
+                    ),
+                    class_="spread_row big_gap",
+                ),
+            ),
+        ),
+    ),
+
+
+def reset_buttons():
+    return ui.div(
+        ui.card(
+            ui.card_header(
+                "Reset Input Buttons"
+            ),
+            ui.card_body(
+                ui.input_action_button("reset_all", "Reset All Inputs"),
+                ui.input_action_button("reset_detailed_only", "Reset Detailed Inputs"),
+                class_="spread_column",
+            ),
+        ),
+    ),
+
+
+def offense_plot():
+    return ui.card(
+        {"style": "border-color: black; border-width: 0.05rem;"},
+        ui.output_plot("calculate_offense"),
+    ),
+
+
+def optional_inputs():
+    return ui.div(
+        {"style": "min-height: 5rem; align-items: start; padding-top: 1rem;"},
+        ui.card(
+            ui.card_body(
+                ui.input_switch(
+                    "use_detailed_inputs",
+                    "Use Detailed Inputs"
+                ),
+                ui.input_radio_buttons(
+                    "simulate_generation",
+                    element_and_tooltip(
+                        "Generation:",
+                        1,
+                        ui.span("Effectiveness 1x- is only relevant in Generations 1 - 4")
+                    ),
+                    {3: "3", 4: "4", 5: "5", 6: "6+"},
+                    inline=True,
+                    selected=3,
+                ),
+                class_="io_column",
+            ),
+        ),
+        ui.div(
+            {"style": "width: 85%"},
+            gen_3_inputs(),
+            gen_4_inputs(),
+            gen_5_onwards_inputs(),
+        ),
+        class_="io_row top",
+    ),
+
+
+def gen_3_inputs():
+    return ui.panel_conditional(
+        "input.simulate_generation == 3 & input.use_detailed_inputs",
+        ui.card(
+            {"style": "border-color: #C65A1E; border-width: .15rem;"},
+            ui.card_body(
+                ui.div(
+                    ui.input_switch("is_burned", "Enemy Burned"),
+                    element_and_tooltip(
+                        ui.input_switch("ff_active", "Flashfire Bonus"),
+                        0,
+                        "Getting hit by a fire move gives this bonus for the whole fight.",
+                    ),
+                    element_and_tooltip(
+                        ui.input_switch("has_dd_charge", "Double Damage / Charge Bonus"),
+                        0,
+                        double_damage_tooltip(),
+                    ),
+                    class_="io_row"
+                ),
+                ui.div(
+                    ui.input_switch("move_is_explosion_selfdestruct", "Explosion / Selfdestruct"),
+                    ui.input_radio_buttons("enemy_ability",
+                                           element_and_tooltip(
+                                               ("Enemy Ability: ", spacer(1, 0)),
+                                               0,
+                                               ability_tooltip(),
+                                           ),
+                                           {"1": "generic", "1.5x power": "1.5x Move Power",
+                                            "1.5": "1.5x ATK/SPA", "2": "2x ATK"},
+                                           selected="1",
+                                           inline=True,
+                                           ),
+                    class_="io_row align_bottom"
+                ),
+                value="enemy_modifiers_counter",
+                class_="io_column",
+            ),
+        ),
+        ui.card(
+            {"style": "border-color: #4E9E3A; border-width: .15rem;"},
+            ui.card_body(
+                ui.div(
+                    ui.input_switch("has_def_spd_badge", "DEF/SPD Badge"),
+                    ui.input_switch("has_thick_fat", "Thick Fat"),
+                    ui.input_switch("has_marvel_scale", "Marvel Scale"),
+                    class_="io_row",
+                ),
+                ui.div(
+                    ui.input_switch("has_reflect_lightscreen", "Reflect / Lightscreen"),
+                    ui.input_switch("mud_or_water_sport_active", "Mud/Water Sport"),
+                    ui.input_radio_buttons(
+                        "weather_modifier",
+                        "Weather Modifier:",
+                        {"0.5": "0.5x", "1": "1x", "1.5": "1.5x"},
+                        inline=True,
+                        selected="1",
+                    ),
+                    class_="io_row align_bottom",
+                ),
+                value="own_modifiers_counter",
+                class_="io_column",
+            ),
+        ),
+        class_="spread_row top",
+    ),
+
+
+def gen_4_inputs():
+    return ui.panel_conditional(
+        "input.simulate_generation == 4 & input.use_detailed_inputs",
+        ui.card(
+            element_and_tooltip(
+                "Early Stage Modifier",
+                1,
+                ui.span("Burn: 0.5"),
+                ui.span("Reflect/Lightscreen: 0.5"),
+                ui.span("moreTargets(Double Battle): 0.75"),
+                ui.span("Weather: 0.5, 1, 1.5"),
+                ui.span("Flash Fire: 1.5"),
+            ),
+            number_input(id="early_modifier_gen_4", init=1, min_value=0.25, max_value=50, step=0.25),
+            class_="io_row",
+        ),
+        ui.card(
+            element_and_tooltip(
+                "Mid Stage Modifier",
+                1,
+                ui.span("Life Orb: 1.3"),
+                ui.span("Metronome(item): 1.0-2.0"),
+                ui.span("Me First: 1.5"),
+            ),
+            number_input(id="mid_modifier_gen_4", init=1, min_value=0.5, max_value=3, step=0.5),
+            class_="io_row",
+        ),
+        ui.card(
+            element_and_tooltip(
+                "Late Stage Modifier",
+                1,
+                ui.span("Solid Rock: 0.75"),
+                ui.span("Filter: 0.75"),
+                ui.span("Expert Belt: 1.2"),
+                ui.span("Tinted Lens: 2"),
+                ui.span("Type-Weakening-Berries: 0.5")
+            ),
+            number_input(id="late_modifier_gen_4", init=1, min_value=0.25, max_value=3, step=0.25),
+            class_="io_row",
+        ),
+        class_="spread_row top",
+    ),
+
+
+def gen_5_onwards_inputs():
+    return ui.panel_conditional(
+        "(input.simulate_generation == 5 || input.simulate_generation == 6) "
+        "& input.use_detailed_inputs",
+        ui.card(
+            element_and_tooltip(
+                "Mid Stage Modifier",
+                1,
+                ui.span("moreTargets(Double Battle): 0.75"),
+                ui.span("moreTargets(Battle Royals): 0.5"),
+                ui.span("Parental Bond 2nd Strike: 0.5 (Gen 6), 0.25 (other Gens)"),
+                ui.span("Weather: 0.5, 1, 1.5"),
+                ui.span("Glaive Rush: 2"),
+            ),
+            number_input("mid_modifier_gen_5_onward", min_value=0.25, max_value=10, init=1, step=0.5),
+            class_="io_row",
+        ),
+        ui.card(
+            element_and_tooltip(
+                "Late Stage Modifier",
+                1,
+                ui.span("Burn: 0.5"),
+                ui.span("other: see below"),
+                ui.span("Z-Move vs protected target: 0.25"),
+                ui.span("Tera Shield: 0.2-0.75"),
+                other_factors(),
+            ),
+            number_input("late_modifier_gen_5_onward", min_value=0.25, max_value=20, init=1, step=0.25),
+            class_="io_row",
+        ),
+        class_="spread_row top",
+    ),
 
 
 def typing_tooltip():
@@ -638,8 +668,8 @@ def atk_spa_calculation_page_server(input: Inputs, output: Outputs, session: Ses
         applied_def_spd_stage = 0 if (is_crit and def_spd_stage > 0) else def_spd_stage
         effective_def_spd = calc_defensive_stat_modifiers(own_defense, has_defensive_badge=has_def_spd_badge,
                                                           defensive_stage=applied_def_spd_stage,
-                                                          marvel_scale_active = has_marvel_scale,
-                                                          move_is_explosion_selfdestruct = move_is_explosion_selfdestruct)
+                                                          marvel_scale_active=has_marvel_scale,
+                                                          move_is_explosion_selfdestruct=move_is_explosion_selfdestruct)
 
         if gen_used == 3 or gen_used == 4:
             eff1 = 0.5
