@@ -6,10 +6,6 @@ changing default layout
   background: whitesmoke;
 }
 
-.w-auto {
-  width: 100% !important
-}
-
 .form-group {
   margin-bottom: inherit;
 }
@@ -501,4 +497,12 @@ input[name="atk_spa_calculator-effectiveness"][value="0.25"]:hover +span {
 label[for="atk_spa_calculator-is_stab"], label[for="atk_spa_calculator-is_crit"] {
   width: 5rem;
   z-index: 2
+}
+
+#iv_calculation-result {
+ display: flex !important;
+}
+
+#iv_calculation-unit_used > div > .radio > label {
+ width: 6rem;
 }

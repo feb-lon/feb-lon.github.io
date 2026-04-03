@@ -1,5 +1,8 @@
 from math import ceil
+from tokenize import String
 
+from numpy._core.strings import upper
+from pandas.core.computation.align import align_terms
 from shiny import render
 from shiny.types import SilentException
 
@@ -21,64 +24,103 @@ def iv_calculation_page():
         ),
         ui.div(
             ui.div(
-                {"style": "width: 20%"},
-                ui.card(
-                    ui.card_body(
-                        {"style": "text-align: center"},
-                        "Select Pokemon:",
-                        ui.div(
-                            ui.input_selectize("pokemon", "",
-                                               sorted(pokemons.index), selected="Lickitung"),
-                            ui.output_code("pokemon_bst"),
-                            class_="io_row",
-                        ),
-                        ui.div(
-                            ui.input_radio_buttons("nature_plus", "Nature + :",
-                                                   ["=", "+ ATK", "+ DEF", "+ SPA", "+ SPD", "+ SPE"]),
-                            ui.input_radio_buttons("nature_minus", "Nature - :",
-                                                   ["=", "- ATK", "- DEF", "- SPA", "- SPD", "- SPE"]),
-                            class_="spread_row",
-                        ),
-                        class_="io_column small_gap",
-                    ),
-                ),
+                {"style": "width: 20%; text-align: center"},
+                settings(),
             ),
             ui.div(
                 {"style": "width: 70%"},
-                ui.card(
-                    ui.output_table("result"),
-                ),
-                ui.card(
-                    ui.div(
-                        ui.input_action_button("prefill_current_level", "Guess stats for this Level ->"),
-                        number_input(id="level", label="Level:", init=5, min_value=1, max_value=100),
-                        number_input(id="hp", label="HP:", init=22, min_value=11, max_value=999),
-                        number_input(id="atk", label="ATK:", init=12, min_value=4, max_value=999),
-                        number_input(id="def", label="DEF:", init=12, min_value=4, max_value=999),
-                        number_input(id="spa", label="SPA:", init=12, min_value=4, max_value=999),
-                        number_input(id="spd", label="SPD:", init=12, min_value=4, max_value=999),
-                        number_input(id="spe", label="SPE:", init=12, min_value=4, max_value=999),
-                        # ui.input_selectize("mons_defeated", "Mons Defeated at this Level:", sorted(pokemons.index), multiple=True, class_="io_row"),
-                        ui.input_action_button("save_stats", "Save Stats"),
-                        class_="io_row",
-                    ),
-                ),
-                ui.card(
-                    ui.card_body(
-                        ui.div(
-                            ui.layout_columns(ui.h5("Stat History (editable)")),
-                            ui.input_action_button("delete_row", "Delete Selected Row"),
-                            ui.input_action_button("reset_all", "Clear All"),
-                            class_="io_row"
-                        ),
-                        ui.output_data_frame("history"),
-                        class_="io_column",
-                    ),
-                ),
+                result_table(),
+                input_array(),
+                stat_history(),
             ),
             class_="top_layer_row",
         ),
     )
+
+
+def settings():
+    return (
+        ui.card(
+            ui.card_header(
+                "Pokemon:",
+            ),
+            ui.card_body(
+                ui.div(
+                    ui.input_selectize("pokemon", "",
+                                       sorted(pokemons.index), selected="Lickitung"),
+                    ui.output_code("pokemon_bst"),
+                    class_="io_row",
+                ),
+            ),
+
+        ),
+        ui.card(
+            ui.card_header(
+                "Nature:",
+            ),
+            ui.card_body(
+                ui.div(
+                    ui.input_radio_buttons("nature_plus", "",
+                                           ["=", "+ ATK", "+ DEF", "+ SPA", "+ SPD", "+ SPE"]),
+                    ui.input_radio_buttons("nature_minus", "",
+                                           ["=", "- ATK", "- DEF", "- SPA", "- SPD", "- SPE"]),
+                    class_="spread_row",
+                ),
+                class_="io_column small_gap",
+            ),
+        ),
+        ui.card(
+            ui.card_header(
+                "Result Options"
+            ),
+            ui.card_body(
+                ui.input_switch("possible", "only consider possible values", True),
+                ui.input_radio_buttons("unit_used", "Base Stat Format:",
+                                       {"Hide": "Hide", "PosBase": "Base - IVs", "Base": "Base", "IVs": "IVs", },
+                                       selected="Hide"),
+                class_="io_column",
+            ),
+        )
+    ),
+
+
+def result_table():
+    return ui.card(
+        ui.output_table("result"),
+    ),
+
+
+def input_array():
+    return ui.card(
+        ui.div(
+            ui.input_action_button("prefill_current_level", "Guess Stats for Level:"),
+            number_input(id="level", label="Level:", init=5, min_value=1, max_value=100),
+            number_input(id="hp", label="HP:", init=22, min_value=11, max_value=999),
+            number_input(id="atk", label="ATK:", init=12, min_value=4, max_value=999),
+            number_input(id="def", label="DEF:", init=12, min_value=4, max_value=999),
+            number_input(id="spa", label="SPA:", init=12, min_value=4, max_value=999),
+            number_input(id="spd", label="SPD:", init=12, min_value=4, max_value=999),
+            number_input(id="spe", label="SPE:", init=12, min_value=4, max_value=999),
+            # ui.input_selectize("mons_defeated", "Mons Defeated at this Level:", sorted(pokemons.index), multiple=True, class_="io_row"),
+            ui.input_action_button("save_stats", "Save Stats"),
+            class_="io_row",
+        ),
+    ),
+
+
+def stat_history():
+    return ui.card(
+        ui.card_body(
+            ui.div(
+                ui.layout_columns(ui.h5("Stat History (editable)")),
+                ui.input_action_button("delete_row", "Delete Selected Row"),
+                ui.input_action_button("reset_all", "Clear All"),
+                class_="io_row"
+            ),
+            ui.output_data_frame("history"),
+            class_="io_column",
+        ),
+    ),
 
 
 @module.server
@@ -86,9 +128,9 @@ def iv_calculation_page_server(input: Inputs, output: Outputs, session: Session)
     stat_history = reactive.value(
         pd.DataFrame(columns=["level", "hp", "atk", "def", "spa", "spd", "spe"], dtype=int))
 
-    empty_table = reactive.value(
-        pd.DataFrame(index=["hp_biv", "atk_biv", "def_biv", "spa_biv", "spd_biv", "spe_biv"],
-                     columns=["min", "mid", "max"], dtype=int))
+    empty_table = pd.DataFrame(index=["min", "avg", "max"], columns=["Total IVs", "AVG IVs per Stat"],
+                               data=[[0, 0], [0, 0], [0, 0]])
+
     level_value, set_level = number_input_server(id="level", init=5, min_value=1, max_value=100)
     hp_value, set_hp = number_input_server(id="hp", init=22, min_value=11, max_value=999)
     atk_value, set_atk = number_input_server(id="atk", init=12, min_value=4, max_value=999)
@@ -118,7 +160,7 @@ def iv_calculation_page_server(input: Inputs, output: Outputs, session: Session)
 
     def prefill_level(level: int):
         biv_table = calc_biv_table()
-        if biv_table.equals(empty_table()):
+        if biv_table.size == 0:
             raise SilentException
 
         hp_biv = ceil(biv_table.loc["hp_biv"].mean())
@@ -149,83 +191,60 @@ def iv_calculation_page_server(input: Inputs, output: Outputs, session: Session)
         spd_nature_modifier.set(1.1 if nature_plus == "+ SPD" else 0.9 if nature_minus == "- SPD" else 1)
         spe_nature_modifier.set(1.1 if nature_plus == "+ SPE" else 0.9 if nature_minus == "- SPE" else 1)
 
-    @render.table(index=True)
+    @render.table(index=True, justify="left", col_space="8rem")
     @reactive.event(input.save_stats, input.reset_all, input.pokemon,
-                    input.nature_plus, input.nature_minus, stat_history)
+                    input.nature_plus, input.nature_minus, stat_history, input.unit_used, input.possible)
     def result():
         df = calc_biv_table()
+        if df.empty: return empty_table
         base_as_biv = current_bst() * 2
+        unit_used = input.unit_used()
+        possible = input.possible()
 
         total_biv_min = df["min"].sum()
         total_min = total_biv_min - base_as_biv
         total_biv_max = df["max"].sum()
         total_max = total_biv_max - base_as_biv
-        total_avg = (total_min + total_max) / 2
+        if possible:
+            total_max = min(total_max, 186)
+            total_min = max(total_min, 0)
+        total_avg = (total_max + total_min) / 2
 
-        base_hp_min, base_hp_max = (biv_to_base_min(df.loc["hp_biv", "min"]),
-                                    biv_to_base_max(df.loc["hp_biv", "max"]))
-        base_hp_gap = base_hp_max - base_hp_min
-        hp_error_free = df.loc["hp_biv", "min"] <= df.loc["hp_biv", "max"]
+        total_stats = [f"{total_min:g}", f"{total_avg:g}", f"{total_max:g}"]
+        avg_per_stat = [f"{total_min / 6:.2f}", f"{total_avg / 6:.2f}", f"{total_max / 6:.2f}"]
 
-        base_atk_min, base_atk_max = (biv_to_base_min(df.loc["atk_biv", "min"]),
-                                      biv_to_base_max(df.loc["atk_biv", "max"]))
-        base_atk_gap = base_atk_max - base_atk_min
-        atk_error_free = df.loc["atk_biv", "min"] <= df.loc["atk_biv", "max"]
+        table = pd.DataFrame(columns=["min", "avg", "max"])
+        table.loc["Total IVs"] = total_stats
+        table.loc["AVG IVs per Stat"] = avg_per_stat
+        if unit_used != "Hide":
+            for stat in ["hp", "atk", "def", "spa", "spd", "spe"]:
+                min_val = df.loc[stat + "_biv", "min"]
+                avg_val = df.loc[stat + "_biv"].mean()
+                max_val = df.loc[stat + "_biv", "max"]
 
-        base_def_min, base_def_max = (biv_to_base_min(df.loc["def_biv", "min"]),
-                                      biv_to_base_max(df.loc["def_biv", "max"]))
-        base_def_gap = base_def_max - base_def_min
-        def_error_free = df.loc["def_biv", "min"] <= df.loc["def_biv", "max"]
+                if possible:
+                    min_val = max(min_val, 22)
+                    max_val = min(max_val, 541)
+                if max_val < min_val:
+                    avg_val = 0
+                if unit_used == "PosBase":
+                    min_val = biv_to_base_min(min_val)
+                    max_val = biv_to_base_max(max_val)
+                    avg_val = (max_val + min_val) / 2
+                elif unit_used == "Base":
+                    min_val = min_val / 2
+                    max_val = max_val / 2
+                    avg_val = avg_val / 2
 
-        base_spa_min, base_spa_max = (biv_to_base_min(df.loc["spa_biv", "min"]),
-                                      biv_to_base_max(df.loc["spa_biv", "max"]))
-        base_spa_gap = base_spa_max - base_spa_min
-        spa_error_free = df.loc["spa_biv", "min"] <= df.loc["spa_biv", "max"]
+                label = unit_used
+                if unit_used == "PosBase": label = "Base"
+                table.loc[label + " " + upper(stat)] = [f"{min_val:g}", f"{avg_val:g}", f"{max_val:g}"]
 
-        base_spd_min, base_spd_max = (biv_to_base_min(df.loc["spd_biv", "min"]),
-                                      biv_to_base_max(df.loc["spd_biv", "max"]))
-        base_spd_gap = base_spd_max - base_spd_min
-        spd_error_free = df.loc["spd_biv", "min"] <= df.loc["spd_biv", "max"]
-
-        base_spe_min, base_spe_max = (biv_to_base_min(df.loc["spe_biv", "min"]),
-                                      biv_to_base_max(df.loc["spe_biv", "max"]))
-        base_spe_gap = base_spe_max - base_spe_min
-        spe_error_free = df.loc["spe_biv", "min"] <= df.loc["spe_biv", "max"]
-
-        error_free = hp_error_free and atk_error_free and def_error_free and spa_error_free and spd_error_free and spe_error_free
-        totals = [total_min, total_avg, total_max, error_free]
-        totals_avg = [f"{totals[0] / 6:.2f}", f"{totals[1] / 6:.2f}", f"{totals[2] / 6:.2f}",
-                      error_free]
-
-        base_gap_sum = base_hp_gap + base_atk_gap + base_def_gap + base_spa_gap + base_spd_gap + base_spe_gap
-        base_min_sum = base_hp_min + base_atk_min + base_def_min + base_spa_min + base_spd_min + base_spe_min
-        biv_gap_sum = base_gap_sum * 2
-        if biv_gap_sum == 0:
-            base_gap_sum = 1
-        missing_base_stats = current_bst() - base_min_sum
-
-        base_hp_med = round(base_hp_min + missing_base_stats / base_gap_sum * base_hp_gap)
-        base_atk_med = round(base_atk_min + missing_base_stats / base_gap_sum * base_atk_gap)
-        base_def_med = round(base_def_min + missing_base_stats / base_gap_sum * base_def_gap)
-        base_spa_med = round(base_spa_min + missing_base_stats / base_gap_sum * base_spa_gap)
-        base_spd_med = round(base_spd_min + missing_base_stats / base_gap_sum * base_spd_gap)
-        base_spe_med = round(base_spe_min + missing_base_stats / base_gap_sum * base_spe_gap)
-
-        result_table = pd.DataFrame(columns=["min", "mid", "max", "error-free?"])
-        result_table.loc["Total IVs"] = totals
-        result_table.loc["Average IVs"] = totals_avg
-        result_table.loc["Base HP:"] = [base_hp_min, base_hp_med, base_hp_max, hp_error_free]
-        result_table.loc["Base ATK:"] = [base_atk_min, base_atk_med, base_atk_max, atk_error_free]
-        result_table.loc["Base DEF:"] = [base_def_min, base_def_med, base_def_max, def_error_free]
-        result_table.loc["Base SPA:"] = [base_spa_min, base_spa_med, base_spa_max, spa_error_free]
-        result_table.loc["Base SPD:"] = [base_spd_min, base_spd_med, base_spd_max, spd_error_free]
-        result_table.loc["Base SPE:"] = [base_spe_min, base_spe_med, base_spe_max, spe_error_free]
-
-        return result_table.transpose()
+        return table.transpose()
 
     def calc_biv_table():
         if stat_history().size < 1:
-            return empty_table()
+            return pd.DataFrame()
 
         biv_table = pd.DataFrame(columns=["min", "max"],
                                  index=["hp_biv", "atk_biv", "def_biv", "spa_biv", "spd_biv", "spe_biv"])
