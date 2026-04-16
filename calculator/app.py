@@ -9,6 +9,8 @@ app_ui = (
             ui.a("Project Code on Github", href="https://github.com/feb-lon/feb-lon.github.io", target="_blank"),
         ),
         ui.nav_spacer(),
+        ui.nav_control(ui.output_ui("page_title")),
+        ui.nav_spacer(),
         atk_spa_calculator_page(id="atk_spa_calculator"),
         pokemon_info_page(id="pokemon_info"),
         iv_calculation_page(id="iv_calculation"),
@@ -17,8 +19,8 @@ app_ui = (
             ui.include_css(app_dir / "number_input_style.css"),
         ),
         id="mode",
-        title="Pokemon Calculator (Generation 3 Focus)",
-        window_title="Gen 3 Calculator",
+        title="Pokemon Calculator (Gen. 3 Focus)",
+        window_title="Pokemon Calculator",
     )
 )
 
@@ -27,6 +29,11 @@ def server(input: Inputs, output: Outputs, session: Session):
     atk_spa_calculation_page_server(id="atk_spa_calculator")
     iv_calculation_page_server(id="iv_calculation")
     pokemon_info_page_server(id="pokemon_info")
+
+    @render.ui
+    @reactive.event(input.mode)
+    def page_title():
+        return ui.h3(input.mode())
 
 
 app = App(app_ui, server,

@@ -13,7 +13,6 @@ from ui_elements import *
 def atk_spa_calculator_page():
     return ui.nav_panel(
         "ATK / SPA Calculator",
-        ui.h2("ATK / SPA Calculator"),
         ui.div(
             ui.page_fluid(
                 graph_settings(),

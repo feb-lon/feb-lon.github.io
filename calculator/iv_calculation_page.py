@@ -16,12 +16,6 @@ from number_input import *
 def iv_calculation_page():
     return ui.nav_panel(
         "IV Calculator",
-        element_and_tooltip(
-            ui.h2("IV Calculator"),
-            1,
-            "As there is currently no method to track EVs, i would "
-            "not recommend using this when having no idea what to do about EVs",
-        ),
         ui.div(
             ui.div(
                 {"style": "width: 20%; text-align: center"},
@@ -80,6 +74,9 @@ def settings():
                                        selected="Hide"),
                 class_="io_column",
             ),
+        ),
+        ui.card(
+            "Note: As there is currently no method to track EVs, i would not recommend using this when having no idea what to do about EVs"
         )
     ),
 
