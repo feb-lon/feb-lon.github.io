@@ -231,13 +231,13 @@ def biv_min(level: int, current_stat: int, evs: int, nature: float) -> int:
 
 # the maximum possible 2*Base+IV sum for given level, stat, EVs, nature
 def biv_max(level: int, current_stat: int, evs: int, nature: float) -> int:
-    biv = max(22, min(541, floor((current_stat
+    biv = max(22, min(541, floor(((current_stat
                                   + (0 if not (nature == 0.9 and current_stat % 10 == 0) else 1)
                                   + (0 if nature == 1
                                      else ceil(current_stat / 9) if nature == 0.9
                                      else - floor(current_stat / 11))
                                   - 5)
-                                 * 100 + 99 / level)
+                                 * 100 + 99) / level)
                                 - floor(evs / 4)
                       ))
     return biv
@@ -289,6 +289,13 @@ def calc_stat(level: int, base: int, iv: int, ev: int, nature: float) -> int:
 # hp has a slightly different calculation compared to other stats
 def calc_hp(level: int, base: int, iv: int, ev: int) -> int:
     return floor(floor(2 * base + iv + floor(ev / 4)) * level / 100) + 10 + level
+
+
+def possible_base(base: int):
+    return min(max(base, 11), 255)
+
+def possible_base_hp(base: int):
+    return min(max(base, 21), 255)
 
 
 # starting in generation 5, this rounding formula is used for some calculations

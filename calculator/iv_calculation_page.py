@@ -1,13 +1,8 @@
-from math import ceil
-from tokenize import String
-
 from numpy._core.strings import upper
-from pandas.core.computation.align import align_terms
 from shiny import render
 from shiny.types import SilentException
 
 from utils import *
-from ui_elements import *
 from shared import *
 from number_input import *
 
@@ -18,11 +13,12 @@ def iv_calculation_page():
         "IV Calculator",
         ui.div(
             ui.div(
-                {"style": "width: 20%; text-align: center"},
+                {"style": "min-width: 15%; text-align: center"},
                 settings(),
+                class_="io_column",
             ),
             ui.div(
-                {"style": "width: 70%"},
+                {"style": "min-width: 75%"},
                 result_table(),
                 input_array(),
                 stat_history(),
@@ -53,14 +49,11 @@ def settings():
                 "Nature:",
             ),
             ui.card_body(
-                ui.div(
-                    ui.input_radio_buttons("nature_plus", "",
-                                           ["=", "+ ATK", "+ DEF", "+ SPA", "+ SPD", "+ SPE"]),
-                    ui.input_radio_buttons("nature_minus", "",
-                                           ["=", "- ATK", "- DEF", "- SPA", "- SPD", "- SPE"]),
-                    class_="spread_row",
-                ),
-                class_="io_column small_gap",
+                ui.input_radio_buttons("nature_plus", "",
+                                       ["=", "+ ATK", "+ DEF", "+ SPA", "+ SPD", "+ SPE"]),
+                ui.input_radio_buttons("nature_minus", "",
+                                       ["=", "- ATK", "- DEF", "- SPA", "- SPD", "- SPE"]),
+                class_="spread_row",
             ),
         ),
         ui.card(
@@ -76,7 +69,10 @@ def settings():
             ),
         ),
         ui.card(
-            "Note: As there is currently no method to track EVs, i would not recommend using this when having no idea what to do about EVs"
+            ui.card_header(
+                "Note"
+            ),
+            "As there is currently no method to track EVs, i would not recommend using this when having no idea what to do about EVs"
         )
     ),
 
@@ -219,19 +215,43 @@ def iv_calculation_page_server(input: Inputs, output: Outputs, session: Session)
                 avg_val = df.loc[stat + "_biv"].mean()
                 max_val = df.loc[stat + "_biv", "max"]
 
-                if possible:
-                    min_val = max(min_val, 22)
-                    max_val = min(max_val, 541)
                 if max_val < min_val:
                     avg_val = 0
+
                 if unit_used == "PosBase":
                     min_val = biv_to_base_min(min_val)
                     max_val = biv_to_base_max(max_val)
+                    if possible:
+                        if stat == "hp":
+                            min_val = possible_base_hp(min_val)
+                            max_val = possible_base_hp(max_val)
+                        else:
+                            min_val = possible_base(min_val)
+                            max_val = possible_base(max_val)
                     avg_val = (max_val + min_val) / 2
                 elif unit_used == "Base":
-                    min_val = min_val / 2
-                    max_val = max_val / 2
+                    min_val = ceil(min_val / 2)
+                    max_val = floor(max_val / 2)
+
+                    # use the lower base option, as the usual case for this is when EVs are involved
+                    if max_val < min_val:
+                        min_val = max_val
+                    if possible:
+                        if stat == "hp":
+                            min_val = possible_base_hp(min_val)
+                            max_val = possible_base_hp(max_val)
+                        else:
+                            min_val = possible_base(min_val)
+                            max_val = possible_base(max_val)
                     avg_val = avg_val / 2
+                else:
+                    if possible:
+                        if stat == "hp":
+                            min_val = min(max(min_val, 42), 541)
+                            max_val = max(min(min_val, 541), 42)
+                        else:
+                            min_val = min(max(min_val, 22), 541)
+                            max_val = max(min(min_val, 541), 22)
 
                 label = unit_used
                 if unit_used == "PosBase": label = "Base"
