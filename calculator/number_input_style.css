@@ -15,7 +15,7 @@
 
 .number_input {
   display: flex;
-  align-items: end;
+  align-items: start;
   justify-content: space-between;
   align-content: normal;
   margin-block: .1rem;

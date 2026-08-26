@@ -1,7 +1,6 @@
-from matplotlib import pyplot as plt, get_backend
-from shiny import module, ui, Inputs, Outputs, render
+from matplotlib import pyplot as plt
+from shiny import render
 from shiny.types import SilentException, SafeException
-from typing_extensions import get_args
 
 from utils import *
 from number_input import *
@@ -10,20 +9,17 @@ from ui_elements import *
 
 
 @module.ui
-def atk_spa_calculator_page():
-    return ui.nav_panel(
-        "ATK / SPA Calculator",
-        ui.div(
-            ui.page_fluid(
-                graph_settings(),
-                main_inputs(),
-                reset_buttons(),
-                class_="spread_row",
-            ),
-            offense_plot(),
-            optional_inputs(),
-            class_="top_layer_column",
-        )
+def offense_calculation_page():
+    return ui.div(
+        ui.page_fluid(
+            settings(),
+            main_inputs(),
+            reset_buttons(),
+            class_="spread_row"
+        ),
+        offense_plot(),
+        optional_inputs(),
+        class_="ui_column",
     )
 
 
@@ -66,7 +62,7 @@ def double_damage_tooltip():
     )
 
 
-def graph_settings():
+def settings():
     return ui.card(
         ui.card_body(
             ui.input_radio_buttons(
@@ -82,11 +78,25 @@ def graph_settings():
             ),
             ui.input_radio_buttons(
                 "graph_style",
-                "Graph Style:",
+                ui.span("Graph style:"),
                 {"only_dmg_received": "Only DMG Received", "all_dmg_values": "All DMG Values"},
                 inline=False,
                 selected="only_dmg_received",
             ),
+            class_="io_column",
+        ),
+    ),
+
+
+def reset_buttons():
+    return ui.card(
+        ui.card_header(
+            "Reset Input Buttons"
+        ),
+        ui.card_body(
+            ui.input_action_button("reset_all", "Reset All Inputs"),
+            ui.input_action_button("reset_detailed_only", "Reset Detailed Inputs"),
+            class_="io_column",
         ),
     ),
 
@@ -97,30 +107,30 @@ def main_inputs():
             {"style": "border-color: black; border-width: 0.1rem; background-color: #FFF;"},
             ui.card_body(
                 ui.div(
-                    {"style": "display: flex;"},
+                    {"style": "display: flex; text-align: center;"},
                     ui.div(
                         ui.div(
                             number_input(id="enemy_level", label="",
                                          init=8, layout="big"),
-                            "Enemy LVL",
+                            ui.span("Enemy LVL"),
                             class_="io_column close_distance",
                         ),
                         ui.div(
                             number_input(id="move_power", label="",
                                          init=95, step=5, min_value=5, max_value=999, layout="big"),
-                            "Power",
+                            ui.span("Power"),
                             class_="io_column close_distance",
                         ),
                         ui.div(
                             number_input(id="own_defense", label="",
                                          init=20, min_value=1, max_value=999, layout="big"),
-                            "DEF/SPD",
+                            ui.span("DEF/SPD"),
                             class_="io_column close_distance",
                         ),
                         ui.div(
                             number_input(id="damage_received", label="",
                                          init=10, min_value=1, max_value=999, layout="big"),
-                            "DMG",
+                            ui.span("DMG"),
                             class_="io_column close_distance",
                         ),
                         class_="io_row",
@@ -185,21 +195,6 @@ def main_inputs():
     ),
 
 
-def reset_buttons():
-    return ui.div(
-        ui.card(
-            ui.card_header(
-                "Reset Input Buttons"
-            ),
-            ui.card_body(
-                ui.input_action_button("reset_all", "Reset All Inputs"),
-                ui.input_action_button("reset_detailed_only", "Reset Detailed Inputs"),
-                class_="spread_column",
-            ),
-        ),
-    ),
-
-
 def offense_plot():
     return ui.card(
         {"style": "border-color: black; border-width: 0.05rem;"},
@@ -209,8 +204,9 @@ def offense_plot():
 
 def optional_inputs():
     return ui.div(
-        {"style": "min-height: 5rem; align-items: start; padding-top: 1rem;"},
+        {"style": "min-height: 7rem;"},
         ui.card(
+            {"style": "align-self: start; margin-top: 0.5rem;"},
             ui.card_body(
                 ui.input_switch(
                     "use_detailed_inputs",
@@ -231,20 +227,22 @@ def optional_inputs():
             ),
         ),
         ui.div(
-            {"style": "width: 85%"},
+            {"style": "min-width: 85%; "},
             gen_3_inputs(),
             gen_4_inputs(),
             gen_5_onwards_inputs(),
+            class_="spread_row",
         ),
-        class_="io_row top",
+        class_="io_row"
     ),
 
 
 def gen_3_inputs():
     return ui.panel_conditional(
         "input.simulate_generation == 3 & input.use_detailed_inputs",
+        {"style": "width: 100%;"},
         ui.card(
-            {"style": "border-color: #C65A1E; border-width: .15rem;"},
+            {"style": "border-color: #C65A1E; border-width: .15rem; margin-bottom: 0;"},
             ui.card_body(
                 ui.div(
                     ui.input_switch("is_burned", "Enemy Burned"),
@@ -280,7 +278,7 @@ def gen_3_inputs():
             ),
         ),
         ui.card(
-            {"style": "border-color: #4E9E3A; border-width: .15rem;"},
+            {"style": "border-color: #4E9E3A; border-width: .15rem; margin-bottom: 0;"},
             ui.card_body(
                 ui.div(
                     ui.input_switch("has_def_spd_badge", "DEF/SPD Badge"),
@@ -311,6 +309,7 @@ def gen_3_inputs():
 def gen_4_inputs():
     return ui.panel_conditional(
         "input.simulate_generation == 4 & input.use_detailed_inputs",
+        {"style": "width: 100%;"},
         ui.card(
             element_and_tooltip(
                 "Early Stage Modifier",
@@ -356,6 +355,7 @@ def gen_5_onwards_inputs():
     return ui.panel_conditional(
         "(input.simulate_generation == 5 || input.simulate_generation == 6) "
         "& input.use_detailed_inputs",
+        {"style": "width: 100%;"},
         ui.card(
             element_and_tooltip(
                 "Mid Stage Modifier",
@@ -509,7 +509,7 @@ def typing_tooltip():
 
 
 @module.server
-def atk_spa_calculation_page_server(input: Inputs, output: Outputs, session: Session):
+def offense_calculation_page_server(input: Inputs, output: Outputs, session: Session):
     # general inputs
     get_enemy_level, set_enemy_level = number_input_server("enemy_level")
     get_enemy_move_power, set_enemy_move_power \
@@ -558,7 +558,7 @@ def atk_spa_calculation_page_server(input: Inputs, output: Outputs, session: Ses
             number_input(id="atk_spa_stage", label="",
                          init=stage, min_value=-6, max_value=6, layout="stages"),
             ui.div(
-                {"style": "width:3.7rem;font-size: .8rem;"},
+                {"style": "width:3.7rem; font-size: .8rem;"},
                 "ATK/SPA Stage",
             ),
             class_="io_column close_distance",
@@ -857,13 +857,18 @@ def atk_spa_calculation_page_server(input: Inputs, output: Outputs, session: Ses
                                 "\n\nGen 4+: Due to not being as granular as the game the rounding might not be the same, "
                                 "\nespecially if several factors are submitted through a single input (like Sniper + Magnitude vs Dig in gen5+ late stage modifier). "
                                 "\n\nIn these cases, trying +-1 DMG (or +-2DMG) and inspecting their \"All DMG Values\" styled graph might be helpful.")
+
+        # limit the upper and lower limits of the list so the graph only shows relevant information
+        dmg = dmg[(min_offense - min_offense_guess): (max_offense - min_offense_guess + 1)]
+        offense_min.set(min_offense)
+        offense_max.set(max_offense)
+        dmg_rolls.set(dmg)
+
         if max_offense < 1:
             raise SilentException
         graph_style = input.graph_style()
 
         if graph_style == "only_dmg_received":
-            # limit the upper and lower limits of the list so the graph only shows relevant information
-            dmg = dmg[(min_offense - min_offense_guess): (max_offense - min_offense_guess + 1)]
 
             fig, ax = plt.subplots()
             ax.set_title("ATK/SPA Value Likelihood")
@@ -981,3 +986,10 @@ def atk_spa_calculation_page_server(input: Inputs, output: Outputs, session: Ses
             return modifiers_changed
         else:
             return ""
+
+    # values used for the stat history
+    offense_min = reactive.value(int)
+    offense_max = reactive.value(int)
+    dmg_rolls = reactive.value([])
+
+    return get_enemy_level, set_enemy_level, offense_min, offense_max, dmg_rolls

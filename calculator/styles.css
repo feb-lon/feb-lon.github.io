@@ -2,6 +2,14 @@
 changing default layout
 */
 
+.main {
+  padding-top: 0 !important;
+}
+
+.bslib-sidebar-layout > .sidebar .shiny-input-container {
+  width: auto !important;
+}
+
 .bslib-page-navbar {
   background: whitesmoke;
 }
@@ -93,7 +101,7 @@ custom classes
   justify-content: flex-start;
   margin: .5rem;
   padding: .5rem;
-  gap: .2rem;
+  gap: .3rem;
 }
 
 .io_column.top {
@@ -120,8 +128,9 @@ custom classes
 .spread_column {
   display: flex;
   flex-direction: column;
-  justify-content: space-around;
-  align-content: center;
+  justify-content: space-evenly;
+  align-content: space-evenly;
+  height: 100%;
 }
 
 /* for divs that have switches in them */
@@ -154,7 +163,9 @@ custom classes
   justify-content: space-between;
   gap: 2rem;
   align-items: top;
-  gap: 3%;
+  gap: 2rem;
+  padding-left: 1rem;
+  padding-right: 1rem;
 }
 
 .top_layer_column {
@@ -163,7 +174,9 @@ custom classes
   justify-content: space-between;
   align-items: top;
   text-align: center;
-  gap: 7%;
+  gap: 2rem;
+  padding-left: 1rem;
+  padding-right: 1rem;
 }
 
 @media only screen and (max-width: 1000px) {
@@ -234,11 +247,13 @@ input[type="radio"] +span, .form-check-input +label {
 .radio>label>span, .radio-inline>label>span {
   display: block;
   border-radius: 0;
+  text-align: center;
 }
 
 .radio-inline, .radio  {
   padding: 0 !important;
   margin: 0 !important;
+  align-self: center;
 }
 
 .bslib-input-switch, .shiny-input-container-inline {
@@ -250,7 +265,7 @@ input[type="radio"] +span, .form-check-input +label {
   align-content: space-between;
 }
 
-.shiny-input-radiogroup>.shiny-options-group {
+.shiny-input-radiogroup > .shiny-options-group {
   display: flex;
   justify-content: center;
   align-content: center;
@@ -259,12 +274,12 @@ input[type="radio"] +span, .form-check-input +label {
   gap: 0;
 }
 
-.shiny-input-radiogroup.shiny-input-container-inline {
-  text-align: center;
+.shiny-input-radiogroup > label {
+  display: flex;
+  justify-content: center;
 }
 
 .shiny-options-group:has(.radio) {
-  display: flex;
   flex-direction: column;
 }
 
@@ -340,7 +355,6 @@ tooltip
 
 .tooltip_card {
   border-color: black;
-  background: aliceblue;
 }
 
 .tooltip_card >.card-body {
@@ -390,93 +404,95 @@ dropdowns
 targeted by ids
 */
 
-input[name="atk_spa_calculator-effectiveness"] +span,
-input[name="iv_calculation-nature_plus"] +span,
-input[name="iv_calculation-nature_minus"] +span {
- width: 4rem;
+input[name="offense_overview-offense_calculator-effectiveness"] + span,
+input[name="offense_overview-iv_calculation-nature_plus"] + span,
+input[name="offense_overview-iv_calculation-nature_minus"] + span,
+input[name="iv_calculation-nature_minus"] + span,
+input[name="iv_calculation-nature_plus"] + span {
+  width: 4rem;
 }
 
-input[name="atk_spa_calculator-graph_style"] +span {
+input[name="offense_overview-offense_calculator-graph_style"] +span {
  width: 10rem;
 }
 
-input[name="atk_spa_calculator-effectiveness"][value="4"]:checked +span,
-input[name="atk_spa_calculator-enemy_ability"][value="2"]:checked +span {
+input[name="offense_overview-offense_calculator-effectiveness"][value="4"]:checked +span,
+input[name="offense_overview-offense_calculator-enemy_ability"][value="2"]:checked +span {
   background: #009456 !important;
   color: white;
   border-color: black;
 }
 
-input[name="atk_spa_calculator-effectiveness"][value="4"]:hover +span,
-input[name="atk_spa_calculator-enemy_ability"][value="2"]:hover +span {
+input[name="offense_overview-offense_calculator-effectiveness"][value="4"]:hover +span,
+input[name="offense_overview-offense_calculator-enemy_ability"][value="2"]:hover +span {
   background: #80CAAB !important;
   color: black;
 }
 
-input[name="atk_spa_calculator-effectiveness"][value="2"]:checked +span,
-input[name="atk_spa_calculator-weather_modifier"][value="1.5"]:checked +span,
-#atk_spa_calculator-def_spd_stage-number_value,
-#atk_spa_calculator-atk_spa_stage-number_value,
-input[name="atk_spa_calculator-enemy_ability"][value="1.5x power"]:checked +span,
-input[name="atk_spa_calculator-enemy_ability"][value="1.5"]:checked +span {
+input[name="offense_overview-offense_calculator-effectiveness"][value="2"]:checked +span,
+input[name="offense_overview-offense_calculator-weather_modifier"][value="1.5"]:checked +span,
+#offense_overview-offense_calculator-def_spd_stage-number_value,
+#offense_overview-offense_calculator-atk_spa_stage-number_value,
+input[name="offense_overview-offense_calculator-enemy_ability"][value="1.5x power"]:checked +span,
+input[name="offense_overview-offense_calculator-enemy_ability"][value="1.5"]:checked +span {
   background: #4E9E3A !important;
   color: white;
   border-color: black;
 }
 
-#atk_spa_calculator-def_spd_stage-number_value[value="0"],
-#atk_spa_calculator-atk_spa_stage-number_value[value="0"] {
+#offense_overview-offense_calculator-def_spd_stage-number_value[value="0"],
+#offense_overview-offense_calculator-atk_spa_stage-number_value[value="0"] {
   background: #fff !important;
   color: black;
   border-color: black;
 }
 
-input[name="atk_spa_calculator-effectiveness"][value="2"]:hover +span,
-input[name="atk_spa_calculator-weather_modifier"][value="1.5"]:hover +span,
-input[name="atk_spa_calculator-enemy_ability"][value="1.5x power"]:hover +span,
-input[name="atk_spa_calculator-enemy_ability"][value="1.5"]:hover +span  {
+input[name="offense_overview-offense_calculator-effectiveness"][value="2"]:hover +span,
+input[name="offense_overview-offense_calculator-weather_modifier"][value="1.5"]:hover +span,
+input[name="offense_overview-offense_calculator-enemy_ability"][value="1.5x power"]:hover +span,
+input[name="offense_overview-offense_calculator-enemy_ability"][value="1.5"]:hover +span  {
   background: #A7CF9D !important;
   color: black;
 }
 
-input[name="atk_spa_calculator-effectiveness"][value="1-"]:checked +span {
+input[name="offense_overview-offense_calculator-effectiveness"][value="1-"]:checked +span {
   background: #B38F00 !important;
   color: white;
   border-color: black;
 }
 
-input[name="atk_spa_calculator-effectiveness"][value="1-"]:hover +span{
+input[name="offense_overview-offense_calculator-effectiveness"][value="1-"]:hover +span{
   background: #D9C780 !important;
   color: black;
 }
 
-input[name="atk_spa_calculator-effectiveness"][value="0.5"]:checked +span,
-input[name="atk_spa_calculator-weather_modifier"][value="0.5"]:checked +span,
-#atk_spa_calculator-def_spd_stage-number_value[value*="-"],
-#atk_spa_calculator-atk_spa_stage-number_value[value*="-"]  {
+input[name="offense_overview-offense_calculator-effectiveness"][value="0.5"]:checked +span,
+input[name="offense_overview-offense_calculator-weather_modifier"][value="0.5"]:checked +span,
+#offense_overview-offense_calculator-def_spd_stage-number_value[value*="-"],
+#offense_overview-offense_calculator-atk_spa_stage-number_value[value*="-"]  {
   background: #C65A1E !important;
   color: white;
   border-color: black;
 }
 
-input[name="atk_spa_calculator-effectiveness"][value="0.5"]:hover +span,
-input[name="atk_spa_calculator-weather_modifier"][value="0.5"]:hover +span {
+input[name="offense_overview-offense_calculator-effectiveness"][value="0.5"]:hover +span,
+input[name="offense_overview-offense_calculator-weather_modifier"][value="0.5"]:hover +span {
   background: #E3AD8F !important;
   color: black;
 }
 
-input[name="atk_spa_calculator-effectiveness"][value="0.25"]:checked +span {
+input[name="offense_overview-offense_calculator-effectiveness"][value="0.25"]:checked +span {
   background: #B3262E !important;
   color: white;
   border-color: black;
 }
 
-input[name="atk_spa_calculator-effectiveness"][value="0.25"]:hover +span {
+input[name="offense_overview-offense_calculator-effectiveness"][value="0.25"]:hover +span {
   background: #D99397 !important;
   color: black;
 }
 
-#atk_spa_calculator-has_sniper +label {
+#offense_overview-offense_calculator-has_sniper +label {
   padding-inline: .3rem;
   padding-top: .1rem;
   margin-bottom: -1rem;
@@ -484,7 +500,7 @@ input[name="atk_spa_calculator-effectiveness"][value="0.25"]:hover +span {
   align-self: end;
 }
 
-#atk_spa_calculator-has_adaptability +label {
+#offense_overview-offense_calculator-has_adaptability +label {
   border-start-end-radius: 0;
   border-start-start-radius: 0;
   padding-inline: .4rem;
@@ -494,7 +510,7 @@ input[name="atk_spa_calculator-effectiveness"][value="0.25"]:hover +span {
   align-self: start;
 }
 
-label[for="atk_spa_calculator-is_stab"], label[for="atk_spa_calculator-is_crit"] {
+label[for="offense_overview-offense_calculator-is_stab"], label[for="offense_overview-offense_calculator-is_crit"] {
   width: 5rem;
   z-index: 2
 }

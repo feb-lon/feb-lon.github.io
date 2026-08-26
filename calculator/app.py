@@ -1,6 +1,6 @@
+from offense_calculation_overview import offense_calculation_overview, offense_calculation_overview_server
 from iv_calculation_page import *
 from pokemon_info_page import *
-from atk_spa_calculation_page import *
 from shiny import *
 
 app_ui = (
@@ -11,7 +11,7 @@ app_ui = (
         ui.nav_spacer(),
         ui.nav_control(ui.output_ui("page_title")),
         ui.nav_spacer(),
-        atk_spa_calculator_page(id="atk_spa_calculator"),
+        offense_calculation_overview(id="offense_overview"),
         pokemon_info_page(id="pokemon_info"),
         iv_calculation_page(id="iv_calculation"),
         ui.head_content(
@@ -26,7 +26,7 @@ app_ui = (
 
 
 def server(input: Inputs, output: Outputs, session: Session):
-    atk_spa_calculation_page_server(id="atk_spa_calculator")
+    offense_calculation_overview_server(id="offense_overview")
     iv_calculation_page_server(id="iv_calculation")
     pokemon_info_page_server(id="pokemon_info")
 
@@ -36,5 +36,4 @@ def server(input: Inputs, output: Outputs, session: Session):
         return ui.h3(input.mode())
 
 
-app = App(app_ui, server,
-          static_assets=Path(app_dir / "images"))
+app = App(app_ui, server, static_assets=Path(app_dir / "images"))

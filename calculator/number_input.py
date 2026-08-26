@@ -2,18 +2,20 @@ from shiny import Inputs, Outputs, Session, module, reactive, ui
 
 
 @module.ui
-def number_input(init: float, label = "", min_value: float = 1, max_value: float = 100,
-                 step: float = 1, layout="") -> ui.TagChild:
+def number_input(init: float, label="", min_value: float = 1, max_value: float = 100,
+                 step: float = 1, layout="", style="") -> ui.TagChild:
     has_layout = layout != ""
-
     return ui.card(
         {"class": "number_input" + (" " + layout if has_layout else "")},
+        ui.card_body(
         ui.div(label, class_="number_input_label"),
         ui.div(
             ui.input_action_button("decrement", "∨", class_="button_minus", tabindex_="-1"),
             ui.input_numeric(id="number_value", label="", value=init, min=min_value, max=max_value, step=step),
             ui.input_action_button("increment", "^", class_="button_plus", tabindex_="-1"),
             class_="number_input_controls" + (" " + layout + "_controls" if has_layout else "")
+        ),
+        {"style": style + "margin-top: auto;margin-bottom: auto;flex: 1 1 auto;"},
         ),
         class_="number_input_row" + (" " + layout + "_row" if has_layout else "")
     )
