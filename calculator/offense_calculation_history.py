@@ -13,7 +13,7 @@ def offense_calculation_history():
         ui.input_action_button("analyse_history_button", "Analyse History"),
         ui.input_action_button("refresh_button", "Refresh History"),
         ui.div(
-            ui.output_data_frame("roll_history"),
+            ui.output_data_frame("damage_history"),
             ui.output_data_frame("enc_history"),
             class_="io_row",
         ),
@@ -22,58 +22,51 @@ def offense_calculation_history():
 
 
 @module.server
-def offense_calculation_history_server(input: Inputs, output: Outputs, session: Session):
-    damage_history = reactive.value(pd.DataFrame(
-        columns=["encounter", "offense_from", "offense_to", "dmg_rolls_per_stat"],))
-    encounter_history = reactive.value(pd.DataFrame(columns=["encounter", "IVs", "level"]))
+def offense_calculation_history_server(input: Inputs, output: Outputs, session: Session,
+                                       roll_history, encounter_history):
 
     @render.data_frame
-    @reactive.event(input.refresh_button, damage_history, ignore_none=False)
-    def roll_history():
+    @reactive.event(input.refresh_button, ignore_none=False)
+    def damage_history():
         return render.DataTable(
-            damage_history(),
+            roll_history.get(),
             width="100%",
             editable=False,
             selection_mode="row",
         )
 
     @render.data_frame
-    @reactive.event(input.refresh_button, encounter_history, ignore_none=False)
+    @reactive.event(input.refresh_button, ignore_none=False)
     def enc_history():
         return render.DataTable(
-            encounter_history(),
+            encounter_history.get(),
             width="100%",
             editable=False,
             selection_mode="row",
         )
-
-    def insert_roll(encounter, offense_min, offense_max, dmg_rolls_per_stat):
-        row = [encounter, offense_min, offense_max, dmg_rolls_per_stat]
-        damage_history().loc[len(damage_history())] = row
-
-    def insert_encounter(encounter, ivs, level):
-        encounter_history().loc[len(encounter_history())] = [encounter, ivs, level]
 
     @render.plot
     @reactive.event(input.analyse_history_button)
     def analyse_history():
-        if encounter_history().empty:
+        enc_hist = encounter_history.get()
+        roll_hist = roll_history.get()
+
+        if enc_hist.empty:
             raise SafeException("History Empty")
         encounter_bases = {}
         base_min = 1
         base_max = 255
 
         # first, get as much data as possible out of each encounter
-        for i in encounter_history().index:
-            row = encounter_history().loc[i]
-            enc_nr, ivs, level = row.iloc[0:3]
+        for enc_nr in enc_hist.index:
+            ivs, level = enc_hist.iloc[enc_nr, 0:2]
             if ivs.isdigit():
                 iv_min = int(ivs)
                 iv_max = iv_min
             else:
                 iv_min = 0
                 iv_max = 31
-            vals = damage_history().loc[damage_history()["encounter"] == enc_nr]
+            vals = roll_hist.loc[roll_hist["encounter"] == enc_nr]
 
             of_min = vals["offense_from"].max()
             biv_min_pos = biv_min(level, of_min, 0, 1.1)
@@ -172,18 +165,8 @@ def offense_calculation_history_server(input: Inputs, output: Outputs, session: 
         df = pd.DataFrame(result, index=["combinations"])
         df = df.loc[:, (df != 0).any(axis=0)]
         df = df.transpose()
-        plot = df.plot(kind="bar")
+        plot = df.plot(kind="bar", legend=False)
+        plot.set_xlabel("BST")
+        plot.set_ylabel("Likelihood")
 
         return plot
-
-    def encounter_row():
-        return encounter_history().loc[encounter_history().index.max()]
-
-    def reset_history():
-        damage_history.set(pd.DataFrame(columns=["encounter", "offense_from", "offense_to", "dmg_rolls_per_stat"]))
-        encounter_history.set(pd.DataFrame(columns=["encounter", "IVs", "level"]))
-
-
-
-    return insert_roll, insert_encounter, encounter_row, reset_history
-

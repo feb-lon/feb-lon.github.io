@@ -1,6 +1,7 @@
 import pandas as pd
 from matplotlib.pyplot import minorticks_on
 from shiny import render
+from shiny.types import SafeException
 
 from offense_calculation_history import offense_calculation_history, offense_calculation_history_server
 from offense_calculation_page import offense_calculation_page, offense_calculation_page_server
@@ -30,7 +31,7 @@ def offense_calculation_overview():
 
 def sidebar_content():
     return ui.div(
-        {"style": "gap: 2rem"},
+        {"style": "gap: 1rem"},
         ui.input_radio_buttons(
             "selected_page",
             "Page Selected:",
@@ -70,14 +71,21 @@ def sidebar_content():
 
 @module.server
 def offense_calculation_overview_server(input: Inputs, output: Outputs, session: Session):
-    get_level_calc, set_level_calc, offense_min, offense_max, dmg_rolls \
-        = offense_calculation_page_server(id="offense_calculator")
-    save_value, save_encounter, curr_enc, reset_history = offense_calculation_history_server(id="history")
-    get_level, set_level = number_input_server(id="level", init=8, min_value=1, max_value=100)
+    get_level_calc, set_level_calc, offense_min, offense_max, dmg_rolls = offense_calculation_page_server(
+        id="offense_calculator")
+    get_level, set_level = number_input_server(
+        id="level", init=8, min_value=1, max_value=100)
+
+    roll_history = reactive.value(pd.DataFrame(
+        columns=["encounter", "offense_from", "offense_to", "dmg_rolls_per_stat"]))
+    encounter_history = reactive.value(pd.DataFrame(
+        columns=["IVs", "level"]))
+
+    history = offense_calculation_history_server(id="history",
+                                                 roll_history=roll_history,
+                                                 encounter_history=encounter_history)
 
     shared_level_value = reactive.value(8)
-    current_encounter_id = reactive.value(0)
-    first_roll_of_encounter = reactive.value(True)
 
     iv_pairings_table = pd.DataFrame(data={
         "Value": ["0-31",
@@ -131,46 +139,53 @@ def offense_calculation_overview_server(input: Inputs, output: Outputs, session:
 
     @render.text
     def get_offense_description():
-        return str(offense_min()) + " to " + str(offense_max()) + " offense"
+        return str(offense_min.get()) + " to " + str(offense_max.get()) + " offense"
 
     @reactive.effect
     @reactive.event(input.new_encounter)
     def new_encounter():
-        current_encounter_id.set(current_encounter_id() + 1)
-        first_roll_of_encounter.set(True)
+        if encounter_history().empty:
+            encounter_history().loc[0] = [input.opponent_ivs(), shared_level_value()]
+        else:
+            encounter_history().loc[len(encounter_history())] = [input.opponent_ivs(), shared_level_value()]
 
     @reactive.effect
     @reactive.event(input.save_current_offense, input.new_encounter)
     def save_roll():
-        if first_roll_of_encounter():
-            save_encounter(current_encounter_id(), input.opponent_ivs(), get_level_calc())
-        save_value(current_encounter_id(), offense_min(), offense_max(), dmg_rolls())
-        first_roll_of_encounter.set(False)
+        if roll_history().empty:
+            roll_history().loc[0] = [
+                0, offense_min.get(), offense_max.get(), dmg_rolls.get()]
+        else:
+            roll_history().loc[len(roll_history())] = [
+                len(encounter_history())-1, offense_min.get(), offense_max.get(), dmg_rolls.get()]
 
     @render.ui
-    @reactive.event(input.save_current_offense, shared_level_value, input.opponent_ivs)
+    @reactive.event(input.new_encounter, input.delete_history, ignore_none=False)
     def current_encounter():
-        if first_roll_of_encounter():
-            return (
-                ui.div(
-                    {"style": "display: flex; justify-content: space-between;"},
-                    ui.span("DMG roll by: "),
-                    ui.span("Lvl: " + str(shared_level_value())),
-                    ui.span("IVs: " + str(input.opponent_ivs()))
-                ),
-            )
-        else:
-            return (
-                ui.div(
-                    {"style": "display: flex; justify-content: space-between;"},
-                    ui.span("DMG roll by: "),
-                    ui.span("Lvl: " + str(curr_enc().iloc[2])),
-                    ui.span("IVs: " + str(curr_enc().iloc[1]))
-                ),
-            )
+        if encounter_history().empty:
+            return ui.span("History is empty.")
+        return (
+            ui.div(
+                {"style": "display: flex; justify-content: space-between;"},
+                ui.span("DMG roll by: "),
+                ui.span("Lvl: " + str(encounter_history.get().loc[len(encounter_history())-1, "level"])),
+                ui.span("IVs: " + str(encounter_history.get().loc[len(encounter_history())-1, "IVs"]))
+            ),
+        )
+
+    @render.ui
+    @reactive.event(input.save_current_offense, shared_level_value, input.opponent_ivs, input.delete_history)
+    def current_values():
+        return (
+            ui.div(
+                {"style": "display: flex; justify-content: space-between;"},
+                ui.span("Lvl: " + str(shared_level_value())),
+                ui.span("IVs: " + str(input.opponent_ivs()))
+            ),
+        )
 
     @reactive.effect
     @reactive.event(input.delete_history)
     def delete_history():
-        reset_history()
-        first_roll_of_encounter.set(True)
+        roll_history.set(pd.DataFrame(columns=["encounter", "offense_from", "offense_to", "dmg_rolls_per_stat"]))
+        encounter_history.set(pd.DataFrame(columns=["IVs", "level"]))
