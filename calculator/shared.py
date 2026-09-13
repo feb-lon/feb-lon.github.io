@@ -7,14 +7,16 @@ import numpy as np
 app_dir = Path(__file__).parent
 csv_dir = Path(__file__).parent / "data"
 img_dir = Path(__file__).parent / "images"
-pokemons = pd.read_csv(csv_dir / "pokemon.csv", keep_default_na=False)
-pokemons.set_index("Pokemon", inplace=True)
-types = pd.read_csv(csv_dir / "type_effectiveness.csv")
-types.set_index("Type", inplace=True)
-moves = pd.read_csv(csv_dir / "moves.csv")
-moves.set_index("Name", inplace=True)
-experience = pd.read_csv(csv_dir / "experience_values.csv", dtype=np.int64)
-experience.set_index("Level", inplace=True)
+
+pokemons = pd.read_csv(csv_dir / "pokemon.csv", keep_default_na=False, index_col="Pokemon")
+types = pd.read_csv(csv_dir / "type_effectiveness.csv", index_col="Type")
+moves = pd.read_csv(csv_dir / "moves.csv", index_col="Name")
+experience = pd.read_csv(csv_dir / "experience_values.csv", dtype=np.int64, index_col="Level")
+
+## tables for "x 2*Base+IV at LVL y with z nature" -> stat
+biv_lvl_minus = pd.read_csv(csv_dir / "biv_lvl_minus.csv", dtype=np.int64, index_col=0)
+biv_lvl_neutral = pd.read_csv(csv_dir / "biv_lvl_neutral.csv", dtype=np.int64, index_col=0)
+biv_lvl_plus = pd.read_csv(csv_dir / "biv_lvl_plus.csv", dtype=np.int64, index_col=0)
 
 type_image_size = "64px"
 type_tooltip_col_width = (2,1,1,1,1,1,1,1,1,1,1)

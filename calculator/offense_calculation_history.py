@@ -10,14 +10,13 @@ from ui_elements import *
 @module.ui
 def offense_calculation_history():
     return ui.page_fluid(
-        ui.input_action_button("analyse_history_button", "Analyse History"),
-        ui.input_action_button("refresh_button", "Refresh History"),
         ui.div(
             ui.output_data_frame("damage_history"),
             ui.output_data_frame("enc_history"),
             class_="io_row",
         ),
-        ui.output_plot("analyse_history"),
+        ui.input_action_button("base_probabilities_button", "possible Bases"),
+        ui.output_plot("show_plot"),
     )
 
 
@@ -25,8 +24,11 @@ def offense_calculation_history():
 def offense_calculation_history_server(input: Inputs, output: Outputs, session: Session,
                                        roll_history, encounter_history):
 
+    trigger = reactive.value(True)
+    shown_plot = reactive.value()
+
     @render.data_frame
-    @reactive.event(input.refresh_button, ignore_none=False)
+    @reactive.event(trigger, ignore_none=False)
     def damage_history():
         return render.DataTable(
             roll_history.get(),
@@ -36,7 +38,7 @@ def offense_calculation_history_server(input: Inputs, output: Outputs, session: 
         )
 
     @render.data_frame
-    @reactive.event(input.refresh_button, ignore_none=False)
+    @reactive.event(trigger, ignore_none=False)
     def enc_history():
         return render.DataTable(
             encounter_history.get(),
@@ -45,9 +47,42 @@ def offense_calculation_history_server(input: Inputs, output: Outputs, session: 
             selection_mode="row",
         )
 
+    def refresh():
+        trigger.set(not trigger.get())
+
+    @reactive.effect
+    @reactive.event(input.base_probabilities_button)
+    def base_probabilities_plot():
+        shown_plot.set(plot_calculation("base_prob_plot"))
+
+
+    def plot_calculation(source):
+        if source == "base_prob_plot":
+            return base_probabilities()
+        else:
+            raise SafeException()
+
+    def base_probabilities():
+        base_chances = possible_bases()
+
+        df = pd.DataFrame(base_chances, index=["combinations"])
+        df = df.loc[:, (df != 0).any(axis=0)]
+        df = df.transpose()
+
+        plot = df.plot(kind="bar", legend=False)
+        plot.set_xlabel("BST")
+        plot.set_ylabel("Likelihood")
+        shown_plot.set(plot)
+
     @render.plot
-    @reactive.event(input.analyse_history_button)
-    def analyse_history():
+    @reactive.event(input.base_probabilities_button)
+    def show_plot():
+        return shown_plot.get()
+
+    def possible_bases():
+
+        if encounter_history().empty or roll_history().empty:
+            raise SilentException()
         enc_hist = encounter_history.get()
         roll_hist = roll_history.get()
 
@@ -147,26 +182,20 @@ def offense_calculation_history_server(input: Inputs, output: Outputs, session: 
 
             encounter_bases[enc_nr] = base_cases
 
-        result = dict(zip(range(base_min, base_max+1), np.ones(base_max-base_min+1)))
+        base_chances = dict(zip(range(base_min, base_max+1), np.ones(base_max-base_min+1)))
 
         for encounter in encounter_bases.keys():
             curr_enc = encounter_bases.get(encounter, {})
             for base in range(base_min, base_max+1):
-                result[base] = result[base] * curr_enc.get(base, 0)
+                base_chances[base] = base_chances[base] * curr_enc.get(base, 0)
 
         values_total = 0
-        for value in result.values():
+        for value in base_chances.values():
             values_total += value
 
-        for base in result.keys():
-            result[base] = result[base] / values_total
+        for base in base_chances.keys():
+            base_chances[base] = base_chances[base] / values_total
 
+        return base_chances
 
-        df = pd.DataFrame(result, index=["combinations"])
-        df = df.loc[:, (df != 0).any(axis=0)]
-        df = df.transpose()
-        plot = df.plot(kind="bar", legend=False)
-        plot.set_xlabel("BST")
-        plot.set_ylabel("Likelihood")
-
-        return plot
+    return refresh

@@ -1,5 +1,4 @@
 import pandas as pd
-from matplotlib.pyplot import minorticks_on
 from shiny import render
 from shiny.types import SafeException
 
@@ -14,26 +13,29 @@ def offense_calculation_overview():
     return ui.nav_panel(
         "ATK / SPA Calculator",
         ui.page_sidebar(
-            ui.sidebar(sidebar_content(), width=350, open="closed"),
-            ui.page_fluid(
-                ui.panel_conditional(
-                    "input.selected_page == 'calculation'",
+            sidebar_with_content(),
+            ui.navset_hidden(
+                ui.nav_panel(
+                    None,
                     offense_calculation_page(id="offense_calculator"),
+                    value="calculation",
                 ),
-                ui.panel_conditional(
-                    "input.selected_page == 'history'",
+                ui.nav_panel(
+                    None,
                     offense_calculation_history(id="history"),
+                    value="history",
                 ),
+                id="selected_page"
             ),
         ),
     )
 
 
-def sidebar_content():
-    return ui.div(
+def sidebar_with_content():
+    return ui.sidebar(
         {"style": "gap: 1rem"},
         ui.input_radio_buttons(
-            "selected_page",
+            "page_selection",
             "Page Selected:",
             ["calculation", "history"],
             inline=True,
@@ -46,14 +48,14 @@ def sidebar_content():
         ui.card(
             ui.layout_columns(
                 ui.span("LVL:"),
-                ui.span("IVs:"),
-                number_input(id="level", label="", init=8, min_value=1, max_value=100,
-                             style="padding-left: 0; padding-right: 0; "),
                 element_and_tooltip(
-                    ui.input_select(id="opponent_ivs", label="",
-                                    choices=["0-31", 0, 3, 4, 6, 12, 18, 30, 31]),
+                    ui.span("IVs:"),
                     1,
                     ui.output_table("iv_table")),
+                number_input(id="level", label="", init=8, min_value=1, max_value=100,
+                             style="padding-left: 0; padding-right: 0; "),
+                ui.input_select(id="opponent_ivs", label="",
+                                choices=["0-31", 0, 3, 4, 6, 12, 18, 30, 31]),
                 col_widths=(6, 6),
                 class_="io_row",
             ),
@@ -65,8 +67,10 @@ def sidebar_content():
                 ui.input_action_button(id="delete_history", label="Delete History"),
             ),
         ),
-        class_="spread_column",
-    ),
+        width=300,
+        open="closed",
+        class_="io_column",
+    )
 
 
 @module.server
@@ -81,7 +85,7 @@ def offense_calculation_overview_server(input: Inputs, output: Outputs, session:
     encounter_history = reactive.value(pd.DataFrame(
         columns=["IVs", "level"]))
 
-    history = offense_calculation_history_server(id="history",
+    refresh_history = offense_calculation_history_server(id="history",
                                                  roll_history=roll_history,
                                                  encounter_history=encounter_history)
 
@@ -116,6 +120,11 @@ def offense_calculation_overview_server(input: Inputs, output: Outputs, session:
                              "Ace of Rival Route 22 (2nd encounter)", "",
                              "Champion"],
     })
+
+    @reactive.effect
+    @reactive.event(input.page_selection, ignore_none=False)
+    def _():
+        ui.update_navset("selected_page", selected=str(input.page_selection()))
 
     @reactive.effect
     def _sync():
@@ -157,7 +166,8 @@ def offense_calculation_overview_server(input: Inputs, output: Outputs, session:
                 0, offense_min.get(), offense_max.get(), dmg_rolls.get()]
         else:
             roll_history().loc[len(roll_history())] = [
-                len(encounter_history())-1, offense_min.get(), offense_max.get(), dmg_rolls.get()]
+                len(encounter_history()) - 1, offense_min.get(), offense_max.get(), dmg_rolls.get()]
+        refresh_history()
 
     @render.ui
     @reactive.event(input.new_encounter, input.delete_history, ignore_none=False)
@@ -168,8 +178,8 @@ def offense_calculation_overview_server(input: Inputs, output: Outputs, session:
             ui.div(
                 {"style": "display: flex; justify-content: space-between;"},
                 ui.span("DMG roll by: "),
-                ui.span("Lvl: " + str(encounter_history.get().loc[len(encounter_history())-1, "level"])),
-                ui.span("IVs: " + str(encounter_history.get().loc[len(encounter_history())-1, "IVs"]))
+                ui.span("Lvl: " + str(encounter_history.get().loc[len(encounter_history()) - 1, "level"])),
+                ui.span("IVs: " + str(encounter_history.get().loc[len(encounter_history()) - 1, "IVs"]))
             ),
         )
 
@@ -189,3 +199,4 @@ def offense_calculation_overview_server(input: Inputs, output: Outputs, session:
     def delete_history():
         roll_history.set(pd.DataFrame(columns=["encounter", "offense_from", "offense_to", "dmg_rolls_per_stat"]))
         encounter_history.set(pd.DataFrame(columns=["IVs", "level"]))
+        refresh_history()
