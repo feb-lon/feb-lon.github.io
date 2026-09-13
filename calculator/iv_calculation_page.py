@@ -212,8 +212,8 @@ def iv_calculation_page_server(input: Inputs, output: Outputs, session: Session)
         if unit_used != "Hide":
             for stat in ["hp", "atk", "def", "spa", "spd", "spe"]:
                 min_val = df.loc[stat + "_biv", "min"]
-                avg_val = df.loc[stat + "_biv"].mean()
                 max_val = df.loc[stat + "_biv", "max"]
+                avg_val = round((min_val + max_val)/2)
 
                 if max_val < min_val:
                     avg_val = 0
