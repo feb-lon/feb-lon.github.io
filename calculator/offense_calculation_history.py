@@ -1,3 +1,6 @@
+from jedi.inference.utils import to_list
+from matplotlib.pyplot import minorticks_on
+from matplotlib.ticker import MultipleLocator
 from shiny import render
 from shiny.types import SilentException, SafeException
 
@@ -15,7 +18,14 @@ def offense_calculation_history():
             ui.output_data_frame("enc_history"),
             class_="io_row",
         ),
-        ui.input_action_button("base_probabilities_button", "possible Bases"),
+        ui.div(
+            ui.input_action_button("base_probabilities_button", "possible Bases"),
+            ui.input_action_button("atk_chance", "next encounter ATK chance"),
+            ui.input_action_button("atk_exists_chance", "ATK exists chance"),
+            number_input(id="level", label="", init=8, min_value=1, max_value=100,
+                        style="padding-left: 0; padding-right: 0; "),
+            class_="io_row",
+        ),
         ui.output_plot("show_plot"),
     )
 
@@ -26,6 +36,7 @@ def offense_calculation_history_server(input: Inputs, output: Outputs, session: 
 
     trigger = reactive.value(True)
     shown_plot = reactive.value()
+    get_level, set_level = number_input_server(id="level", init=8, min_value=1, max_value=100)
 
     @render.data_frame
     @reactive.event(trigger, ignore_none=False)
@@ -53,16 +64,6 @@ def offense_calculation_history_server(input: Inputs, output: Outputs, session: 
     @reactive.effect
     @reactive.event(input.base_probabilities_button)
     def base_probabilities_plot():
-        shown_plot.set(plot_calculation("base_prob_plot"))
-
-
-    def plot_calculation(source):
-        if source == "base_prob_plot":
-            return base_probabilities()
-        else:
-            raise SafeException()
-
-    def base_probabilities():
         base_chances = possible_bases()
 
         df = pd.DataFrame(base_chances, index=["combinations"])
@@ -74,13 +75,94 @@ def offense_calculation_history_server(input: Inputs, output: Outputs, session: 
         plot.set_ylabel("Likelihood")
         shown_plot.set(plot)
 
+    @reactive.effect
+    @reactive.event(input.atk_chance)
+    def atk_chance():
+        atk_chances = next_encounter_atk_chance()
+
+        df = pd.DataFrame(atk_chances, index=["combinations"])
+        df = df.loc[:, (df != 0).any(axis=0)]
+        df = df.transpose()
+
+        plot = df.plot(kind="bar", legend=False)
+        plot.set_xlabel("ATK")
+        plot.set_ylabel("Likelihood")
+        shown_plot.set(plot)
+
+    @reactive.effect
+    @reactive.event(input.atk_exists_chance)
+    def atk_chance():
+        atk_chances = atk_exists_likelihood()
+
+        df = pd.DataFrame(atk_chances, index=["combinations"])
+        df = df.loc[:, (df != 0).any(axis=0)]
+        df = df.transpose()
+
+        plot = df.plot(kind="bar", legend=False)
+        plot.set_label("ATK exists likelihood")
+        plot.minorticks_on()
+        plot.set_yticks([0, 0.2, 0.4, 0.6, 0.8, 1.0], labels=["0%", "20%", "40%", "60%", "80%", "100%"])
+        plot.yaxis.set_minor_locator(MultipleLocator(.1))
+        plot.grid(True, which="major", linewidth="1.5", axis="y")
+        plot.grid(True, which="minor", linewidth="0.5", axis="y")
+        plot.set_xlabel("ATK")
+        plot.set_ylabel("Likelihood")
+        shown_plot.set(plot)
+
     @render.plot
-    @reactive.event(input.base_probabilities_button)
+    @reactive.event(shown_plot)
     def show_plot():
         return shown_plot.get()
 
-    def possible_bases():
+    def next_encounter_atk_chance():
+        base_likelihoods = possible_bases()
+        level = get_level()
 
+        max_atk = biv_lvl_plus.loc[max(base_likelihoods.keys())*2+31, str(level)]
+        min_atk = biv_lvl_minus.loc[min(base_likelihoods.keys())*2, str(level)]
+        atk_values = dict.fromkeys(range(int(min_atk), int(max_atk+1)), 0)
+
+        for base in base_likelihoods:
+            base_likelihood = base_likelihoods[base]
+
+            for biv in range(2*base, 2*base+32):
+                stat_minus = biv_lvl_minus.loc[biv, str(level)]
+                stat_neutral = biv_lvl_neutral.loc[biv, str(level)]
+                stat_plus = biv_lvl_plus.loc[biv, str(level)]
+
+                atk_values[stat_minus] += base_likelihood/5/32
+                atk_values[stat_neutral] += base_likelihood*3/5/32
+                atk_values[stat_plus] += base_likelihood/5/32
+
+        return atk_values
+
+    def atk_exists_likelihood():
+        base_likelihoods = possible_bases()
+        level = get_level()
+
+        max_atk = biv_lvl_plus.loc[max(base_likelihoods.keys())*2+31, str(level)]
+        min_atk = biv_lvl_minus.loc[min(base_likelihoods.keys())*2, str(level)]
+        atk_exists_chance = dict.fromkeys(range(int(min_atk), int(max_atk+1)), 0)
+
+        for base in base_likelihoods:
+            atk_exists_list = dict.fromkeys(range(int(min_atk), int(max_atk+1)), False)
+
+            for biv in range(2*base, 2*base+32):
+                stat_minus = biv_lvl_minus.loc[biv, str(level)]
+                stat_neutral = biv_lvl_neutral.loc[biv, str(level)]
+                stat_plus = biv_lvl_plus.loc[biv, str(level)]
+
+                atk_exists_list[stat_minus] = True
+                atk_exists_list[stat_neutral] = True
+                atk_exists_list[stat_plus] = True
+
+            for atk_value, atk_exists in atk_exists_list.items():
+                if atk_exists:
+                    atk_exists_chance[atk_value] += base_likelihoods[base]
+
+        return atk_exists_chance
+
+    def possible_bases():
         if encounter_history().empty or roll_history().empty:
             raise SilentException()
         enc_hist = encounter_history.get()
