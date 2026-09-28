@@ -885,9 +885,9 @@ def offense_calculation_page_server(input: Inputs, output: Outputs, session: Ses
             if max_offense - min_offense < 20:
                 ax.set_xticks(range(min_offense, max_offense + 1))
             ax.bar(range(min_offense, max_offense + 1), dmg)
-            if not fig:
+            if not ax:
                 raise SilentException()
-            return fig
+            return ax
         elif graph_style == "all_dmg_values":
             # limit the upper and lower limits of the list so the graph only shows relevant information
             values = values[(min_offense - min_offense_guess): (max_offense - min_offense_guess + 1)]

@@ -1,6 +1,7 @@
 from offense_calculation_overview import offense_calculation_overview, offense_calculation_overview_server
 from iv_calculation_page import *
 from pokemon_info_page import *
+from coverage_calculator_page import *
 from shiny import *
 
 app_ui = (
@@ -13,6 +14,7 @@ app_ui = (
         ui.nav_spacer(),
         offense_calculation_overview(id="offense_overview"),
         pokemon_info_page(id="pokemon_info"),
+        coverage_calculator_page(id="coverage_calculator"),
         iv_calculation_page(id="iv_calculation"),
         ui.head_content(
             ui.include_css(app_dir / "styles.css"),
@@ -29,6 +31,7 @@ def server(input: Inputs, output: Outputs, session: Session):
     offense_calculation_overview_server(id="offense_overview")
     iv_calculation_page_server(id="iv_calculation")
     pokemon_info_page_server(id="pokemon_info")
+    coverage_calculator_page_server(id="coverage_calculator")
 
     @render.ui
     @reactive.event(input.mode)

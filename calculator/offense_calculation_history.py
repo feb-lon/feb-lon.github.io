@@ -1,5 +1,3 @@
-from jedi.inference.utils import to_list
-from matplotlib.pyplot import minorticks_on
 from matplotlib.ticker import MultipleLocator
 from shiny import render
 from shiny.types import SilentException, SafeException
@@ -70,10 +68,10 @@ def offense_calculation_history_server(input: Inputs, output: Outputs, session: 
         df = df.loc[:, (df != 0).any(axis=0)]
         df = df.transpose()
 
-        plot = df.plot(kind="bar", legend=False)
-        plot.set_xlabel("BST")
-        plot.set_ylabel("Likelihood")
-        shown_plot.set(plot)
+        plt = df.plot(kind="bar", legend=False)
+        plt.set_xlabel("BST")
+        plt.set_ylabel("Likelihood")
+        shown_plot.set(plt)
 
     @reactive.effect
     @reactive.event(input.atk_chance)
@@ -84,10 +82,10 @@ def offense_calculation_history_server(input: Inputs, output: Outputs, session: 
         df = df.loc[:, (df != 0).any(axis=0)]
         df = df.transpose()
 
-        plot = df.plot(kind="bar", legend=False)
-        plot.set_xlabel("ATK")
-        plot.set_ylabel("Likelihood")
-        shown_plot.set(plot)
+        plt = df.plot(kind="bar", legend=False)
+        plt.set_xlabel("ATK")
+        plt.set_ylabel("Likelihood")
+        shown_plot.set(plt)
 
     @reactive.effect
     @reactive.event(input.atk_exists_chance)
@@ -98,16 +96,16 @@ def offense_calculation_history_server(input: Inputs, output: Outputs, session: 
         df = df.loc[:, (df != 0).any(axis=0)]
         df = df.transpose()
 
-        plot = df.plot(kind="bar", legend=False)
-        plot.set_label("ATK exists likelihood")
-        plot.minorticks_on()
-        plot.set_yticks([0, 0.2, 0.4, 0.6, 0.8, 1.0], labels=["0%", "20%", "40%", "60%", "80%", "100%"])
-        plot.yaxis.set_minor_locator(MultipleLocator(.1))
-        plot.grid(True, which="major", linewidth="1.5", axis="y")
-        plot.grid(True, which="minor", linewidth="0.5", axis="y")
-        plot.set_xlabel("ATK")
-        plot.set_ylabel("Likelihood")
-        shown_plot.set(plot)
+        plt = df.plot(kind="bar", legend=False)
+        plt.set_label("ATK exists likelihood")
+        plt.minorticks_on()
+        plt.set_yticks([0, 0.2, 0.4, 0.6, 0.8, 1.0], labels=["0%", "20%", "40%", "60%", "80%", "100%"])
+        plt.yaxis.set_minor_locator(MultipleLocator(.1))
+        plt.grid(True, which="major", linewidth="1.5", axis="y")
+        plt.grid(True, which="minor", linewidth="0.5", axis="y")
+        plt.set_xlabel("ATK")
+        plt.set_ylabel("Likelihood")
+        shown_plot.set(plt)
 
     @render.plot
     @reactive.event(shown_plot)
