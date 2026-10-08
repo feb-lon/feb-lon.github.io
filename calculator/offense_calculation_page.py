@@ -878,8 +878,8 @@ def offense_calculation_page_server(input: Inputs, output: Outputs, session: Ses
 
             ax.set_yticks([0, 4, 8, 12, 16], labels=["0", "4", "8", "12", "16"])
             ax.yaxis.set_minor_locator(MultipleLocator(2))
-            ax.grid(True, which="major", linewidth=".5", color="black", axis="y")
-            ax.grid(True, which="minor", linewidth="0.2", axis="y")
+            ax.grid(True, which="major", linewidth=".3", color="grey", axis="y")
+            ax.grid(True, which="minor", linewidth=".15", axis="y")
             ax.set_ylim(0, 16)
 
             if max_offense - min_offense < 20:
