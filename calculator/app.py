@@ -7,6 +7,7 @@ from shiny import *
 app_ui = (
     ui.page_navbar(
         ui.nav_control(
+            ui.div(),
             ui.a("Project Code on Github", href="https://github.com/feb-lon/feb-lon.github.io", target="_blank"),
         ),
         ui.nav_spacer(),
@@ -21,7 +22,6 @@ app_ui = (
             ui.include_css(app_dir / "number_input_style.css"),
         ),
         id="mode",
-        title="Pokemon Calculator (Gen. 3 Focus)",
         window_title="Pokemon Calculator",
     )
 )

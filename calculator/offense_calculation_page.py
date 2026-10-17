@@ -105,7 +105,6 @@ def reset_buttons():
 def main_inputs():
     return ui.div(
         ui.card(
-            {"style": "border-color: black; border-width: 0.1rem; background-color: #FFF;"},
             ui.card_body(
                 ui.div(
                     {"style": "display: flex; text-align: center;"},
@@ -198,7 +197,6 @@ def main_inputs():
 
 def offense_plot():
     return ui.card(
-        {"style": "border-color: black; border-width: 0.05rem;"},
         ui.output_plot("calculate_offense"),
     ),
 

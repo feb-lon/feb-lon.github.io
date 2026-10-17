@@ -85,8 +85,6 @@ text_bottom>div {
   display: flex;
   align-items: center;
   justify-content: center;
-  color: #000;
-  background: whitesmoke;
 }
 
 .stages_small_controls>button, .stages_controls>button {
@@ -142,4 +140,31 @@ input[type=number]::-webkit-inner-spin-button {
   border-start-end-radius: 5rem;
   border-start-start-radius: 5rem;
   margin-top: -.7rem;
+}
+
+@media (prefers-color-scheme: dark) {
+
+    .number_input_controls > .form-group > input {
+      background: #4B4B4B;
+      color: whitesmoke;
+    }
+
+    .number_input_controls>button {
+      background: #6C757D;
+    }
+
+    .number_input_controls>button {
+      color: #fff;
+    }
+}
+
+@media (prefers-color-scheme: light) {
+
+    .number_input_controls>button {
+      background: whitesmoke;
+    }
+
+    .number_input_controls>button {
+      color: #000;
+    }
 }

@@ -10,10 +10,6 @@ changing default layout
   width: auto !important;
 }
 
-.bslib-page-navbar {
-  background: whitesmoke;
-}
-
 .form-group {
   margin-bottom: inherit;
 }
@@ -228,6 +224,14 @@ input[type="radio"]:checked +span {
   background:#009456;
 }
 
+input[type="radio"]:hover +span {
+  background: #BFDEF0;
+}
+
+input[type="checkbox"]:hover +label {
+  background: #BFEEDA;
+}
+
 input[type="radio"] +span, .form-check-input +label {
   padding: 4px 9px;
   background: white;
@@ -308,14 +312,6 @@ input[type="radio"] +span, .form-check-input +label {
   border-radius: 0 !important;
 }
 
-input[type="radio"]:hover +span {
-  background: #BFDEF0;
-}
-
-input[type="checkbox"]:hover +label {
-  background: #BFEEDA;
-}
-
 .shiny-options-group {
   justify-content: space-between;
   margin-top: 0rem !important;
@@ -351,10 +347,6 @@ tooltip
 
 .centered_img_row>div {
   justify-content: center;
-}
-
-.tooltip_card {
-  border-color: black;
 }
 
 .tooltip_card >.card-body {
@@ -416,82 +408,6 @@ input[name="offense_overview-offense_calculator-graph_style"] +span {
  width: 10rem;
 }
 
-input[name="offense_overview-offense_calculator-effectiveness"][value="4"]:checked +span,
-input[name="offense_overview-offense_calculator-enemy_ability"][value="2"]:checked +span {
-  background: #009456 !important;
-  color: white;
-  border-color: black;
-}
-
-input[name="offense_overview-offense_calculator-effectiveness"][value="4"]:hover +span,
-input[name="offense_overview-offense_calculator-enemy_ability"][value="2"]:hover +span {
-  background: #80CAAB !important;
-  color: black;
-}
-
-input[name="offense_overview-offense_calculator-effectiveness"][value="2"]:checked +span,
-input[name="offense_overview-offense_calculator-weather_modifier"][value="1.5"]:checked +span,
-#offense_overview-offense_calculator-def_spd_stage-number_value,
-#offense_overview-offense_calculator-atk_spa_stage-number_value,
-input[name="offense_overview-offense_calculator-enemy_ability"][value="1.5x power"]:checked +span,
-input[name="offense_overview-offense_calculator-enemy_ability"][value="1.5"]:checked +span {
-  background: #4E9E3A !important;
-  color: white;
-  border-color: black;
-}
-
-#offense_overview-offense_calculator-def_spd_stage-number_value[value="0"],
-#offense_overview-offense_calculator-atk_spa_stage-number_value[value="0"] {
-  background: #fff !important;
-  color: black;
-  border-color: black;
-}
-
-input[name="offense_overview-offense_calculator-effectiveness"][value="2"]:hover +span,
-input[name="offense_overview-offense_calculator-weather_modifier"][value="1.5"]:hover +span,
-input[name="offense_overview-offense_calculator-enemy_ability"][value="1.5x power"]:hover +span,
-input[name="offense_overview-offense_calculator-enemy_ability"][value="1.5"]:hover +span  {
-  background: #A7CF9D !important;
-  color: black;
-}
-
-input[name="offense_overview-offense_calculator-effectiveness"][value="1-"]:checked +span {
-  background: #B38F00 !important;
-  color: white;
-  border-color: black;
-}
-
-input[name="offense_overview-offense_calculator-effectiveness"][value="1-"]:hover +span{
-  background: #D9C780 !important;
-  color: black;
-}
-
-input[name="offense_overview-offense_calculator-effectiveness"][value="0.5"]:checked +span,
-input[name="offense_overview-offense_calculator-weather_modifier"][value="0.5"]:checked +span,
-#offense_overview-offense_calculator-def_spd_stage-number_value[value*="-"],
-#offense_overview-offense_calculator-atk_spa_stage-number_value[value*="-"]  {
-  background: #C65A1E !important;
-  color: white;
-  border-color: black;
-}
-
-input[name="offense_overview-offense_calculator-effectiveness"][value="0.5"]:hover +span,
-input[name="offense_overview-offense_calculator-weather_modifier"][value="0.5"]:hover +span {
-  background: #E3AD8F !important;
-  color: black;
-}
-
-input[name="offense_overview-offense_calculator-effectiveness"][value="0.25"]:checked +span {
-  background: #B3262E !important;
-  color: white;
-  border-color: black;
-}
-
-input[name="offense_overview-offense_calculator-effectiveness"][value="0.25"]:hover +span {
-  background: #D99397 !important;
-  color: black;
-}
-
 #offense_overview-offense_calculator-has_sniper +label {
   padding-inline: .3rem;
   padding-top: .1rem;
@@ -521,4 +437,244 @@ label[for="offense_overview-offense_calculator-is_stab"], label[for="offense_ove
 
 #iv_calculation-unit_used > div > .radio > label {
  width: 6rem;
+}
+
+@media (prefers-color-scheme: dark) {
+  .navbar {
+    background: #2E2E2E;
+    color: whitesmoke;
+  }
+
+  .bslib-sidebar-layout > .sidebar {
+    color: whitesmoke;
+    background: #4B4B4B;
+  }
+
+  .bslib-page-navbar {
+    background: #4B4B4B;
+    color: whitesmoke;
+  }
+
+  .navbar-nav {
+    --bs-nav-link-color: white;
+    --bs-nav-link-hover-color: whitesmoke;
+    --bs-nav-link-disabled-color: whitesmoke;
+    --bs-navbar-active-color: #B0B0B0;
+  }
+
+  .tooltip_card {
+    border-color: white;
+  }
+
+  .bslib-card {
+    --bslib-card-border-color: white;
+    --bs-body-bg: #2E2E2E;
+    color: whitesmoke;
+    border-color: white;
+  }
+
+  input[type="radio"] + span, .form-check-input + label {
+    background: #4B4B4B;
+    border-color: whitesmoke;
+  }
+
+  input[name="offense_overview-offense_calculator-effectiveness"][value="4"]:checked +span,
+  input[name="offense_overview-offense_calculator-enemy_ability"][value="2"]:checked +span {
+    background: #009456 !important;
+    color: whitesmoke;
+  }
+
+    input[name="offense_overview-offense_calculator-effectiveness"][value="4"]:hover +span,
+    input[name="offense_overview-offense_calculator-enemy_ability"][value="2"]:hover +span {
+      background: #80CAAB !important;
+      color: black;
+    }
+
+    input[name="offense_overview-offense_calculator-effectiveness"][value="2"]:checked +span,
+    input[name="offense_overview-offense_calculator-weather_modifier"][value="1.5"]:checked +span,
+    #offense_overview-offense_calculator-def_spd_stage-number_value,
+    #offense_overview-offense_calculator-atk_spa_stage-number_value,
+    input[name="offense_overview-offense_calculator-enemy_ability"][value="1.5x power"]:checked +span,
+    input[name="offense_overview-offense_calculator-enemy_ability"][value="1.5"]:checked +span {
+      background: #4E9E3A !important;
+      color: whitesmoke;
+    }
+
+    input[name="offense_overview-offense_calculator-effectiveness"][value="2"]:hover +span,
+    input[name="offense_overview-offense_calculator-weather_modifier"][value="1.5"]:hover +span,
+    input[name="offense_overview-offense_calculator-enemy_ability"][value="1.5x power"]:hover +span,
+    input[name="offense_overview-offense_calculator-enemy_ability"][value="1.5"]:hover +span  {
+      background: #A7CF9D !important;
+      color: black;
+    }
+
+    input[name="offense_overview-offense_calculator-effectiveness"][value="1-"]:checked +span {
+      background: #B38F00 !important;
+      color: whitesmoke;
+    }
+
+    input[name="offense_overview-offense_calculator-effectiveness"][value="1-"]:hover +span{
+      background: #D9C780 !important;
+      color: black;
+    }
+
+    input[name="offense_overview-offense_calculator-effectiveness"][value="1"]:checked +span {
+      border-color: white;
+    }
+
+    input[name="offense_overview-offense_calculator-effectiveness"][value="1"]:hover +span{
+      color: black;
+    }
+
+    input[name="offense_overview-offense_calculator-effectiveness"][value="0.5"]:checked +span,
+    input[name="offense_overview-offense_calculator-weather_modifier"][value="0.5"]:checked +span,
+    #offense_overview-offense_calculator-def_spd_stage-number_value[value*="-"],
+    #offense_overview-offense_calculator-atk_spa_stage-number_value[value*="-"]  {
+      background: #C65A1E !important;
+      color: whitesmoke;
+    }
+
+    input[name="offense_overview-offense_calculator-effectiveness"][value="0.5"]:hover +span,
+    input[name="offense_overview-offense_calculator-weather_modifier"][value="0.5"]:hover +span {
+      background: #E3AD8F !important;
+      color: black;
+    }
+
+    input[name="offense_overview-offense_calculator-effectiveness"][value="0.25"]:checked +span {
+      background: #B3262E !important;
+      color: whitesmoke;
+    }
+
+    input[name="offense_overview-offense_calculator-effectiveness"][value="0.25"]:hover +span {
+      background: #D99397 !important;
+      color: black;
+    }
+
+    .btn {
+      --bs-btn-color: whitesmoke !important;
+      --bs-btn-border-color: white !important;
+      --bs-btn-bg: #4B4B4B !important !important;
+    }
+
+    #offense_overview-offense_calculator-def_spd_stage-number_value[value="0"],
+    #offense_overview-offense_calculator-atk_spa_stage-number_value[value="0"] {
+      background: #4B4B4B !important;
+      color: whitesmoke;
+    }
+
+    .table > :not(caption) > * > * {
+      color: whitesmoke;
+    }
+
+    .shiny-input-selectize, .selectize-input, .form-select, .selectize-dropdown {
+      color: whitesmoke;
+      background: #4B4B4B;
+    }
+
+    .selectize-dropdown {
+      color: black;
+      background: #6C757D;
+    }
+
+    .collapse-icon {
+      color: whitesmoke;
+    }
+}
+
+@media (prefers-color-scheme: light) {
+  .bslib-page-, .navbar, .navbar-brand {
+    background: whitesmoke;
+    color: black;
+  }
+
+  .tooltip_card {
+    border-color: black;
+  }
+
+  input[name="offense_overview-offense_calculator-effectiveness"][value="4"]:checked +span,
+  input[name="offense_overview-offense_calculator-enemy_ability"][value="2"]:checked +span {
+    background: #009456 !important;
+    color: white;
+    border-color: black;
+  }
+
+    input[name="offense_overview-offense_calculator-effectiveness"][value="4"]:hover +span,
+    input[name="offense_overview-offense_calculator-enemy_ability"][value="2"]:hover +span {
+      background: #80CAAB !important;
+      color: black;
+    }
+
+    input[name="offense_overview-offense_calculator-effectiveness"][value="2"]:checked +span,
+    input[name="offense_overview-offense_calculator-weather_modifier"][value="1.5"]:checked +span,
+    #offense_overview-offense_calculator-def_spd_stage-number_value,
+    #offense_overview-offense_calculator-atk_spa_stage-number_value,
+    input[name="offense_overview-offense_calculator-enemy_ability"][value="1.5x power"]:checked +span,
+    input[name="offense_overview-offense_calculator-enemy_ability"][value="1.5"]:checked +span {
+      background: #4E9E3A !important;
+      color: white;
+      border-color: black;
+    }
+
+    #offense_overview-offense_calculator-def_spd_stage-number_value[value="0"],
+    #offense_overview-offense_calculator-atk_spa_stage-number_value[value="0"] {
+      background: #fff !important;
+      color: black;
+      border-color: black;
+    }
+
+    input[name="offense_overview-offense_calculator-effectiveness"][value="2"]:hover +span,
+    input[name="offense_overview-offense_calculator-weather_modifier"][value="1.5"]:hover +span,
+    input[name="offense_overview-offense_calculator-enemy_ability"][value="1.5x power"]:hover +span,
+    input[name="offense_overview-offense_calculator-enemy_ability"][value="1.5"]:hover +span  {
+      background: #A7CF9D !important;
+      color: black;
+    }
+
+    input[name="offense_overview-offense_calculator-effectiveness"][value="1-"]:checked +span {
+      background: #B38F00 !important;
+      color: white;
+      border-color: black;
+    }
+
+    input[name="offense_overview-offense_calculator-effectiveness"][value="1-"]:hover +span{
+      background: #D9C780 !important;
+      color: black;
+    }
+
+    input[name="offense_overview-offense_calculator-effectiveness"][value="0.5"]:checked +span,
+    input[name="offense_overview-offense_calculator-weather_modifier"][value="0.5"]:checked +span,
+    #offense_overview-offense_calculator-def_spd_stage-number_value[value*="-"],
+    #offense_overview-offense_calculator-atk_spa_stage-number_value[value*="-"]  {
+      background: #C65A1E !important;
+      color: white;
+      border-color: black;
+    }
+
+    input[name="offense_overview-offense_calculator-effectiveness"][value="0.5"]:hover +span,
+    input[name="offense_overview-offense_calculator-weather_modifier"][value="0.5"]:hover +span {
+      background: #E3AD8F !important;
+      color: black;
+    }
+
+    input[name="offense_overview-offense_calculator-effectiveness"][value="0.25"]:checked +span {
+      background: #B3262E !important;
+      color: white;
+      border-color: black;
+    }
+
+    input[name="offense_overview-offense_calculator-effectiveness"][value="0.25"]:hover +span {
+      background: #D99397 !important;
+      color: black;
+    }
+
+    #offense_overview-offense_calculator-def_spd_stage-number_value[value="0"],
+    #offense_overview-offense_calculator-atk_spa_stage-number_value[value="0"] {
+      background: #fff !important;
+      color: whitesmoke;
+    }
+}
+
+.navbar {
+  --bslib-navbar-light-bg: black;
+  --bslib-navbar-dark-bg: white;
 }

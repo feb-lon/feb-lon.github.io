@@ -36,7 +36,7 @@ def sidebar_with_content():
         {"style": "gap: 1rem"},
         ui.input_radio_buttons(
             "page_selection",
-            "Page Selected:",
+            ui.span("Page Selected:"),
             ["calculation", "history"],
             inline=True,
             selected="calculation",

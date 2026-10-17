@@ -19,12 +19,12 @@ def coverage_calculator_page():
                 ui.div(
                     ui.input_selectize(id="move_types",
                                        choices=types.index.tolist(),
-                                       label="Own Move Types:",
+                                       label=ui.span("Own Move Types:"),
                                        multiple=True, selected=""),
                     ui.input_select(id="pokemon_weight",
                                     choices={1: "none", "BST": "BST", "pow(BST, 1.5)": "BST^1.5",
                                              "pow(BST, 2)": "BST^2", "pow(BST, 3)": "BST^3"},
-                                    label="How should a pokemon be weighted?"),
+                                    label=ui.span("Weighting Used:")),
                     class_="io_row"),
             ),
             ui.div(
