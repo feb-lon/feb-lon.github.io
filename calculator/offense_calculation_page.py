@@ -11,16 +11,35 @@ from ui_elements import *
 
 @module.ui
 def offense_calculation_page():
-    return ui.div(
-        ui.page_fluid(
-            settings(),
-            main_inputs(),
-            reset_buttons(),
-            class_="spread_row"
-        ),
-        offense_plot(),
-        optional_inputs(),
-        class_="ui_column",
+    return ui.page_fluid(
+        ui.tags.style("""
+            .input-layout {
+                display: flex;
+                grid-template-columns: repeat(2, minmax(0, 1fr));
+                gap: 1rem;
+            }
+    
+            @media (max-width: 1400px) {
+                .input-layout {
+                    display: grid;
+                }
+    
+                .item-1 { grid-column: 1; grid-row: 1; }
+                .item-2 { grid-column: 1 / -1; grid-row: 2; }
+                .item-3 { grid-column: 2; grid-row: 1; }
+            }
+        """),
+        ui.div(
+            ui.page_fluid(
+                settings(),
+                main_inputs(),
+                reset_buttons(),
+                class_="input-layout spread_row",
+            ),
+            offense_plot(),
+            optional_inputs(),
+            class_="ui_column",
+        )
     )
 
 
@@ -86,6 +105,7 @@ def settings():
             ),
             class_="io_column",
         ),
+        class_="item-1",
     ),
 
 
@@ -99,99 +119,99 @@ def reset_buttons():
             ui.input_action_button("reset_detailed_only", "Reset Detailed Inputs"),
             class_="io_column",
         ),
+        class_="item-3",
     ),
 
 
 def main_inputs():
-    return ui.div(
-        ui.card(
-            ui.card_body(
+    return ui.card(
+        ui.card_body(
+            ui.div(
+                {"style": "display: flex; text-align: center;"},
                 ui.div(
-                    {"style": "display: flex; text-align: center;"},
                     ui.div(
-                        ui.div(
-                            number_input(id="enemy_level", label="",
-                                         init=8, layout="big"),
-                            ui.span("Enemy LVL"),
-                            class_="io_column close_distance",
-                        ),
-                        ui.div(
-                            number_input(id="move_power", label="",
-                                         init=95, step=5, min_value=5, max_value=999, layout="big"),
-                            ui.span("Power"),
-                            class_="io_column close_distance",
-                        ),
-                        ui.div(
-                            number_input(id="own_defense", label="",
-                                         init=20, min_value=1, max_value=999, layout="big"),
-                            ui.span("DEF/SPD"),
-                            class_="io_column close_distance",
-                        ),
-                        ui.div(
-                            number_input(id="damage_received", label="",
-                                         init=10, min_value=1, max_value=999, layout="big"),
-                            ui.span("DMG"),
-                            class_="io_column close_distance",
-                        ),
-                        class_="io_row",
+                        number_input(id="enemy_level", label="",
+                                     init=8, layout="big"),
+                        ui.span("Enemy LVL"),
+                        class_="io_column close_distance",
                     ),
                     ui.div(
-                        {"style": "margin-top: -1rem; margin-bottom: -1rem;"},
-                        ui.output_ui("atk_spa_stage_ui"),
-                        ui.output_ui("def_spd_stage_ui"),
-                        ui.div(
-                            ui.panel_conditional(
-                                "input.simulate_generation == 4",
-                                ui.input_switch("has_sniper", "Sniper"),
-                            ),
-                            ui.panel_conditional(
-                                "input.simulate_generation == 5 || input.simulate_generation == 6",
-                                {"style": "visibility: hidden;"},
-                                ui.input_switch("padding_element", ""),
-                            ),
-                            ui.input_switch("is_crit", "CRIT"),
-                            ui.input_switch("is_stab", "STAB"),
-                            ui.panel_conditional(
-                                "input.simulate_generation == 4 || input.simulate_generation == 5 "
-                                "|| input.simulate_generation == 6",
-                                ui.input_switch("has_adaptability", "Adaptability"),
-                            ),
-                            class_="ui_column big_buttons small_gap",
-                        ),
-                        ui.div(
-                            ui.input_radio_buttons(
-                                "effectiveness",
-                                "",
-                                {"4": "4x", "2": "2x", "1": "1x", "1-": "1x-", "0.5": "0.5x",
-                                 "0.25": "0.25x"},
-                                selected="1",
-                            ),
-                        ),
-                        ui.span(
-                            {
-                                "style":
-                                    "line-break: anywhere;"
-                                    "width: 0;"
-                                    "font-size: 1.6rem;"
-                                    "margin-left: 0rem;"
-                                    "padding: 0rem;"
-                                    "margin-top: 0rem;"
-                                    "margin-bottom: 0rem;"
-                                    "border-color: transparent;"
-                            },
-                            "EFF",
-                            ui.tooltip(
-                                question_circle_fill,
-                                typing_tooltip(),
-                                id="effectiveness_tooltip_advanced",
-                            ),
-                        ),
-                        class_="spread_row small_gap",
+                        number_input(id="move_power", label="",
+                                     init=95, step=5, min_value=5, max_value=999, layout="big"),
+                        ui.span("Power"),
+                        class_="io_column close_distance",
                     ),
-                    class_="spread_row big_gap",
+                    ui.div(
+                        number_input(id="own_defense", label="",
+                                     init=20, min_value=1, max_value=999, layout="big"),
+                        ui.span("DEF/SPD"),
+                        class_="io_column close_distance",
+                    ),
+                    ui.div(
+                        number_input(id="damage_received", label="",
+                                     init=10, min_value=1, max_value=999, layout="big"),
+                        ui.span("DMG"),
+                        class_="io_column close_distance",
+                    ),
+                    class_="io_row",
                 ),
+                ui.div(
+                    {"style": "margin-top: -1rem; margin-bottom: -1rem;"},
+                    ui.output_ui("atk_spa_stage_ui"),
+                    ui.output_ui("def_spd_stage_ui"),
+                    ui.div(
+                        ui.panel_conditional(
+                            "input.simulate_generation == 4",
+                            ui.input_switch("has_sniper", "Sniper"),
+                        ),
+                        ui.panel_conditional(
+                            "input.simulate_generation == 5 || input.simulate_generation == 6",
+                            {"style": "visibility: hidden;"},
+                            ui.input_switch("padding_element", ""),
+                        ),
+                        ui.input_switch("is_crit", "CRIT"),
+                        ui.input_switch("is_stab", "STAB"),
+                        ui.panel_conditional(
+                            "input.simulate_generation == 4 || input.simulate_generation == 5 "
+                            "|| input.simulate_generation == 6",
+                            ui.input_switch("has_adaptability", "Adaptability"),
+                        ),
+                        class_="ui_column big_buttons small_gap",
+                    ),
+                    ui.div(
+                        ui.input_radio_buttons(
+                            "effectiveness",
+                            "",
+                            {"4": "4x", "2": "2x", "1": "1x", "1-": "1x-", "0.5": "0.5x",
+                             "0.25": "0.25x"},
+                            selected="1",
+                        ),
+                    ),
+                    ui.span(
+                        {
+                            "style":
+                                "line-break: anywhere;"
+                                "width: 0;"
+                                "font-size: 1.6rem;"
+                                "margin-left: 0rem;"
+                                "padding: 0rem;"
+                                "margin-top: 0rem;"
+                                "margin-bottom: 0rem;"
+                                "border-color: transparent;"
+                        },
+                        "EFF",
+                        ui.tooltip(
+                            question_circle_fill,
+                            typing_tooltip(),
+                            id="effectiveness_tooltip_advanced",
+                        ),
+                    ),
+                    class_="spread_row small_gap",
+                ),
+                class_="spread_row big_gap",
             ),
         ),
+        class_="item-2",
     ),
 
 
