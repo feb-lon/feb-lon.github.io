@@ -21,6 +21,7 @@ def coverage_calculator_page():
                                        choices=types.index.tolist(),
                                        label=ui.span("Own Move Types:"),
                                        multiple=True, selected=""),
+                    ui.input_switch("evo_only", "Evo only"),
                     ui.input_select(id="pokemon_weight",
                                     choices={1: "none", "BST": "BST", "pow(BST, 1.5)": "BST^1.5",
                                              "pow(BST, 2)": "BST^2", "pow(BST, 3)": "BST^3"},
@@ -53,29 +54,31 @@ def coverage_calculator_page_server(input: Inputs, output: Outputs, session: Ses
                                             columns=["absolute", "weighted", "percentage"]))
 
     @reactive.effect
-    @reactive.event(input.move_types, input.pokemon_weight)
+    @reactive.event(input.move_types, input.pokemon_weight, input.evo_only)
     def weighted_coverage():
         if not input.move_types.get(): raise SilentException()
         move_types = input.move_types.get()
         weighting_method = input.pokemon_weight.get()
+        evo_only = input.evo_only.get()
 
         weight_cov = pd.DataFrame(index=[0, 0.25, 0.5, 1, 2, 4],
                                   columns=["absolute", "weighted", "percentage"],
                                   data=[[0, 0.0, 0.0],[0, 0.0, 0.0],[0, 0.0, 0.0],[0, 0.0, 0.0],[0, 0.0, 0.0],[0, 0.0, 0.0]])
 
         for mon in pokemons.index:
+            if not pokemons.loc[mon, "Is_Final_Evo"] and evo_only: continue
             type_1 = pokemons.loc[mon, "Type 1"]
             type_2 = pokemons.loc[mon, "Type 2"]
             BST = pokemons.loc[mon, "BST"]
             effectiveness = 0
 
             for move_type in move_types:
-                move_effectiveness = types.loc[move_type, type_1]
+                effectiveness_1 = types.loc[move_type, type_1]
                 if type_2 != "":
-                    move_effectiveness = move_effectiveness * types.loc[move_type, type_2]
-                effectiveness = max(effectiveness, move_effectiveness)
+                    effectiveness_1 = effectiveness_1 * types.loc[move_type, type_2]
+                effectiveness = max(effectiveness, effectiveness_1)
 
-            if mon == "shedinja" and effectiveness < 2: effectiveness = 0
+            if mon == "Shedinja" and effectiveness < 2: effectiveness = 0
 
             weight_cov.loc[effectiveness, "absolute"] += 1
 
