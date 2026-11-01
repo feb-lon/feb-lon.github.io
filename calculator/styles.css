@@ -570,6 +570,10 @@ label[for="offense_overview-offense_calculator-is_stab"], label[for="offense_ove
       color: whitesmoke;
       background: #4B4B4B;
     }
+    .selectize-input > div {
+      color: whitesmoke !important;
+      background: #6C757D !important;
+    }
 
     .selectize-dropdown {
       color: black;
