@@ -10,6 +10,9 @@ app_ui = (
             ui.div(),
             ui.a("Project Code on Github", href="https://github.com/feb-lon/feb-lon.github.io", target="_blank"),
         ),
+        ui.nav_control(
+            ui.input_select(id="theme",label="Colortheme:", choices=["light", "dark", "quack"]),
+        ),
         ui.nav_spacer(),
         ui.nav_control(ui.output_ui("page_title")),
         ui.nav_spacer(),
@@ -20,6 +23,18 @@ app_ui = (
         ui.head_content(
             ui.include_css(app_dir / "styles.css"),
             ui.include_css(app_dir / "number_input_style.css"),
+            ui.include_css(app_dir / "themes.css"),
+            ui.include_css(app_dir / "colors.css"),
+            ui.tags.script("""
+        $(document).on('shiny:inputchanged', function(event) {
+            if (event.name === 'theme') {
+                document.documentElement.setAttribute(
+                    'data-theme',
+                    event.value
+                );
+            }
+        });
+        """)
         ),
         id="mode",
         window_title="Pokemon Calculator",
