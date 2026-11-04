@@ -25,7 +25,7 @@ def pokemon_info_page():
                     ),
                     ui.div(
                         "Pokemon:",
-                        ui.input_selectize("pokemon", "", sorted(pokemons.index)),
+                        ui.input_select("pokemon", "", sorted(pokemons.index)),
                         "at Level",
                         number_input(id="enemy_level", label="", init=8, min_value=1, max_value=100),
                         class_="io_row",

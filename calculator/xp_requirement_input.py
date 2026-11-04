@@ -15,7 +15,7 @@ def xp_requirement_input(from_level=5, to_level=8, curve="Fluctuating"):
         ),
         ui.div(
             "XP Curve:",
-            ui.input_selectize("xp_curve", "", choices=list(experience.columns),
+            ui.input_select("xp_curve", "", choices=list(experience.columns),
                                selected=curve),
             "XP required:",
             ui.output_code("calc_xp_from_to"),

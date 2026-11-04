@@ -11,7 +11,7 @@ app_ui = (
             ui.a("Project Code on Github", href="https://github.com/feb-lon/feb-lon.github.io", target="_blank"),
         ),
         ui.nav_control(
-            ui.input_select(id="theme",label="Colortheme:", choices=["light", "dark", "quack"]),
+            ui.input_select(id="theme",label="Theme:", choices=["light", "dark", "quack"]),
         ),
         ui.nav_spacer(),
         ui.nav_control(ui.output_ui("page_title")),
@@ -22,9 +22,8 @@ app_ui = (
         iv_calculation_page(id="iv_calculation"),
         ui.head_content(
             ui.include_css(app_dir / "styles.css"),
-            ui.include_css(app_dir / "number_input_style.css"),
-            ui.include_css(app_dir / "themes.css"),
             ui.include_css(app_dir / "colors.css"),
+            ui.include_css(app_dir / "number_input_style.css"),
             ui.tags.script("""
         $(document).on('shiny:inputchanged', function(event) {
             if (event.name === 'theme') {
