@@ -7,6 +7,7 @@ from shiny.types import SilentException
 import pandas as pd
 import numpy as np
 
+from ui_elements import spacer
 from shared import types, pokemons
 
 
@@ -17,10 +18,14 @@ def coverage_calculator_page():
         ui.page_fluid(
             ui.card(
                 ui.div(
-                    ui.input_selectize(id="move_types",
-                                       choices=types.index.tolist(),
-                                       label=ui.span("Own Move Types:"),
-                                       multiple=True, selected=""),
+                    ui.div(ui.span("Own Move Types:"),
+                           spacer(.5, .5),
+                           ui.input_selectize(id="move_types",
+                                              choices=types.index.tolist(),
+                                              label="",
+                                              multiple=True, selected=""),
+                           class_="io_row"
+                           ),
                     ui.input_switch("evo_only", "Evo only"),
                     ui.input_select(id="pokemon_weight",
                                     choices={1: "none", "BST": "BST", "pow(BST, 1.5)": "BST^1.5",
@@ -63,7 +68,8 @@ def coverage_calculator_page_server(input: Inputs, output: Outputs, session: Ses
 
         weight_cov = pd.DataFrame(index=[0, 0.25, 0.5, 1, 2, 4],
                                   columns=["absolute", "weighted", "percentage"],
-                                  data=[[0, 0.0, 0.0],[0, 0.0, 0.0],[0, 0.0, 0.0],[0, 0.0, 0.0],[0, 0.0, 0.0],[0, 0.0, 0.0]])
+                                  data=[[0, 0.0, 0.0], [0, 0.0, 0.0], [0, 0.0, 0.0], [0, 0.0, 0.0], [0, 0.0, 0.0],
+                                        [0, 0.0, 0.0]])
 
         for mon in pokemons.index:
             if not pokemons.loc[mon, "Is_Final_Evo"] and evo_only: continue
@@ -114,7 +120,8 @@ def coverage_calculator_page_server(input: Inputs, output: Outputs, session: Ses
     @reactive.event(cov_table)
     def weighted_coverage_table():
         return cov_table.get().style.format({"weighted": "{:.0f}", "percentage": lambda x: f"{x * 100:.1f}%"},
-                                            na_rep="0").format_index(lambda x: f"{x:g}x").set_properties(**{"text-align": "right"})
+                                            na_rep="0").format_index(lambda x: f"{x:g}x").set_properties(
+            **{"text-align": "right"})
 
     def high_pct(pct):
         if pct >= 7:

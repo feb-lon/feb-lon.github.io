@@ -9,13 +9,28 @@
  --bg-output: orange;
  --bg-hover: #87d1ff;
 
+ --bg-4x: #009456;
+ --bg-4x-hover: #80CAAB;
+ --bg-2x: #4E9E3A;
+ --bg-2x-hover: #A7CF9D;
+ --bg-1x: var(--bg-selected);
+ --bg-1x-hover: var(--bg-hover);
+ --bg-1x-: #B38F00;
+ --bg-1x-_hover: #D9C780;
+ --bg-0-5x: #C65A1E;
+ --bg-0-5x-hover: #E3AD8F;
+ --bg-0-25x: #B3262E;
+ --bg-0-25x-hover: #D99397;
+ --bg-0x: #3A3A3A;
+
  --text-1: #1E1E1E;
  --text-2: #2D3B3D;
  --text-3: #FFF;
  --text-true: #EEE;
  --text-selected: var(--text-3);
  --text-output: black;
- --text-hover: #96DFCE;
+ --text-hover: #0D6EFD;
+ --text-effectiveness: #EEE;
 
  --border-color: #1E1E1E;
  --border-color-selected: var(--bg-selected);
@@ -41,6 +56,7 @@
  --text-2: #D7D7D7;
  --text-3: #1C1C1E;
  --text-true: #EEE;
+ --text-hover: #96DFCE;
 
  --border-color: #EEE;
 
@@ -155,14 +171,14 @@ input[type="checkbox"]:hover +label,  {
 
 input[name="offense_overview-offense_calculator-effectiveness"][value="4"]:checked +span,
 input[name="offense_overview-offense_calculator-enemy_ability"][value="2"]:checked +span {
-background: #009456 !important;
- color: var(--bg-1);
+background: var(--bg-4x) !important;
+ color: var(--text-effectiveness);
  border-color: var(--border-color);
 }
 
 input[name="offense_overview-offense_calculator-effectiveness"][value="4"]:hover +span,
 input[name="offense_overview-offense_calculator-enemy_ability"][value="2"]:hover +span {
-  background: #80CAAB !important;
+  background: var(--bg-4x-hover) !important;
   color: var(--text-1);
 }
 
@@ -172,14 +188,8 @@ input[name="offense_overview-offense_calculator-weather_modifier"][value="1.5"]:
 #offense_overview-offense_calculator-atk_spa_stage-number_value,
 input[name="offense_overview-offense_calculator-enemy_ability"][value="1.5x power"]:checked +span,
 input[name="offense_overview-offense_calculator-enemy_ability"][value="1.5"]:checked +span {
-  background: #4E9E3A !important;
-  color: var(--bg-1);
-  border-color: var(--border-color);
-}
-
-#offense_overview-offense_calculator-def_spd_stage-number_value[value="0"],
-#offense_overview-offense_calculator-atk_spa_stage-number_value[value="0"] {
-  color: var(--text-1);
+  background: var(--bg-2x) !important;
+  color: var(--text-effectiveness);
   border-color: var(--border-color);
 }
 
@@ -187,18 +197,18 @@ input[name="offense_overview-offense_calculator-effectiveness"][value="2"]:hover
 input[name="offense_overview-offense_calculator-weather_modifier"][value="1.5"]:hover +span,
 input[name="offense_overview-offense_calculator-enemy_ability"][value="1.5x power"]:hover +span,
 input[name="offense_overview-offense_calculator-enemy_ability"][value="1.5"]:hover +span  {
-  background: #A7CF9D !important;
+  background: var(--bg-2x-hover) !important;
   color: var(--text-1);
 }
 
 input[name="offense_overview-offense_calculator-effectiveness"][value="1-"]:checked +span {
-  background: #B38F00 !important;
-  color: var(--bg-1);
+  background: var(--bg-1x-) !important;
+  color: var(--text-effectiveness);
   border-color: var(--border-color);
 }
 
 input[name="offense_overview-offense_calculator-effectiveness"][value="1-"]:hover +span{
-  background: #D9C780 !important;
+  background: var(--bg-1x-_hover) !important;
   color: var(--text-1);
 }
 
@@ -206,25 +216,25 @@ input[name="offense_overview-offense_calculator-effectiveness"][value="0.5"]:che
 input[name="offense_overview-offense_calculator-weather_modifier"][value="0.5"]:checked +span,
 #offense_overview-offense_calculator-def_spd_stage-number_value[value*="-"],
 #offense_overview-offense_calculator-atk_spa_stage-number_value[value*="-"]  {
-  background: #C65A1E !important;
-  color: var(--bg-1);
+  background: var(--bg-0-5x) !important;
+  color: var(--text-effectiveness);
   border-color: var(--border-color);
 }
 
 input[name="offense_overview-offense_calculator-effectiveness"][value="0.5"]:hover +span,
 input[name="offense_overview-offense_calculator-weather_modifier"][value="0.5"]:hover +span {
-  background: #E3AD8F !important;
+  background: var(--bg-0-5x-hover) !important;
   color: var(--text-1);
 }
 
 input[name="offense_overview-offense_calculator-effectiveness"][value="0.25"]:checked +span {
-  background: #B3262E !important;
-  color: var(--bg-1);
+  background: var(--bg-0-25x) !important;
+  color: var(--text-effectiveness);
   border-color: var(--border-color);
 }
 
 input[name="offense_overview-offense_calculator-effectiveness"][value="0.25"]:hover +span {
-  background: #D99397 !important;
+  background: var(--bg-0-25x-hover) !important;
   color: var(--text-1);
 }
 
