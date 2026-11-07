@@ -15,15 +15,17 @@
  --text-true: #EEE;
  --text-selected: var(--text-3);
  --text-output: black;
- --text-hover: black;
+ --text-hover: #96DFCE;
 
  --border-color: #1E1E1E;
  --border-color-selected: var(--bg-selected);
 
  --bs-body-color: var(--text-1);
- --bs-body-bg: var(--bg-2);
+ --bs-body-bg: transparent;
+ --bs-border-color: transparent;
  --bs-btn-bg: var(--bg-1);
  --bs-heading-color: var(--text-1);
+ --bs-emphasis-color: var(--text-1);
 }
 
 [data-theme="dark"] {
@@ -50,6 +52,10 @@
  }
 }
 
+.bslib-page-navbar {
+  background: var(--bg-2);
+}
+
 .noplaceholder {
   color: var(--bg-1);
   background: #009456 !important;
@@ -67,8 +73,11 @@ pre {
  color: var(--text-1);
 }
 
-.selectize-dropdown, .selectize-input, .selectize-input input {
+.selectize-dropdown, .select-dropdown,
+.selectize-input, .select-dropdown,
+.selectize-input input, .select-input input {
  color: var(--text-1);
+ background: var(--bg-1);
 }
 
 .table, .table > :not(caption) > * > * {
@@ -86,7 +95,11 @@ a, .nav-link {
 }
 
 .nav-link.active {
- color: var(--text-2) !important;
+ color: var(--text-1) !important;
+}
+
+.nav-link:hover {
+ color: var(--text-hover);
 }
 
 .card {
@@ -136,7 +149,7 @@ input[type="radio"]:hover +span, input[type="radio"]:checked:hover +span {
   color: var(--text-hover);
 }
 
-input[type="checkbox"]:hover +label {
+input[type="checkbox"]:hover +label,  {
   background: #BFEEDA;
 }
 

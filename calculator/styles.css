@@ -165,19 +165,9 @@ custom classes
   padding-right: 1rem;
 }
 
-@media only screen and (max-width: 1000px) {
- .top_layer_column {
-  gap: 1%;
- }
-}
-
 .close_distance {
   padding: 0;
   margin: 0;
-}
-
-.big_gap {
-  gap: 4rem;
 }
 
 .small_gap {
@@ -400,4 +390,36 @@ label[for="offense_overview-offense_calculator-is_stab"], label[for="offense_ove
 
 #iv_calculation-unit_used > div > .radio > label {
  width: 6rem;
+}
+
+.input-layout {
+    display: flex;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 1rem;
+}
+
+@media (max-width: 1610px) {
+    .input-layout {
+        display: grid;
+    }
+
+    .item-1 { grid-column: 1; grid-row: 1; }
+    .item-2 { grid-column: 1 / -1; grid-row: 2; }
+    .item-3 { grid-column: 2; grid-row: 1; }
+
+    .optional-inputs {
+      flex-direction: column;
+      gap: 1rem;
+    }
+}
+
+.main_inputs {
+  gap: 4rem;
+}
+
+@media (max-width: 1100px) {
+ .main_inputs {
+  gap: 1rem;
+  flex-direction: column-reverse;
+ }
 }

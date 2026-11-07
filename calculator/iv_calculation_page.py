@@ -36,7 +36,7 @@ def settings():
             ),
             ui.card_body(
                 ui.div(
-                    ui.input_selectize("pokemon", "",
+                    ui.input_select("pokemon", "",
                                        sorted(pokemons.index), selected="Lickitung"),
                     ui.output_code("pokemon_bst"),
                     class_="io_row",

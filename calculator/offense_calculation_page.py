@@ -12,23 +12,6 @@ from ui_elements import *
 @module.ui
 def offense_calculation_page():
     return ui.page_fluid(
-        ui.tags.style("""
-            .input-layout {
-                display: flex;
-                grid-template-columns: repeat(2, minmax(0, 1fr));
-                gap: 1rem;
-            }
-    
-            @media (max-width: 1400px) {
-                .input-layout {
-                    display: grid;
-                }
-    
-                .item-1 { grid-column: 1; grid-row: 1; }
-                .item-2 { grid-column: 1 / -1; grid-row: 2; }
-                .item-3 { grid-column: 2; grid-row: 1; }
-            }
-        """),
         ui.div(
             ui.page_fluid(
                 settings(),
@@ -83,49 +66,53 @@ def double_damage_tooltip():
 
 
 def settings():
-    return ui.card(
-        ui.card_body(
-            ui.input_radio_buttons(
-                "dmg_type",
-                element_and_tooltip(
-                    "Minimum Damage:",
-                    1,
-                    "Only used for determining minimum DMG (physical DMG has higher minimum DMG)",
+    return ui.page_fluid(
+        ui.card(
+            ui.card_body(
+                ui.input_radio_buttons(
+                    "dmg_type",
+                    element_and_tooltip(
+                        "Minimum Damage:",
+                        1,
+                        "Only used for determining minimum DMG (physical DMG has higher minimum DMG)",
+                    ),
+                    {"physical": "Physical", "special": "Special"},
+                    selected="special",
+                    inline=True,
                 ),
-                {"physical": "Physical", "special": "Special"},
-                selected="special",
-                inline=True,
+                ui.input_radio_buttons(
+                    "graph_style",
+                    ui.span("Graph style:"),
+                    {"only_dmg_received": "Only DMG Received", "all_dmg_values": "All DMG Values"},
+                    inline=False,
+                    selected="only_dmg_received",
+                ),
+                class_="io_column",
             ),
-            ui.input_radio_buttons(
-                "graph_style",
-                ui.span("Graph style:"),
-                {"only_dmg_received": "Only DMG Received", "all_dmg_values": "All DMG Values"},
-                inline=False,
-                selected="only_dmg_received",
-            ),
-            class_="io_column",
         ),
-        class_="item-1",
+        class_="spread_row item-1",
     ),
 
 
 def reset_buttons():
-    return ui.card(
-        ui.card_header(
-            "Reset Input Buttons"
+    return ui.page_fluid(
+        ui.card(
+            ui.card_header(
+                "Reset Input Buttons"
+            ),
+            ui.card_body(
+                ui.input_action_button("reset_all", "Reset All Inputs"),
+                ui.input_action_button("reset_detailed_only", "Reset Detailed Inputs"),
+                class_="io_column",
+            ),
         ),
-        ui.card_body(
-            ui.input_action_button("reset_all", "Reset All Inputs"),
-            ui.input_action_button("reset_detailed_only", "Reset Detailed Inputs"),
-            class_="io_column",
-        ),
-        class_="item-3",
+        class_="spread_row item-3"
     ),
 
 
 def main_inputs():
-    return ui.card(
-        ui.card_body(
+    return ui.page_fluid(
+        ui.card(
             ui.div(
                 {"style": "display: flex; text-align: center;"},
                 ui.div(
@@ -208,10 +195,10 @@ def main_inputs():
                     ),
                     class_="spread_row small_gap",
                 ),
-                class_="spread_row big_gap",
+                class_="spread_row main_inputs",
             ),
         ),
-        class_="item-2",
+        class_="item-2 spread_row",
     ),
 
 
@@ -321,7 +308,7 @@ def gen_3_inputs():
                 class_="io_column",
             ),
         ),
-        class_="spread_row top",
+        class_="spread_row optional-inputs",
     ),
 
 

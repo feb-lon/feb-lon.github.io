@@ -11,7 +11,12 @@ app_ui = (
             ui.a("Project Code on Github", href="https://github.com/feb-lon/feb-lon.github.io", target="_blank"),
         ),
         ui.nav_control(
-            ui.input_select(id="theme",label="Theme:", choices=["light", "dark", "quack"]),
+            ui.div(
+                ui.span("Theme:"),
+                spacer(.5, .5),
+                ui.input_select(id="theme",label="", choices=["light", "dark", "quack"]),
+                class_="io_row",
+            ),
         ),
         ui.nav_spacer(),
         ui.nav_control(ui.output_ui("page_title")),
