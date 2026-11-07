@@ -14,7 +14,7 @@ app_ui = (
             ui.div(
                 ui.span("Theme:"),
                 spacer(.5, .5),
-                ui.input_select(id="theme",label="", choices=["light", "dark", "quack"]),
+                ui.input_select(id="theme",label="", choices=["light", "dark"]),
                 class_="io_row",
             ),
         ),
