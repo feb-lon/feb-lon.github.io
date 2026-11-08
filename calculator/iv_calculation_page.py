@@ -32,7 +32,8 @@ def settings():
     return (
         ui.card(
             ui.card_header(
-                "Pokemon:",
+                ui.span("Pokemon:",
+                class_="card_header"),
             ),
             ui.card_body(
                 ui.div(
@@ -46,7 +47,8 @@ def settings():
         ),
         ui.card(
             ui.card_header(
-                "Nature:",
+                ui.span("Nature:",
+                class_="card_header"),
             ),
             ui.card_body(
                 ui.input_radio_buttons("nature_plus", "",
@@ -58,7 +60,8 @@ def settings():
         ),
         ui.card(
             ui.card_header(
-                "Result Options"
+                ui.span("Result Options",
+                class_="card_header"),
             ),
             ui.card_body(
                 ui.input_switch("possible", "only consider possible values", True),
@@ -70,7 +73,8 @@ def settings():
         ),
         ui.card(
             ui.card_header(
-                "Note"
+                ui.span("Note",
+                class_="card_header"),
             ),
             "As there is currently no method to track EVs, i would not recommend using this when having no idea what to do about EVs"
         )

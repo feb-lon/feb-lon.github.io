@@ -24,13 +24,18 @@ def coverage_calculator_page():
                                               choices=types.index.tolist(),
                                               label="",
                                               multiple=True, selected=""),
-                           class_="io_row"
+                           class_="io_row",
                            ),
                     ui.input_switch("evo_only", "Evo only"),
-                    ui.input_select(id="pokemon_weight",
-                                    choices={1: "none", "BST": "BST", "pow(BST, 1.5)": "BST^1.5",
-                                             "pow(BST, 2)": "BST^2", "pow(BST, 3)": "BST^3"},
-                                    label=ui.span("Weighting Used:")),
+                    ui.div(
+                        ui.span("Weighting Used:"),
+                           spacer(.5, .5),
+                        ui.input_select(id="pokemon_weight",
+                                        choices={1: "none", "BST": "BST", "pow(BST, 1.5)": "BST^1.5",
+                                                 "pow(BST, 2)": "BST^2", "pow(BST, 3)": "BST^3"},
+                                        label=""),
+                        class_="io_row",
+                    ),
                     class_="io_row"),
             ),
             ui.div(

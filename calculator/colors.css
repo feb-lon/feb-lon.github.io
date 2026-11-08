@@ -1,13 +1,14 @@
   :root {
- --bg-1: #F1FAFB;
- --bg-2: #CCE5F2;
- --bg-3: #90CAF9;
+  --bg-1: #FFF;
+  --bg-2: #a9d0e7;
+  --bg-3: #007bc2;
  --bg-true: #009456;
  --bg-false: #FDE8E8;
  --bg-clickable: #007bc2;
  --bg-selected: #5AA5D5;
  --bg-output: orange;
  --bg-hover: #87d1ff;
+ --bg-hover-nav: #00649d;
 
  --bg-4x: #009456;
  --bg-4x-hover: #80CAAB;
@@ -24,13 +25,15 @@
  --bg-0x: #3A3A3A;
 
  --text-1: #1E1E1E;
- --text-2: #2D3B3D;
+ --text-2: #FFF;
  --text-3: #FFF;
  --text-true: #EEE;
  --text-selected: var(--text-3);
  --text-output: black;
- --text-hover: #0D6EFD;
+ --text-hover: var(--text-1);
+ --text-hover-nav: var(--text-2);
  --text-effectiveness: #EEE;
+ --text-effectiveness-hover: #111;
 
  --border-color: #1E1E1E;
  --border-color-selected: var(--bg-selected);
@@ -39,7 +42,7 @@
  --bs-body-bg: transparent;
  --bs-border-color: transparent;
  --bs-btn-bg: var(--bg-1);
- --bs-heading-color: var(--text-1);
+ --bs-heading-color: var(--text-3);
  --bs-emphasis-color: var(--text-1);
 }
 
@@ -50,13 +53,13 @@
  --bg-true: #009456;
  --bg-false: #FDE8E8;
  --bg-clickable: #00A8E1;
- --bg-selected: #4ECDC4;
+ /*--bg-selected: #4ECDC4;*/
+ --bg-hover-nav: var(--bg-2);
 
  --text-1: #EAEAEA;
- --text-2: #D7D7D7;
  --text-3: #1C1C1E;
  --text-true: #EEE;
- --text-hover: #96DFCE;
+ --text-hover: var(--text-3);
 
  --border-color: #EEE;
 
@@ -98,7 +101,7 @@ pre {
 
 .table, .table > :not(caption) > * > * {
  background: transparent;
- color: var(--text-2)
+ color: var(--text-1)
 }
 
 /* there is color in the element that needs to be overwritten  */
@@ -106,22 +109,41 @@ pre {
  background: transparent !important;
 }
 
+.page-title {
+ color: var(--text-2);
+ font-size: 1.5rem;
+}
+
+#mode > li > div > span, #theme {
+ color: var(--text-2);
+ border-color: var(--text-2);
+}
+
+#theme {
+ background: var(--bg-3);
+}
+
 a, .nav-link {
  color: var(--text-2);
 }
 
 .nav-link.active {
- color: var(--text-1) !important;
+ color: var(--text-2) !important;
 }
 
-.nav-link:hover {
- color: var(--text-hover);
+a:hover, .nav-link:hover, #theme:hover {
+ background: var(--bg-hover-nav);
+ color: var(--text-hover-nav);
+}
+
+.card_header {
+ color: var(--text-1);
+ font-size: 1.3rem;
 }
 
 .card {
- color: var(--text-2);
+ color: var(--text-1);
  background: var(--bg-1);
- --bs-emphasis-color: var(--text-true);
 }
 
 .btn {
@@ -134,8 +156,8 @@ a, .nav-link {
 }
 
 .form-check-input +label, .form-select {
- color: var(--bg-3)
- background: var(--bg-false);
+ color: var(--text-1);
+ background: var(--bg-1);
  border-color: var(--border-color);
 }
 
@@ -171,15 +193,12 @@ input[type="checkbox"]:hover +label,  {
 
 input[name="offense_overview-offense_calculator-effectiveness"][value="4"]:checked +span,
 input[name="offense_overview-offense_calculator-enemy_ability"][value="2"]:checked +span {
-background: var(--bg-4x) !important;
- color: var(--text-effectiveness);
- border-color: var(--border-color);
+ background: var(--bg-4x);
 }
 
 input[name="offense_overview-offense_calculator-effectiveness"][value="4"]:hover +span,
 input[name="offense_overview-offense_calculator-enemy_ability"][value="2"]:hover +span {
-  background: var(--bg-4x-hover) !important;
-  color: var(--text-1);
+  background: var(--bg-4x-hover);
 }
 
 input[name="offense_overview-offense_calculator-effectiveness"][value="2"]:checked +span,
@@ -188,58 +207,58 @@ input[name="offense_overview-offense_calculator-weather_modifier"][value="1.5"]:
 #offense_overview-offense_calculator-atk_spa_stage-number_value,
 input[name="offense_overview-offense_calculator-enemy_ability"][value="1.5x power"]:checked +span,
 input[name="offense_overview-offense_calculator-enemy_ability"][value="1.5"]:checked +span {
-  background: var(--bg-2x) !important;
-  color: var(--text-effectiveness);
-  border-color: var(--border-color);
+  background: var(--bg-2x);
 }
 
 input[name="offense_overview-offense_calculator-effectiveness"][value="2"]:hover +span,
 input[name="offense_overview-offense_calculator-weather_modifier"][value="1.5"]:hover +span,
 input[name="offense_overview-offense_calculator-enemy_ability"][value="1.5x power"]:hover +span,
 input[name="offense_overview-offense_calculator-enemy_ability"][value="1.5"]:hover +span  {
-  background: var(--bg-2x-hover) !important;
-  color: var(--text-1);
+  background: var(--bg-2x-hover);
 }
 
 input[name="offense_overview-offense_calculator-effectiveness"][value="1-"]:checked +span {
-  background: var(--bg-1x-) !important;
-  color: var(--text-effectiveness);
-  border-color: var(--border-color);
+  background: var(--bg-1x-);
 }
 
 input[name="offense_overview-offense_calculator-effectiveness"][value="1-"]:hover +span{
-  background: var(--bg-1x-_hover) !important;
-  color: var(--text-1);
+  background: var(--bg-1x-_hover);
 }
 
 input[name="offense_overview-offense_calculator-effectiveness"][value="0.5"]:checked +span,
 input[name="offense_overview-offense_calculator-weather_modifier"][value="0.5"]:checked +span,
 #offense_overview-offense_calculator-def_spd_stage-number_value[value*="-"],
 #offense_overview-offense_calculator-atk_spa_stage-number_value[value*="-"]  {
-  background: var(--bg-0-5x) !important;
-  color: var(--text-effectiveness);
-  border-color: var(--border-color);
+  background: var(--bg-0-5x);
 }
 
 input[name="offense_overview-offense_calculator-effectiveness"][value="0.5"]:hover +span,
 input[name="offense_overview-offense_calculator-weather_modifier"][value="0.5"]:hover +span {
-  background: var(--bg-0-5x-hover) !important;
-  color: var(--text-1);
+  background: var(--bg-0-5x-hover);
 }
 
 input[name="offense_overview-offense_calculator-effectiveness"][value="0.25"]:checked +span {
   background: var(--bg-0-25x) !important;
+}
+
+input[name="offense_overview-offense_calculator-effectiveness"][value="0.25"]:hover +span {
+  background: var(--bg-0-25x-hover);
+}
+
+input[name="offense_overview-offense_calculator-effectiveness"]:hover +span,
+input[name="offense_overview-offense_calculator-weather_modifier"]:hover +span {
+  color: var(--text-effectiveness-hover);
+  border-color: var(--border-color);
+}
+
+input[name="offense_overview-offense_calculator-effectiveness"]:not([value="1"]):checked +span,
+input[name="offense_overview-offense_calculator-weather_modifier"]:not([value="1"]):checked +span {
   color: var(--text-effectiveness);
   border-color: var(--border-color);
 }
 
-input[name="offense_overview-offense_calculator-effectiveness"][value="0.25"]:hover +span {
-  background: var(--bg-0-25x-hover) !important;
-  color: var(--text-1);
-}
-
 #offense_overview-offense_calculator-def_spd_stage-number_value[value="0"],
 #offense_overview-offense_calculator-atk_spa_stage-number_value[value="0"] {
-  background: var(--bg-1) !important;
+  background: var(--bg-1);
   color: var(--text-1);
 }

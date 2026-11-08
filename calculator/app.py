@@ -55,7 +55,7 @@ def server(input: Inputs, output: Outputs, session: Session):
     @render.ui
     @reactive.event(input.mode)
     def page_title():
-        return ui.h3(input.mode())
+        return ui.span(input.mode(), class_="page-title")
 
 
 app = App(app_ui, server, static_assets=Path(app_dir / "images"))

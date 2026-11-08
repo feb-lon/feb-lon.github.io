@@ -18,7 +18,7 @@ def pokemon_info_page():
                 ui.card(
                     ui.card_header(
                         element_and_tooltip(
-                            ui.h3("Pokemon Information"),
+                            ui.span("Pokemon Information", class_="card_header"),
                             1,
                             "XP information valid for Generations 2 - 4",
                         ),
@@ -45,7 +45,7 @@ def pokemon_info_page():
                 ui.card(
                     element_and_tooltip(
                         ui.card_header(
-                            ui.h3("Nature Information"),
+                            ui.span("Nature Information", class_="card_header"),
                         ),
                         1,
                         "Generations 3+",
@@ -69,7 +69,7 @@ def pokemon_info_page():
                 ),
                 ui.card(
                     element_and_tooltip(
-                        ui.card_header(ui.h3("XP Information")),
+                        ui.card_header(ui.span("XP Information", class_="card_header")),
                         0,
                         "Valid for all Generations.",
                     ),
@@ -83,7 +83,7 @@ def pokemon_info_page():
                 {"style": "width: 30%"},
                 ui.card_header(
                     element_and_tooltip(
-                        ui.h3("Confusion Information"),
+                        ui.span("Confusion Information", class_="card_header"),
                         1,
                         ui.span("When using only inputs above the graph, output usable for every Generation."),
                         ui.span(),

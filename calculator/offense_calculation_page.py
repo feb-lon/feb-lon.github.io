@@ -98,7 +98,8 @@ def reset_buttons():
     return ui.page_fluid(
         ui.card(
             ui.card_header(
-                "Reset Input Buttons"
+                "Reset Input Buttons",
+                class_="card_header",
             ),
             ui.card_body(
                 ui.input_action_button("reset_all", "Reset All Inputs"),

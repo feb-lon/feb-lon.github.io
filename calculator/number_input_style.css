@@ -118,9 +118,6 @@ input[type=number]::-webkit-inner-spin-button {
   height: 3rem;
   font-size: 1.5rem;
   padding: .3rem;
-  margin-top: -.3rem;
-  margin-bottom:-.3rem;
-  z-index: 1;
 }
 
 .stages_small_controls input[type="number"], .stages_controls input[type="number"] {
