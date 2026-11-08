@@ -313,7 +313,6 @@ tooltip
 
 .tooltip {
   --bs-tooltip-max-width: 800px;
-  --bs-tooltip-min-width: 700px;
   --bs-tooltip-font-size: 1rem;
 }
 
