@@ -663,7 +663,7 @@ div#size-detection-cell {
   position: relative;
 }
 .app-frame {
-  border-radius: var(--panel-roundness);
+  border-radius: 0;
   border: 0;
 }
 .shinylive-viewer iframe {
