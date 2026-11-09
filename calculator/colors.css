@@ -25,13 +25,17 @@
  --bg-0x: #3A3A3A;
 
  --text-1: #1E1E1E;
- --text-2: #FFF;
+ --text-2: var(--text-3);
+ --text-2r: var(--text-1);
  --text-3: #FFF;
  --text-true: #EEE;
  --text-selected: var(--text-3);
+ --text-selected-nav: var(--text-3);
  --text-output: black;
+ --text-navbar: var(--text-2);
  --text-hover: var(--text-1);
  --text-hover-nav: var(--text-2);
+ --text-active-nav: var(--text-2);
  --text-effectiveness: #EEE;
  --text-effectiveness-hover: #111;
 
@@ -44,6 +48,9 @@
  --bs-btn-bg: var(--bg-1);
  --bs-heading-color: var(--text-3);
  --bs-emphasis-color: var(--text-1);
+ --bs-nav-link-color: var(--text-1);
+ --bs-nav-link-hover-color: var(--text-1);
+ --bs-nav-underline-link-active-color: var(--text-active-nav);
 }
 
 [data-theme="dark"] {
@@ -54,9 +61,11 @@
  --bg-false: #FDE8E8;
  --bg-clickable: #00A8E1;
  /*--bg-selected: #4ECDC4;*/
- --bg-hover-nav: var(--bg-2);
+ --bg-hover-nav: var(--bg-2-);
 
  --text-1: #EAEAEA;
+ --text-2: var(--text-1);
+ --text-2r: var(--text-3);
  --text-3: #1C1C1E;
  --text-true: #EEE;
  --text-hover: var(--text-3);
@@ -69,6 +78,22 @@
  .form-select {
   --bs-form-select-bg-img: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3e%3cpath fill='none' stroke='%23ffffff' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='m2 5 6 6 6-6'/%3e%3c/svg%3e");
  }
+}
+
+[data-theme="Oringe"] {
+  --bg-2: #e5c997;
+  --bg-3: #c17d00;
+  --bg-clickable: #e7832a;
+  --bg-selected: #FFE300;
+  --bg-hover: var(--bg-2);
+  --bg-hover-nav: #cea357;
+
+  --text-2: var(--text-1);
+  --text-2r: var(--text-3);
+  --text-selected: var(--text-1);
+  --text-navbar: var(--text-2r);
+  --text-hover-nav: var(--text-2);
+  --text-active-nav: var(--text-2);
 }
 
 .bslib-page-navbar {
@@ -89,7 +114,7 @@ pre {
 
 .bslib-page-, .navbar, .navbar-brand {
  background: var(--bg-3);
- color: var(--text-1);
+ color: var(--text-navbar);
 }
 
 .selectize-dropdown, .select-dropdown,
@@ -109,29 +134,30 @@ pre {
  background: transparent !important;
 }
 
-.page-title {
- color: var(--text-2);
+.page-title  {
+ color: var(--text-navbar);
  font-size: 1.5rem;
 }
 
 #mode > li > div > span, #theme {
- color: var(--text-2);
- border-color: var(--text-2);
+ color: var(--text-navbar);
+ border-color: var(--text-navbar);
 }
 
-#theme {
+#theme, .nav-link, a {
  background: var(--bg-3);
-}
-
-a, .nav-link {
- color: var(--text-2);
+ color: var(--text-navbar);
 }
 
 .nav-link.active {
- color: var(--text-2) !important;
+ color: var(--text-active-nav);
 }
 
-a:hover, .nav-link:hover, #theme:hover {
+.nav-link.active:hover, .navbar-nav .nav-link.active {
+ color: var(--text-hover-nav);
+}
+
+a:hover, .nav-link:hover {
  background: var(--bg-hover-nav);
  color: var(--text-hover-nav);
 }
