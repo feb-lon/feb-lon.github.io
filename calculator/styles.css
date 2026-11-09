@@ -2,6 +2,10 @@
 changing default layout
 */
 
+.app-frame {
+ border-radius: 0;
+}
+
 .main {
   padding-top: 0 !important;
 }
