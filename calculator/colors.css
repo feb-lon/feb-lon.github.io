@@ -93,7 +93,60 @@
   --text-selected: var(--text-1);
   --text-navbar: var(--text-2r);
   --text-hover-nav: var(--text-2);
-  --text-active-nav: var(--text-2);
+}
+
+[data-theme="quack"] {
+ #page_title::before {
+   content: "Quackulator";
+   font-size: 1.6rem;
+ }
+ #main_page_title {
+  display:none;
+ }
+  --bg-1: #f9f0dd;
+  --bg-2: #f3d8a2;
+  --bg-3: #dcb878;
+  --bg-clickable: #5e9bc5;
+  --bg-selected: #96b81b;
+  --bg-hover: var(--bg-2);
+  --bg-hover-nav: #d0a129;
+
+  --text-1: #140d0c;
+  --text-2: var(--text-1);
+  --text-2r: var(--text-3);
+  --text-3: #fdf7ee;
+  --text-selected: var(--text-1);
+  --text-hover-nav: var(--text-2);
+
+  .main_inputs {
+    background-image: url("../../farfetchd.png");
+    background-size: 20%;
+    background-repeat: no-repeat;
+    background-position-x: 22.5rem;
+    background-position-y: center;
+  }
+  .main_inputs:has(input[value="4"]:checked) {
+    background-size: 30%;
+    background-image: url("../../zapdos.png");
+    background-position-x: 21rem;
+  }
+  .main {
+    background-image: url("../../psyduck.png");
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-position: center;
+  }
+  #reset_buttons > .card {
+    background-image: url("../../zapduck.png");
+    background-size: 45%;
+    background-repeat: no-repeat;
+    background-position: top right;
+  }
+}
+
+.page-title, #theme:after, #page_title   {
+ color: var(--text-navbar);
+ font-size: 1.5rem;
 }
 
 .bslib-page-navbar {
@@ -132,11 +185,6 @@ pre {
 /* there is color in the element that needs to be overwritten  */
 .table>thead {
  background: transparent !important;
-}
-
-.page-title  {
- color: var(--text-navbar);
- font-size: 1.5rem;
 }
 
 #mode > li > div > span, #theme {

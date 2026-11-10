@@ -14,7 +14,7 @@ app_ui = (
             ui.div(
                 ui.span("Theme:"),
                 spacer(.5, .5),
-                ui.input_select(id="theme",label="", choices=["bluh", "dark", "Oringe"], selected="bluh"),
+                ui.input_select(id="theme",label="", choices=["bluh", "dark", "Oringe", "quack"]),
                 class_="io_row",
             ),
         ),
@@ -38,7 +38,7 @@ app_ui = (
                 );
             }
         });
-        """)
+        """),
         ),
         id="mode",
         window_title="Pokemon Calculator",
@@ -55,7 +55,7 @@ def server(input: Inputs, output: Outputs, session: Session):
     @render.ui
     @reactive.event(input.mode)
     def page_title():
-        return ui.span(input.mode(), class_="page-title")
+        return ui.span(input.mode(), id="main_page_title", class_="page-title")
 
 
 app = App(app_ui, server, static_assets=Path(app_dir / "images"))

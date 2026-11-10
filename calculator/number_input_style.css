@@ -21,7 +21,7 @@
   margin-block: .1rem;
   box-shadow:none;
   border-color: transparent;
-  background: var(--bg-1);
+  background: transparent;
 }
 
 .number_input>div, .short_input>div {

@@ -90,6 +90,7 @@ def settings():
                 class_="io_column",
             ),
         ),
+        id="dmg_settings",
         class_="spread_row item-1",
     ),
 
@@ -107,6 +108,7 @@ def reset_buttons():
                 class_="io_column",
             ),
         ),
+        id="reset_buttons",
         class_="spread_row item-3"
     ),
 
