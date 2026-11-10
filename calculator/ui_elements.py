@@ -92,9 +92,6 @@ def dragon_type():
 def steel_type():
     return ui.tags.img(src="steel_type.png", width=type_image_size, class_="tooltip_img")
 
-def psyduck():
-    return ui.tags.img(src="psyduck.png", width=type_image_size)
-
 
 def other_factors():
     return ui.tags.img(src="gen_5_onward_other_factors.png", width="1000px")
