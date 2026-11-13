@@ -2,6 +2,7 @@ import pandas as pd
 from shiny import render
 from shiny.types import SafeException
 
+from GraphFactory import GraphFactory
 from offense_calculation_history import offense_calculation_history, offense_calculation_history_server
 from offense_calculation_page import offense_calculation_page, offense_calculation_page_server
 from number_input import *
@@ -74,9 +75,9 @@ def sidebar_with_content():
 
 
 @module.server
-def offense_calculation_overview_server(input: Inputs, output: Outputs, session: Session):
+def offense_calculation_overview_server(input: Inputs, output: Outputs, session: Session, graph_factory: GraphFactory):
     get_level_calc, set_level_calc, offense_min, offense_max, dmg_rolls = offense_calculation_page_server(
-        id="offense_calculator")
+        id="offense_calculator", graph_factory=graph_factory)
     get_level, set_level = number_input_server(
         id="level", init=8, min_value=1, max_value=100)
 

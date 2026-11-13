@@ -1,6 +1,7 @@
 from matplotlib import pyplot as plt
 from shiny.types import SilentException
 
+from GraphFactory import GraphFactory
 from xp_requirement_input import *
 from number_input import *
 from ui_elements import *
@@ -172,7 +173,7 @@ def pokemon_info_page():
 
 
 @module.server
-def pokemon_info_page_server(input: Inputs, output: Outputs, session: Session):
+def pokemon_info_page_server(input: Inputs, output: Outputs, session: Session, graph_factory: GraphFactory):
     # for general information
     enemy_level_input, _ = number_input_server(id="enemy_level", init=8, min_value=1, max_value=100)
 
@@ -331,16 +332,11 @@ def pokemon_info_page_server(input: Inputs, output: Outputs, session: Session):
 
         dmg_values = {val: dmg_values.count(val) for val in np.unique(dmg_values)}
 
-        fig, ax = plt.subplots()
+        ax = graph_factory.dmg_spread_only_observed(min(dmg_values), max(dmg_values), dmg_values)
         ax.set_title("Confusion Damage")
         ax.set_xlabel("dmg")
         ax.set_ylabel("likelihood")
-
-        ax.bar(range(min(dmg_values), max(dmg_values) + 1), list(result.values()), align='center')
-        ax.set_xticks(range(min(dmg_values), max(dmg_values) + 1))
-        ax.set_yticks([0, 2, 4, 6, 8, 10, 12, 14, 16], labels=["0", "2", "4", "6", "8", "10", "12", "14", "16"])
-
-        if not fig:
+        if not ax:
             SilentException()
 
-        return fig
+        return ax

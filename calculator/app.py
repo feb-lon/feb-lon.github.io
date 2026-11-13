@@ -1,3 +1,4 @@
+from GraphFactory import GraphFactory
 from offense_calculation_overview import offense_calculation_overview, offense_calculation_overview_server
 from iv_calculation_page import *
 from pokemon_info_page import *
@@ -47,10 +48,15 @@ app_ui = (
 
 
 def server(input: Inputs, output: Outputs, session: Session):
-    offense_calculation_overview_server(id="offense_overview")
+    graph_factory = GraphFactory()
+    offense_calculation_overview_server(id="offense_overview", graph_factory=graph_factory)
     iv_calculation_page_server(id="iv_calculation")
-    pokemon_info_page_server(id="pokemon_info")
+    pokemon_info_page_server(id="pokemon_info", graph_factory=graph_factory)
     coverage_calculator_page_server(id="coverage_calculator")
+
+    @reactive.effect
+    def update_theme():
+        graph_factory.set_theme(input.theme())
 
     @render.ui
     @reactive.event(input.mode)
