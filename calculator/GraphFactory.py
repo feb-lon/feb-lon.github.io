@@ -30,8 +30,6 @@ class GraphFactory:
         }
     }
 
-    _theme=reactive.Value(dict)
-
     def __init__(self, theme="bluh"):
         self._theme = reactive.Value(self.THEMES[theme])
 

@@ -15,7 +15,7 @@ app_ui = (
             ui.div(
                 ui.span("Theme:"),
                 spacer(.5, .5),
-                ui.input_select(id="theme",label="", choices=["bluh", "dark", "Oringe", "quack"]),
+                ui.input_select(id="theme",label="", choices=["bluh", "dark", "Oringe", "quack"], selected="bluh"),
                 class_="io_row",
             ),
         ),
@@ -27,19 +27,41 @@ app_ui = (
         coverage_calculator_page(id="coverage_calculator"),
         iv_calculation_page(id="iv_calculation"),
         ui.head_content(
+            ui.tags.script("""
+                const mq = window.matchMedia("(prefers-color-scheme: dark)");
+
+                function systemTheme() {
+                    return mq.matches ? "dark" : "bluh";
+                }
+
+                function applyTheme(theme) {
+                    document.documentElement.dataset.theme = theme;
+                }
+
+                // User changes the select input
+                $(document).on("shiny:inputchanged", function(event) {
+                    if (event.name === "theme") {
+                        applyTheme(event.value);
+                    }
+                });
+
+                // Initialize after Shiny connects
+                $(document).on("shiny:connected", function() {
+                    const theme = systemTheme();
+                    $("#theme").val(theme).trigger("change");
+                    applyTheme(theme);
+                });
+
+                // OS preference changes
+                mq.addEventListener("change", function() {
+                    const theme = systemTheme();
+                    $("#theme").val(theme).trigger("change");
+                    applyTheme(theme);
+                });
+            """),
             ui.include_css(app_dir / "styles.css"),
             ui.include_css(app_dir / "colors.css"),
             ui.include_css(app_dir / "number_input_style.css"),
-            ui.tags.script("""
-        $(document).on('shiny:inputchanged', function(event) {
-            if (event.name === 'theme') {
-                document.documentElement.setAttribute(
-                    'data-theme',
-                    event.value
-                );
-            }
-        });
-        """),
         ),
         id="mode",
         window_title="Pokemon Calculator",
@@ -62,6 +84,5 @@ def server(input: Inputs, output: Outputs, session: Session):
     @reactive.event(input.mode)
     def page_title():
         return ui.span(input.mode(), id="main_page_title", class_="page-title")
-
 
 app = App(app_ui, server, static_assets=Path(app_dir / "images"))
