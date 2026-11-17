@@ -144,7 +144,7 @@
   }
 }
 
-.page-title, #theme:after, #page_title   {
+.page-title, #theme:after, #page_title {
  color: var(--text-navbar);
  font-size: 1.5rem;
 }
@@ -172,14 +172,26 @@ pre {
 
 .selectize-dropdown, .select-dropdown,
 .selectize-input, .select-dropdown,
-.selectize-input input, .select-input input {
+.selectize-input item,
+.selectize-control.multi .selectize-input > div,
+.selectize-dropdown-content > .option {
  color: var(--text-1);
  background: var(--bg-1);
 }
 
+
+.selectize-input.items > .item {
+ border-color: var(--border-color-selected) !important;
+ border-width: var(--bs-border-width) !important;
+}
+
+.selectize-dropdown-content > .option.active {
+ background: var(--bg-2);
+}
+
 .table, .table > :not(caption) > * > * {
  background: transparent;
- color: var(--text-1)
+ color: var(--text-1);
 }
 
 /* there is color in the element that needs to be overwritten  */
@@ -192,7 +204,7 @@ pre {
  border-color: var(--text-navbar);
 }
 
-#theme, .nav-link, a {
+#theme, .nav-link, li > a {
  background: var(--bg-3);
  color: var(--text-navbar);
 }
@@ -205,12 +217,12 @@ pre {
  color: var(--text-hover-nav);
 }
 
-a:hover, .nav-link:hover {
+li > a:hover, .nav-link:hover {
  background: var(--bg-hover-nav);
  color: var(--text-hover-nav);
 }
 
-.card_header {
+.card_header, .accordion-title {
  color: var(--text-1);
  font-size: 1.3rem;
 }

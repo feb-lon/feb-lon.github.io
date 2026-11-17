@@ -109,7 +109,7 @@ def stat_history():
     return ui.card(
         ui.card_body(
             ui.div(
-                ui.layout_columns(ui.h5("Stat History (editable)")),
+                ui.layout_columns(ui.span("Stat History (editable)", class_="card_header")),
                 ui.input_action_button("delete_row", "Delete Selected Row"),
                 ui.input_action_button("reset_all", "Clear All"),
                 class_="io_row"
